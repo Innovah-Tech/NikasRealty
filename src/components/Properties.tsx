@@ -7,6 +7,10 @@ import property2 from "@/assets/images/property2.jpg";
 import property3 from "@/assets/images/property3.jpg";
 import property4 from "@/assets/images/property4.jpg";
 import property5 from "@/assets/images/property5.jpg";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { useState } from "react";
+import { Input } from "@/components/ui/input";
+import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
 
 const Properties = () => {
   const properties = [
@@ -21,6 +25,9 @@ const Properties = () => {
       bathrooms: 3,
       size: "180 sqm",
       featured: true,
+      type: "Apartment",
+      status: "For Sale",
+      projectStage: "Ready",
     },
     {
       id: 2,
@@ -33,6 +40,9 @@ const Properties = () => {
       bathrooms: 2,
       size: "150 sqm",
       featured: true,
+      type: "Apartment",
+      status: "For Sale",
+      projectStage: "Offplan",
     },
     {
       id: 3,
@@ -45,6 +55,9 @@ const Properties = () => {
       bathrooms: 1,
       size: "45 sqm",
       featured: false,
+      type: "Studio",
+      status: "To Let",
+      projectStage: "Ready",
     },
     {
       id: 4,
@@ -57,6 +70,9 @@ const Properties = () => {
       bathrooms: 3,
       size: "250 sqm",
       featured: false,
+      type: "Bungalow",
+      status: "For Sale",
+      projectStage: "Ready",
     },
     {
       id: 5,
@@ -69,12 +85,66 @@ const Properties = () => {
       bathrooms: 4,
       size: "400 sqm",
       featured: true,
+      type: "Villa",
+      status: "For Sale",
+      projectStage: "Offplan",
     },
   ];
+
+  const [selected, setSelected] = useState<null | typeof properties[0]>(null);
+  const [open, setOpen] = useState(false);
+  const [search, setSearch] = useState("");
+  const [bedrooms, setBedrooms] = useState("");
+  const [featuredOnly, setFeaturedOnly] = useState(false);
+
+  // Filtering logic
+  const filteredProperties = properties.filter((p) => {
+    const matchesSearch =
+      p.title.toLowerCase().includes(search.toLowerCase()) ||
+      p.location.toLowerCase().includes(search.toLowerCase());
+    const matchesBedrooms = bedrooms ? String(p.bedrooms) === bedrooms : true;
+    const matchesFeatured = featuredOnly ? p.featured : true;
+    return matchesSearch && matchesBedrooms && matchesFeatured;
+  });
 
   return (
     <section id="properties" className="py-20 lg:py-32 bg-muted/30">
       <div className="container mx-auto px-4 lg:px-8">
+        {/* Search and Filter Row */}
+        <div className="flex flex-wrap gap-4 mb-10 items-end">
+          <div className="flex-1 min-w-[200px]">
+            <Input
+              placeholder="Search by title or location..."
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              className=""
+            />
+          </div>
+          <div className="min-w-[130px]">
+            <Select value={bedrooms} onValueChange={setBedrooms}>
+              <SelectTrigger>
+                <SelectValue placeholder="Bedrooms" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">All</SelectItem>
+                <SelectItem value="1">1</SelectItem>
+                <SelectItem value="2">2</SelectItem>
+                <SelectItem value="3">3</SelectItem>
+                <SelectItem value="4">4</SelectItem>
+                <SelectItem value="5">5</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <label className="flex items-center space-x-2 select-none cursor-pointer text-sm">
+            <input
+              type="checkbox"
+              checked={featuredOnly}
+              onChange={() => setFeaturedOnly(f => !f)}
+              className="accent-primary w-4 h-4"
+            />
+            <span>Featured only</span>
+          </label>
+        </div>
         {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto mb-16 space-y-4">
           <h2 className="text-4xl md:text-5xl font-bold text-foreground">
@@ -88,7 +158,10 @@ const Properties = () => {
 
         {/* Properties Grid */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {properties.map((property) => (
+          {filteredProperties.length === 0 && (
+            <div className="col-span-full text-center text-muted-foreground py-8 text-lg">No properties match your search.</div>
+          )}
+          {filteredProperties.map((property) => (
             <Card
               key={property.id}
               className="overflow-hidden group hover:shadow-luxury transition-smooth cursor-pointer"
@@ -110,6 +183,15 @@ const Properties = () => {
 
               {/* Content */}
               <CardHeader>
+                {/* Classification badges */}
+                <div className="flex flex-wrap gap-2 mb-2">
+                  <Badge variant="secondary" className="capitalize">{property.type}</Badge>
+                  <Badge variant="outline" className="capitalize">{property.status}</Badge>
+                  <Badge variant="ghost" className="capitalize">{property.projectStage}</Badge>
+                  {property.featured && (
+                    <Badge className="gradient-gold text-secondary font-semibold">Featured</Badge>
+                  )}
+                </div>
                 <CardTitle className="text-xl group-hover:text-primary transition-smooth">
                   {property.title}
                 </CardTitle>
@@ -149,7 +231,10 @@ const Properties = () => {
               <CardFooter>
                 <Button
                   className="w-full gradient-gold text-secondary font-semibold hover:scale-105 transition-smooth"
-                  onClick={() => window.open("https://wa.me/254710132320", "_blank")}
+                  onClick={() => {
+                    setSelected(property);
+                    setOpen(true);
+                  }}
                 >
                   View Details
                 </Button>
@@ -157,9 +242,53 @@ const Properties = () => {
             </Card>
           ))}
         </div>
+        <Dialog open={open} onOpenChange={setOpen}>
+          <DialogContent className="max-w-2xl w-full">
+            {selected && <PropertyDetails property={selected} />}
+          </DialogContent>
+        </Dialog>
       </div>
     </section>
   );
 };
+
+// Detailed Property Modal Content
+const PropertyDetails = ({ property }: { property: typeof properties[0] }) => (
+  <div>
+    <div className="mb-6">
+      <div className="flex flex-col md:flex-row gap-6">
+        <img src={property.image} alt={property.title} className="max-w-md w-full rounded-xl object-cover shadow-lg" />
+        <div className="flex-1 space-y-3">
+          <div className="flex flex-wrap gap-2 mb-2">
+            <Badge variant="secondary" className="capitalize">{property.type}</Badge>
+            <Badge variant="outline" className="capitalize">{property.status}</Badge>
+            <Badge variant="ghost" className="capitalize">{property.projectStage}</Badge>
+            {property.featured && (
+              <Badge className="gradient-gold text-secondary font-semibold">Featured</Badge>
+            )}
+          </div>
+          <h3 className="text-3xl font-bold text-primary mb-2">{property.title}</h3>
+          <p className="text-muted-foreground text-lg mb-4">{property.description}</p>
+          <div className="flex flex-wrap gap-4 items-center text-sm">
+            <span className="flex items-center gap-1"><MapPin size={16} /> {property.location}</span>
+            <span className="flex items-center gap-1"><Bed size={16} /> {property.bedrooms} Beds</span>
+            <span className="flex items-center gap-1"><Bath size={16} /> {property.bathrooms} Baths</span>
+            <span className="flex items-center gap-1"><Square size={16} /> {property.size}</span>
+          </div>
+          <div className="text-2xl font-bold text-primary border-t pt-4 mt-4">{property.price}</div>
+        </div>
+      </div>
+    </div>
+    {/* Gallery or More Images could go here */}
+    <div className="flex justify-end mt-4">
+      <Button
+        className="gradient-gold text-secondary font-semibold"
+        onClick={() => window.open("https://wa.me/254710132320", "_blank")}
+      >
+        WhatsApp Agent
+      </Button>
+    </div>
+  </div>
+);
 
 export default Properties;
