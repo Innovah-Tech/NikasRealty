@@ -94,7 +94,7 @@ const Properties = () => {
   const [selected, setSelected] = useState<null | typeof properties[0]>(null);
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
-  const [bedrooms, setBedrooms] = useState("");
+  const [bedrooms, setBedrooms] = useState("all");
   const [featuredOnly, setFeaturedOnly] = useState(false);
 
   // Filtering logic
@@ -102,7 +102,7 @@ const Properties = () => {
     const matchesSearch =
       p.title.toLowerCase().includes(search.toLowerCase()) ||
       p.location.toLowerCase().includes(search.toLowerCase());
-    const matchesBedrooms = bedrooms ? String(p.bedrooms) === bedrooms : true;
+    const matchesBedrooms = bedrooms === "all" ? true : String(p.bedrooms) === bedrooms;
     const matchesFeatured = featuredOnly ? p.featured : true;
     return matchesSearch && matchesBedrooms && matchesFeatured;
   });
@@ -126,7 +126,7 @@ const Properties = () => {
                 <SelectValue placeholder="Bedrooms" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All</SelectItem>
+                <SelectItem value="all">All</SelectItem>
                 <SelectItem value="1">1</SelectItem>
                 <SelectItem value="2">2</SelectItem>
                 <SelectItem value="3">3</SelectItem>
