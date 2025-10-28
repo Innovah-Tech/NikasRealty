@@ -66,6 +66,32 @@ const About = () => {
           </div>
         </div>
 
+        {/* Story, Mission, Vision, Values */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 text-center mt-20">
+          <div>
+            <h3 className="text-2xl font-bold text-primary mb-3">Our Story</h3>
+            <p className="text-muted-foreground leading-relaxed text-sm">Nikas Realty began with a vision to connect families, investors, and communities to high-quality homes and properties in Kenya. With our founders deeply rooted in real estate, we’ve grown to be a trusted advisor for hundreds of clients, always valuing service and integrity.</p>
+          </div>
+          <div>
+            <h3 className="text-2xl font-bold text-primary mb-3">Our Mission</h3>
+            <p className="text-muted-foreground leading-relaxed text-sm">To simplify and elevate the property experience in Kenya by offering expert advice, transparent processes, and a curated selection of modern, elegant, and luxurious homes for every need.</p>
+          </div>
+          <div>
+            <h3 className="text-2xl font-bold text-primary mb-3">Our Vision</h3>
+            <p className="text-muted-foreground leading-relaxed text-sm">To be Kenya’s most trusted real estate partner, known for innovation, ethics, and creating real value for our clients and communities.</p>
+          </div>
+          <div>
+            <h3 className="text-2xl font-bold text-primary mb-3">Our Values</h3>
+            <ul className="text-muted-foreground leading-relaxed text-sm text-left mx-auto max-w-xs space-y-1">
+              <li>• Integrity in every transaction</li>
+              <li>• Client success first</li>
+              <li>• Market expertise and learning</li>
+              <li>• Transparency and trust</li>
+              <li>• Community-driven growth</li>
+            </ul>
+          </div>
+        </div>
+
         {/* Team Section */}
         <div className="mt-20">
           <h3 className="text-3xl font-bold text-center text-foreground mb-8">Meet Our Team</h3>

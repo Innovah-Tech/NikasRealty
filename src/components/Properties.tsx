@@ -25,7 +25,7 @@ const Properties = () => {
       bathrooms: 3,
       size: "180 sqm",
       featured: true,
-      type: "Apartment",
+      type: "Modern Apartment",
       status: "For Sale",
       projectStage: "Ready",
     },
@@ -40,23 +40,23 @@ const Properties = () => {
       bathrooms: 2,
       size: "150 sqm",
       featured: true,
-      type: "Apartment",
+      type: "Premium Maisonette",
       status: "For Sale",
       projectStage: "Offplan",
     },
     {
       id: 3,
-      title: "Studio Apartments",
-      description: "Modern minimalist design with open plan layout and luxury finishes",
-      price: "KES 1.87M",
+      title: "Contemporary Town House",
+      description: "Spacious town house with lush garden, suitable for family living.",
+      price: "KES 10M",
       image: property3,
       location: "Nairobi, Kenya",
-      bedrooms: 1,
-      bathrooms: 1,
-      size: "45 sqm",
+      bedrooms: 4,
+      bathrooms: 3,
+      size: "220 sqm",
       featured: false,
-      type: "Studio",
-      status: "To Let",
+      type: "Town House",
+      status: "For Sale",
       projectStage: "Ready",
     },
     {
@@ -70,22 +70,22 @@ const Properties = () => {
       bathrooms: 3,
       size: "250 sqm",
       featured: false,
-      type: "Bungalow",
+      type: "Executive Bungalow",
       status: "For Sale",
       projectStage: "Ready",
     },
     {
       id: 5,
-      title: "5 Bedroom Executive Villa",
-      description: "Executive villa with swimming pool and contemporary luxury design",
-      price: "Price on Request",
+      title: "Elegant Duplex Home",
+      description: "A stylish duplex with a private entrance and rooftop views.",
+      price: "KES 18M",
       image: property5,
       location: "Nairobi, Kenya",
       bedrooms: 5,
       bathrooms: 4,
-      size: "400 sqm",
+      size: "365 sqm",
       featured: true,
-      type: "Villa",
+      type: "Duplex",
       status: "For Sale",
       projectStage: "Offplan",
     },
@@ -96,6 +96,7 @@ const Properties = () => {
   const [search, setSearch] = useState("");
   const [bedrooms, setBedrooms] = useState("all");
   const [featuredOnly, setFeaturedOnly] = useState(false);
+  const [propertyType, setPropertyType] = useState("all");
 
   // Filtering logic
   const filteredProperties = properties.filter((p) => {
@@ -104,7 +105,8 @@ const Properties = () => {
       p.location.toLowerCase().includes(search.toLowerCase());
     const matchesBedrooms = bedrooms === "all" ? true : String(p.bedrooms) === bedrooms;
     const matchesFeatured = featuredOnly ? p.featured : true;
-    return matchesSearch && matchesBedrooms && matchesFeatured;
+    const matchesType = propertyType === "all" ? true : p.type === propertyType;
+    return matchesSearch && matchesBedrooms && matchesFeatured && matchesType;
   });
 
   return (
@@ -119,6 +121,23 @@ const Properties = () => {
               onChange={e => setSearch(e.target.value)}
               className=""
             />
+          </div>
+          <div className="min-w-[160px]">
+            <Select value={propertyType} onValueChange={setPropertyType}>
+              <SelectTrigger>
+                <SelectValue placeholder="Property Type" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All</SelectItem>
+                <SelectItem value="Luxury Mansion">Luxury Mansion</SelectItem>
+                <SelectItem value="Modern Apartment">Modern Apartment</SelectItem>
+                <SelectItem value="Premium Maisonette">Premium Maisonette</SelectItem>
+                <SelectItem value="Executive Bungalow">Executive Bungalow</SelectItem>
+                <SelectItem value="Commercial Land">Commercial Land</SelectItem>
+                <SelectItem value="Town House">Town House</SelectItem>
+                <SelectItem value="Duplex">Duplex</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
           <div className="min-w-[130px]">
             <Select value={bedrooms} onValueChange={setBedrooms}>

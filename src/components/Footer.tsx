@@ -72,6 +72,20 @@ const Footer = () => {
             </ul>
           </div>
 
+          {/* Property Types (New Column) */}
+          <div>
+            <h3 className="text-xl font-bold mb-6 text-primary">Property Types</h3>
+            <ul className="space-y-3">
+              <li className="text-white/70">Luxury Mansion</li>
+              <li className="text-white/70">Modern Apartment</li>
+              <li className="text-white/70">Premium Maisonette</li>
+              <li className="text-white/70">Executive Bungalow</li>
+              <li className="text-white/70">Commercial Land</li>
+              <li className="text-white/70">Town House</li>
+              <li className="text-white/70">Duplex</li>
+            </ul>
+          </div>
+
           {/* Contact */}
           <div>
             <h3 className="text-xl font-bold mb-6 text-primary">Contact Us</h3>
@@ -92,7 +106,7 @@ const Footer = () => {
                   📩 nikasrealty@gmail.com
                 </a>
               </li>
-              <li>📍 Nairobi, Kenya</li>
+              <li>📍 Westland Arcade, Nairobi, Westlands, Kenya</li>
             </ul>
           </div>
 
