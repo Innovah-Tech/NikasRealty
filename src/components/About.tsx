@@ -65,9 +65,56 @@ const About = () => {
             </div>
           </div>
         </div>
+
+        {/* Team Section */}
+        <div className="mt-20">
+          <h3 className="text-3xl font-bold text-center text-foreground mb-8">Meet Our Team</h3>
+          <div className="flex flex-wrap gap-8 justify-center items-stretch">
+            {/* Example Team Members */}
+            <TeamMember
+              name="Jane Mwangi"
+              title="Managing Director"
+              image="https://randomuser.me/api/portraits/women/68.jpg"
+              bio="Jane leads the company with 15+ years of real estate expertise and a passion for connecting people with properties they love."
+            />
+            <TeamMember
+              name="Samuel Otieno"
+              title="Senior Property Consultant"
+              image="https://randomuser.me/api/portraits/men/65.jpg"
+              bio="Samuel has sold 200+ homes and specializes in luxury living, providing tailored advice to every client."
+            />
+            <TeamMember
+              name="Susan Kimani"
+              title="Legal Advisor"
+              image="https://randomuser.me/api/portraits/women/43.jpg"
+              bio="Susan ensures every transaction is safe and compliant, with a strong background in Kenyan property law."
+            />
+            <TeamMember
+              name="David Njoroge"
+              title="Customer Success Manager"
+              image="https://randomuser.me/api/portraits/men/41.jpg"
+              bio="David goes the extra mile for our clients, handling inquiries, tours, and post-sale support with a smile."
+            />
+          </div>
+        </div>
       </div>
     </section>
   );
 };
+
+// Simple Team Member Card component
+const TeamMember = ({ name, title, image, bio }: { name: string; title: string; image: string; bio: string }) => (
+  <div className="bg-card rounded-xl shadow-card p-6 max-w-xs flex flex-col items-center text-center gap-3">
+    <img
+      src={image}
+      alt={name}
+      className="w-24 h-24 object-cover rounded-full border-4 border-primary shadow-md mb-2"
+      loading="lazy"
+    />
+    <div className="text-xl font-semibold text-foreground">{name}</div>
+    <div className="text-primary font-medium">{title}</div>
+    <div className="text-muted-foreground text-sm">{bio}</div>
+  </div>
+);
 
 export default About;
