@@ -106,7 +106,16 @@ const Footer = () => {
                   📩 nikasrealty@gmail.com
                 </a>
               </li>
-              <li>📍 Westland Arcade, Nairobi, Westlands, Kenya</li>
+              <li>
+                <a
+                  href="https://maps.app.goo.gl/vtdVH937UKa52MvD7"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-primary transition-smooth"
+                >
+                  📍 Westland Arcade, Nairobi, Westlands, Kenya
+                </a>
+              </li>
             </ul>
           </div>
 

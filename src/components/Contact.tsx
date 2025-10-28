@@ -171,7 +171,7 @@ const Contact = () => {
               <CardContent className="p-0">
                 <div className="relative h-80">
                   <iframe
-                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d255282.35846803324!2d36.70730744853516!3d-1.3028617999999892!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x182f1172d84d49a7%3A0xf7cf0254b297924c!2sNairobi%2C%20Kenya!5e0!3m2!1sen!2sus!4v1647888888888!5m2!1sen!2sus"
+                    src="https://www.google.com/maps?q=Westland%20Arcade%2C%20Nairobi%2C%20Westlands%2C%20Kenya&output=embed"
                     width="100%"
                     height="100%"
                     style={{ border: 0 }}
@@ -184,7 +184,14 @@ const Contact = () => {
                       <MapPin className="text-primary" size={20} />
                       <div>
                         <div className="font-semibold text-foreground">Our Location</div>
-                        <div className="text-sm text-muted-foreground">Nairobi, Kenya</div>
+                        <a
+                          href="https://maps.app.goo.gl/vtdVH937UKa52MvD7"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-sm text-muted-foreground hover:text-primary transition-smooth underline"
+                        >
+                          Westland Arcade, Nairobi, Westlands, Kenya
+                        </a>
                       </div>
                     </div>
                   </div>
