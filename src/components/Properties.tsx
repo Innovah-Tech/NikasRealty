@@ -11,6 +11,7 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
+import { Slider } from "@/components/ui/slider";
 
 const Properties = () => {
   const properties = [
@@ -97,6 +98,19 @@ const Properties = () => {
   const [bedrooms, setBedrooms] = useState("all");
   const [featuredOnly, setFeaturedOnly] = useState(false);
   const [propertyType, setPropertyType] = useState("all");
+  const [status, setStatus] = useState("all");
+  const [location, setLocation] = useState("all");
+  const [completion, setCompletion] = useState("all");
+  const [priceRange, setPriceRange] = useState<[number, number]>([0, 50000000]);
+  const [sortBy, setSortBy] = useState("newest");
+
+  // Helper: parse numeric price from string like "KES 14M" or "Starting KES 11.7M"
+  const parsePrice = (val: string): number => {
+    const match = val.replace(/,/g, '').match(/([0-9]+\.?[0-9]*)\s*(M|m)?/);
+    if (!match) return 0;
+    const n = parseFloat(match[1]);
+    return match[2] ? n * 1000000 : n;
+  };
 
   // Filtering logic
   const filteredProperties = properties.filter((p) => {
@@ -106,7 +120,19 @@ const Properties = () => {
     const matchesBedrooms = bedrooms === "all" ? true : String(p.bedrooms) === bedrooms;
     const matchesFeatured = featuredOnly ? p.featured : true;
     const matchesType = propertyType === "all" ? true : p.type === propertyType;
-    return matchesSearch && matchesBedrooms && matchesFeatured && matchesType;
+    const matchesStatus = status === "all" ? true : p.status === status;
+    const matchesLocation = location === "all" ? true : p.location.toLowerCase().includes(location.toLowerCase());
+    const matchesCompletion = completion === "all" ? true : (p.projectStage?.toLowerCase() || '') === completion.toLowerCase();
+    const priceNum = parsePrice(p.price);
+    const matchesPrice = priceNum >= priceRange[0] && priceNum <= priceRange[1];
+    return matchesSearch && matchesBedrooms && matchesFeatured && matchesType && matchesStatus && matchesLocation && matchesCompletion && matchesPrice;
+  });
+
+  const sortedProperties = [...filteredProperties].sort((a, b) => {
+    if (sortBy === 'price-asc') return (parsePrice(a.price) - parsePrice(b.price));
+    if (sortBy === 'price-desc') return (parsePrice(b.price) - parsePrice(a.price));
+    // default newest first — no createdAt on mock, so keep original order
+    return 0;
   });
 
   return (
@@ -129,12 +155,12 @@ const Properties = () => {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All</SelectItem>
-                <SelectItem value="Luxury Mansion">Luxury Mansion</SelectItem>
-                <SelectItem value="Modern Apartment">Modern Apartment</SelectItem>
-                <SelectItem value="Premium Maisonette">Premium Maisonette</SelectItem>
-                <SelectItem value="Executive Bungalow">Executive Bungalow</SelectItem>
-                <SelectItem value="Commercial Land">Commercial Land</SelectItem>
-                <SelectItem value="Town House">Town House</SelectItem>
+                <SelectItem value="Apartment">Apartment</SelectItem>
+                <SelectItem value="Studio">Studio</SelectItem>
+                <SelectItem value="Duplex">Duplex</SelectItem>
+                <SelectItem value="Triplex">Triplex</SelectItem>
+                <SelectItem value="Bungalow">Bungalow</SelectItem>
+                <SelectItem value="Town House">Townhouse</SelectItem>
                 <SelectItem value="Duplex">Duplex</SelectItem>
               </SelectContent>
             </Select>
@@ -151,6 +177,69 @@ const Properties = () => {
                 <SelectItem value="3">3</SelectItem>
                 <SelectItem value="4">4</SelectItem>
                 <SelectItem value="5">5</SelectItem>
+                <SelectItem value="5+">5+</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="min-w-[140px]">
+            <Select value={status} onValueChange={setStatus}>
+              <SelectTrigger>
+                <SelectValue placeholder="Status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All</SelectItem>
+                <SelectItem value="For Sale">For Sale</SelectItem>
+                <SelectItem value="For Rent">For Rent</SelectItem>
+                <SelectItem value="Offplan">Off-plan</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="min-w-[160px]">
+            <Select value={location} onValueChange={setLocation}>
+              <SelectTrigger>
+                <SelectValue placeholder="Location" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All</SelectItem>
+                <SelectItem value="Langata">Langata</SelectItem>
+                <SelectItem value="Ruiru">Ruiru</SelectItem>
+                <SelectItem value="Kikuyu">Kikuyu</SelectItem>
+                <SelectItem value="Kabete">Kabete</SelectItem>
+                <SelectItem value="Mombasa Road">Mombasa Road</SelectItem>
+                <SelectItem value="Kiambu">Kiambu</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="min-w-[160px]">
+            <Select value={completion} onValueChange={setCompletion}>
+              <SelectTrigger>
+                <SelectValue placeholder="Completion" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All</SelectItem>
+                <SelectItem value="Ready">Ready</SelectItem>
+                <SelectItem value="Under Construction">Under Construction</SelectItem>
+                <SelectItem value="Offplan">Off-plan</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="flex-1 min-w-[220px]">
+            <div className="text-xs text-muted-foreground mb-1">Price Range (KES)</div>
+            <Slider value={priceRange} onValueChange={(v)=>setPriceRange([v[0], v[1]] as [number, number])} min={0} max={50000000} step={500000} />
+            <div className="flex justify-between text-xs mt-1">
+              <span>{priceRange[0].toLocaleString()}</span>
+              <span>{priceRange[1].toLocaleString()}</span>
+            </div>
+          </div>
+          <div className="min-w-[160px]">
+            <Select value={sortBy} onValueChange={setSortBy}>
+              <SelectTrigger>
+                <SelectValue placeholder="Sort By" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="newest">Newest</SelectItem>
+                <SelectItem value="price-asc">Price: Low to High</SelectItem>
+                <SelectItem value="price-desc">Price: High to Low</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -177,10 +266,10 @@ const Properties = () => {
 
         {/* Properties Grid */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {filteredProperties.length === 0 && (
+          {sortedProperties.length === 0 && (
             <div className="col-span-full text-center text-muted-foreground py-8 text-lg">No properties match your search.</div>
           )}
-          {filteredProperties.map((property) => (
+          {sortedProperties.map((property) => (
             <Card
               key={property.id}
               className="overflow-hidden group hover:shadow-luxury transition-smooth cursor-pointer"
@@ -302,7 +391,11 @@ const PropertyDetails = ({ property }: { property: typeof properties[0] }) => (
     <div className="flex justify-end mt-4">
       <Button
         className="gradient-gold text-secondary font-semibold"
-        onClick={() => window.open("https://wa.me/254710132320", "_blank")}
+        onClick={() => {
+          const message = `Hi Nikas Realty, I'm interested in ${property.title}.`;
+          const url = `https://wa.me/254710132320?text=${encodeURIComponent(message)}`;
+          window.open(url, "_blank");
+        }}
       >
         WhatsApp Agent
       </Button>
