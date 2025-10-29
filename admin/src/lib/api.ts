@@ -29,4 +29,10 @@ export const uploadFile = (file: File) => {
   return api.post('/api/upload', form, { headers: { 'Content-Type': 'multipart/form-data' }});
 };
 
+export const uploadFiles = (files: File[]) => {
+  const form = new FormData();
+  files.forEach(f => form.append('files', f));
+  return api.post('/api/upload/multi', form, { headers: { 'Content-Type': 'multipart/form-data' }});
+};
+
 
