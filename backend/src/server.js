@@ -13,7 +13,16 @@ import uploadRoutes from './routes/upload.js';
 const app = express();
 
 const ALLOWED_ORIGINS = [process.env.FRONTEND_URL, process.env.ADMIN_URL].filter(Boolean);
-app.use(cors({ origin: ALLOWED_ORIGINS, credentials: true }));
+app.use(cors({
+  origin: function (origin, callback) {
+    if (!origin || ALLOWED_ORIGINS.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true,
+}));
 app.use(express.json({ limit: '2mb' }));
 app.use(morgan('dev'));
 app.use('/uploads', express.static('uploads'));
