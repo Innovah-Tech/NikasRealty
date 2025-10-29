@@ -15,6 +15,11 @@ router.post('/', requireAuth, requireAdmin, upload.single('file'), async (req, r
   res.status(201).json({ url: fileUrl });
 });
 
+router.post('/multi', requireAuth, requireAdmin, upload.array('files', 12), async (req, res) => {
+  const files = (req.files || []).map((f) => ({ url: `/uploads/${path.basename(f.path)}` }));
+  res.status(201).json({ files });
+});
+
 export default router;
 
 
