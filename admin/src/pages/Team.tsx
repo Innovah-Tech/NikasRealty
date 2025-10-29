@@ -22,22 +22,29 @@ const Team = () => {
   };
 
   return (
-    <div style={{ padding: 24 }}>
-      <h2>Team</h2>
-      <form onSubmit={save} style={{ display: 'grid', gap: 8, maxWidth: 420, margin: '12px 0' }}>
-        <input placeholder="Name" value={form.name} onChange={e=>setForm({ ...form, name: e.target.value })} required />
-        <input placeholder="Role" value={form.role} onChange={e=>setForm({ ...form, role: e.target.value })} required />
-        <button type="submit">{editingId ? 'Update' : 'Create'}</button>
+    <div className="space-y-4">
+      <div>
+        <h2 className="text-xl font-semibold">Team</h2>
+        <p className="text-sm text-gray-500">Manage your team members</p>
+      </div>
+      <form onSubmit={save} className="card p-4 grid gap-3 max-w-md">
+        <input className="input" placeholder="Name" value={form.name} onChange={e=>setForm({ ...form, name: e.target.value })} required />
+        <input className="input" placeholder="Role" value={form.role} onChange={e=>setForm({ ...form, role: e.target.value })} required />
+        <button className="btn btn-primary w-full md:w-auto" type="submit">{editingId ? 'Update' : 'Create'}</button>
       </form>
-      <ul>
-        {items.map(m => (
-          <li key={m._id} style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-            <span>{m.name} — {m.role}</span>
-            <button onClick={()=>{ setForm({ name: m.name, role: m.role }); setEditingId(m._id || null); }}>Edit</button>
-            <button onClick={()=>{ if(m._id) deleteTeam(m._id).then(load); }}>Delete</button>
-          </li>
-        ))}
-      </ul>
+      <div className="card">
+        <ul className="divide-y divide-gray-200">
+          {items.map(m => (
+            <li key={m._id} className="flex items-center justify-between px-4 py-3">
+              <span className="text-sm"><span className="font-medium">{m.name}</span> — {m.role}</span>
+              <div className="space-x-2">
+                <button className="btn border border-gray-300" onClick={()=>{ setForm({ name: m.name, role: m.role }); setEditingId(m._id || null); }}>Edit</button>
+                <button className="btn border border-red-200 text-red-600 hover:bg-red-50" onClick={()=>{ if(m._id) deleteTeam(m._id).then(load); }}>Delete</button>
+              </div>
+            </li>
+          ))}
+        </ul>
+      </div>
     </div>
   );
 };

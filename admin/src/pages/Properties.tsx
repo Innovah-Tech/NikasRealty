@@ -73,7 +73,25 @@ const Properties = () => {
   };
 
   const edit = (p: Property) => {
-    setForm({ title: p.title, type: p.type, price: p.price, location: p.location });
+    setForm({
+      title: p.title,
+      type: p.type,
+      price: p.price,
+      location: p.location,
+      status: p.status,
+      category: p.category,
+      bedrooms: p.bedrooms,
+      bathrooms: p.bathrooms,
+      sqft: p.sqft,
+      completion: p.completion,
+      completionDate: p.completionDate,
+      deposit: p.deposit,
+      paymentPlan: p.paymentPlan,
+      description: p.description,
+      features: p.features || [],
+      images: p.images || [],
+      instagramUrl: p.instagramUrl,
+    });
     setEditingId(p._id || null);
   };
 
@@ -84,12 +102,15 @@ const Properties = () => {
   };
 
   return (
-    <div style={{ padding: 24 }}>
-      <h2>Properties</h2>
-      <form onSubmit={save} style={{ display: 'grid', gap: 8, maxWidth: 720, margin: '12px 0' }}>
-        <input placeholder="Title" value={form.title} onChange={e=>setForm({ ...form, title: e.target.value })} required />
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8 }}>
-          <select value={form.type} onChange={e=>setForm({ ...form, type: e.target.value as Property['type'] })} required>
+    <div className="space-y-4">
+      <div>
+        <h2 className="text-xl font-semibold">Properties</h2>
+        <p className="text-sm text-gray-500">Create and manage property listings</p>
+      </div>
+      <form onSubmit={save} className="card p-4 grid gap-3 max-w-4xl">
+        <input className="input" placeholder="Title" value={form.title} onChange={e=>setForm({ ...form, title: e.target.value })} required />
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <select className="input" value={form.type} onChange={e=>setForm({ ...form, type: e.target.value as Property['type'] })} required>
             <option value="Apartment">Apartment</option>
             <option value="Studio">Studio</option>
             <option value="Duplex">Duplex</option>
@@ -99,42 +120,42 @@ const Properties = () => {
             <option value="Villa">Villa</option>
             <option value="Maisonette">Maisonette</option>
           </select>
-          <select value={form.status} onChange={e=>setForm({ ...form, status: e.target.value as Property['status'] })} required>
+          <select className="input" value={form.status} onChange={e=>setForm({ ...form, status: e.target.value as Property['status'] })} required>
             <option value="For Sale">For Sale</option>
             <option value="For Rent">For Rent</option>
             <option value="Off-plan">Off-plan</option>
           </select>
-          <select value={form.category} onChange={e=>setForm({ ...form, category: e.target.value as NonNullable<Property['category']> })}>
+          <select className="input" value={form.category} onChange={e=>setForm({ ...form, category: e.target.value as NonNullable<Property['category']> })}>
             <option value="Luxury Villas">Luxury Villas</option>
             <option value="Luxury Villas & Townhouses">Luxury Villas & Townhouses</option>
             <option value="Modern Bungalows">Modern Bungalows</option>
             <option value="Apartments & Studios">Apartments & Studios</option>
           </select>
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: 8 }}>
-          <input placeholder="Price (KES)" type="number" value={form.price} onChange={e=>setForm({ ...form, price: Number(e.target.value) })} required />
-          <input placeholder="Bedrooms" type="number" value={form.bedrooms ?? ''} onChange={e=>setForm({ ...form, bedrooms: e.target.value === '' ? undefined : Number(e.target.value) })} />
-          <input placeholder="Bathrooms" type="number" value={form.bathrooms ?? ''} onChange={e=>setForm({ ...form, bathrooms: e.target.value === '' ? undefined : Number(e.target.value) })} />
-          <input placeholder="Size (sqft)" type="number" value={form.sqft ?? ''} onChange={e=>setForm({ ...form, sqft: e.target.value === '' ? undefined : Number(e.target.value) })} />
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+          <input className="input" placeholder="Price (KES)" type="number" value={form.price} onChange={e=>setForm({ ...form, price: Number(e.target.value) })} required />
+          <input className="input" placeholder="Bedrooms" type="number" value={form.bedrooms ?? ''} onChange={e=>setForm({ ...form, bedrooms: e.target.value === '' ? undefined : Number(e.target.value) })} />
+          <input className="input" placeholder="Bathrooms" type="number" value={form.bathrooms ?? ''} onChange={e=>setForm({ ...form, bathrooms: e.target.value === '' ? undefined : Number(e.target.value) })} />
+          <input className="input" placeholder="Size (sqft)" type="number" value={form.sqft ?? ''} onChange={e=>setForm({ ...form, sqft: e.target.value === '' ? undefined : Number(e.target.value) })} />
         </div>
-        <input placeholder="Location" value={form.location} onChange={e=>setForm({ ...form, location: e.target.value })} required />
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-          <select value={form.completion ?? ''} onChange={e=>setForm({ ...form, completion: (e.target.value || undefined) as Property['completion'] })}>
+        <input className="input" placeholder="Location" value={form.location} onChange={e=>setForm({ ...form, location: e.target.value })} required />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <select className="input" value={form.completion ?? ''} onChange={e=>setForm({ ...form, completion: (e.target.value || undefined) as Property['completion'] })}>
             <option value="">Completion status</option>
             <option value="Ready">Ready</option>
             <option value="Under Construction">Under Construction</option>
             <option value="Off-plan">Off-plan</option>
           </select>
-          <input placeholder="Completion Date (YYYY-MM-DD)" type="date" value={form.completionDate || ''} onChange={e=>setForm({ ...form, completionDate: e.target.value })} />
+          <input className="input" placeholder="Completion Date (YYYY-MM-DD)" type="date" value={form.completionDate || ''} onChange={e=>setForm({ ...form, completionDate: e.target.value })} />
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-          <input placeholder="Deposit (e.g., 20%)" value={form.deposit || ''} onChange={e=>setForm({ ...form, deposit: e.target.value })} />
-          <input placeholder="Payment Plan" value={form.paymentPlan || ''} onChange={e=>setForm({ ...form, paymentPlan: e.target.value })} />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <input className="input" placeholder="Deposit (e.g., 20%)" value={form.deposit || ''} onChange={e=>setForm({ ...form, deposit: e.target.value })} />
+          <input className="input" placeholder="Payment Plan" value={form.paymentPlan || ''} onChange={e=>setForm({ ...form, paymentPlan: e.target.value })} />
         </div>
-        <textarea placeholder="Description" value={form.description || ''} onChange={e=>setForm({ ...form, description: e.target.value })} />
-        <input placeholder="Features (comma-separated)" value={(form.features || []).join(', ')} onChange={e=>setForm({ ...form, features: e.target.value.split(',').map(s=>s.trim()).filter(Boolean) })} />
-        <input placeholder="Instagram URL (optional)" value={form.instagramUrl || ''} onChange={e=>setForm({ ...form, instagramUrl: e.target.value })} />
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <textarea className="input min-h-28" placeholder="Description" value={form.description || ''} onChange={e=>setForm({ ...form, description: e.target.value })} />
+        <input className="input" placeholder="Features (comma-separated)" value={(form.features || []).join(', ')} onChange={e=>setForm({ ...form, features: e.target.value.split(',').map(s=>s.trim()).filter(Boolean) })} />
+        <input className="input" placeholder="Instagram URL (optional)" value={form.instagramUrl || ''} onChange={e=>setForm({ ...form, instagramUrl: e.target.value })} />
+        <div className="flex items-center gap-3">
           <input
             type="file"
             multiple
@@ -146,32 +167,39 @@ const Properties = () => {
               setForm(prev => ({ ...prev, images: [ ...(prev.images || []), ...urls ] }));
             }}
           />
-          <span>{(form.images || []).length} images</span>
+          <span className="text-sm text-gray-500">{(form.images || []).length} images</span>
         </div>
-        <button type="submit">{editingId ? 'Update' : 'Create'}</button>
+        <button className="btn btn-primary w-full md:w-auto" type="submit">{editingId ? 'Update' : 'Create'}</button>
       </form>
-      <table cellPadding={8} style={{ borderCollapse: 'collapse' }}>
-        <thead>
-          <tr>
-            <th>Title</th><th>Type</th><th>Status</th><th>Price</th><th>Location</th><th>Actions</th>
+      <div className="card overflow-hidden">
+        <table className="min-w-full">
+          <thead className="bg-gray-50 border-b border-gray-200 text-left text-sm text-gray-600">
+            <tr>
+              <th className="px-4 py-2">Title</th>
+              <th className="px-4 py-2">Type</th>
+              <th className="px-4 py-2">Status</th>
+              <th className="px-4 py-2">Price</th>
+              <th className="px-4 py-2">Location</th>
+              <th className="px-4 py-2">Actions</th>
           </tr>
         </thead>
-        <tbody>
+          <tbody className="divide-y divide-gray-200 text-sm">
           {items.map(p => (
-            <tr key={p._id}>
-              <td>{p.title}</td>
-              <td>{p.type}</td>
-              <td>{p.status}</td>
-              <td>{p.price}</td>
-              <td>{p.location}</td>
-              <td>
-                <button onClick={()=>edit(p)}>Edit</button>
-                <button onClick={()=>remove(p._id)}>Delete</button>
+              <tr key={p._id} className="hover:bg-gray-50">
+                <td className="px-4 py-2">{p.title}</td>
+                <td className="px-4 py-2">{p.type}</td>
+                <td className="px-4 py-2">{p.status}</td>
+                <td className="px-4 py-2">{p.price.toLocaleString()}</td>
+                <td className="px-4 py-2">{p.location}</td>
+                <td className="px-4 py-2 space-x-2">
+                  <button className="btn border border-gray-300" onClick={()=>edit(p)}>Edit</button>
+                  <button className="btn border border-red-200 text-red-600 hover:bg-red-50" onClick={()=>remove(p._id)}>Delete</button>
               </td>
             </tr>
           ))}
         </tbody>
       </table>
+      </div>
     </div>
   );
 };

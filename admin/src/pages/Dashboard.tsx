@@ -21,16 +21,25 @@ const Dashboard = () => {
   const logout = () => { localStorage.removeItem('jwt'); navigate('/login'); };
 
   return (
-    <div style={{ padding: 24 }}>
-      <h1>Admin Dashboard</h1>
-      <div style={{ display: 'flex', gap: 16, margin: '16px 0' }}>
-        <div>Properties: {counts.properties}</div>
-        <div>Team: {counts.team}</div>
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-2xl font-semibold">Dashboard</h1>
+        <p className="text-sm text-gray-500">Quick overview of your content</p>
       </div>
-      <div style={{ display: 'flex', gap: 12 }}>
-        <Link to="/dashboard/properties">Manage Properties</Link>
-        <Link to="/dashboard/team">Manage Team</Link>
-        <button onClick={logout}>Logout</button>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="card p-4">
+          <div className="text-sm text-gray-500">Properties</div>
+          <div className="text-2xl font-semibold">{counts.properties}</div>
+        </div>
+        <div className="card p-4">
+          <div className="text-sm text-gray-500">Team</div>
+          <div className="text-2xl font-semibold">{counts.team}</div>
+        </div>
+      </div>
+      <div className="flex items-center gap-3">
+        <Link to="/dashboard/properties" className="btn btn-primary">Manage Properties</Link>
+        <Link to="/dashboard/team" className="btn border border-gray-300">Manage Team</Link>
+        <button onClick={logout} className="btn border border-gray-300">Logout</button>
       </div>
     </div>
   );

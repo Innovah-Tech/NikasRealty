@@ -1,0 +1,25 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Admin brand tweaks to align with site */
+:root {
+  --brand-primary: 34 197 94; /* emerald-500 fallback */
+}
+
+.btn {
+  @apply inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-colors;
+}
+.btn-primary {
+  @apply bg-emerald-600 text-white hover:bg-emerald-700;
+}
+.card {
+  @apply bg-white rounded-xl shadow-sm border border-gray-200;
+}
+.input {
+  @apply w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500;
+}
+.label {
+  @apply text-sm font-medium text-gray-700;
+}
+
