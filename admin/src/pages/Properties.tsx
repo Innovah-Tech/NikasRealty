@@ -1,209 +1,217 @@
 import { useEffect, useState } from 'react';
-import { createProperty, deleteProperty, listProperties, updateProperty, uploadFiles } from '../lib/api';
+import { DashboardLayout } from '@/components/DashboardLayout';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Card, CardContent } from '@/components/ui/card';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Edit, Eye, Trash2, Search } from 'lucide-react';
+import { axiosClient } from '@/utils/axiosClient';
+import { toast } from 'sonner';
+import { useNavigate } from 'react-router-dom';
 
-type Property = {
-  _id?: string;
+interface Property {
+  _id: string;
   title: string;
-  type: 'Apartment' | 'Studio' | 'Duplex' | 'Triplex' | 'Bungalow' | 'Townhouse' | 'Villa' | 'Maisonette';
-  category?: 'Luxury Villas' | 'Luxury Villas & Townhouses' | 'Modern Bungalows' | 'Apartments & Studios';
-  bedrooms?: number;
-  bathrooms?: number;
-  sqft?: number;
-  price: number;
-  status: 'For Sale' | 'For Rent' | 'Off-plan';
   location: string;
-  completionDate?: string;
-  completion?: 'Ready' | 'Under Construction' | 'Off-plan';
-  deposit?: string;
-  paymentPlan?: string;
-  description?: string;
-  features?: string[];
-  images?: string[];
-  instagramUrl?: string;
-};
-
-const emptyForm: Property = {
-  title: '',
-  type: 'Apartment',
-  category: 'Apartments & Studios',
-  bedrooms: undefined,
-  bathrooms: undefined,
-  sqft: undefined,
-  price: 0,
-  status: 'For Sale',
-  location: '',
-  completion: undefined,
-  completionDate: '',
-  deposit: '',
-  paymentPlan: '',
-  description: '',
-  features: [],
-  images: [],
-  instagramUrl: ''
-};
+  type: string;
+  price: number;
+  status: string;
+  images: string[];
+}
 
 const Properties = () => {
-  const [items, setItems] = useState<Property[]>([]);
-  const [form, setForm] = useState<Property>(emptyForm);
-  const [editingId, setEditingId] = useState<string | null>(null);
+  const [properties, setProperties] = useState<Property[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState('');
+  const [typeFilter, setTypeFilter] = useState('all');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [page, setPage] = useState(1);
+  const navigate = useNavigate();
 
-  const load = async () => {
-    const { data } = await listProperties();
-    setItems(data);
+  useEffect(() => {
+    fetchProperties();
+  }, [page, typeFilter, statusFilter]);
+
+  const fetchProperties = async () => {
+    setLoading(true);
+    try {
+      const params: any = { page, limit: 10 };
+      if (search) params.search = search;
+      if (typeFilter !== 'all') params.type = typeFilter;
+      if (statusFilter !== 'all') params.status = statusFilter;
+
+      const response = await axiosClient.get('/properties', { params });
+      setProperties(response.data.properties || response.data || []);
+    } catch (error) {
+      toast.error('Failed to fetch properties');
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  useEffect(() => { load(); }, []);
+  const handleDelete = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this property?')) return;
 
-  const save = async (e: React.FormEvent) => {
+    try {
+      await axiosClient.delete(`/properties/${id}`);
+      toast.success('Property deleted successfully');
+      fetchProperties();
+    } catch (error) {
+      toast.error('Failed to delete property');
+    }
+  };
+
+  const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    const payload: Property = {
-      ...form,
-      // normalize types
-      bedrooms: form.bedrooms ? Number(form.bedrooms) : undefined,
-      bathrooms: form.bathrooms ? Number(form.bathrooms) : undefined,
-      sqft: form.sqft ? Number(form.sqft) : undefined,
-      price: Number(form.price || 0),
-      features: form.features || [],
-    };
-    if (editingId) await updateProperty(editingId, payload);
-    else await createProperty(payload);
-    setForm(emptyForm);
-    setEditingId(null);
-    load();
-  };
-
-  const edit = (p: Property) => {
-    setForm({
-      title: p.title,
-      type: p.type,
-      price: p.price,
-      location: p.location,
-      status: p.status,
-      category: p.category,
-      bedrooms: p.bedrooms,
-      bathrooms: p.bathrooms,
-      sqft: p.sqft,
-      completion: p.completion,
-      completionDate: p.completionDate,
-      deposit: p.deposit,
-      paymentPlan: p.paymentPlan,
-      description: p.description,
-      features: p.features || [],
-      images: p.images || [],
-      instagramUrl: p.instagramUrl,
-    });
-    setEditingId(p._id || null);
-  };
-
-  const remove = async (id?: string) => {
-    if (!id) return;
-    await deleteProperty(id);
-    load();
+    fetchProperties();
   };
 
   return (
-    <div className="space-y-4">
-      <div>
-        <h2 className="text-xl font-semibold">Properties</h2>
-        <p className="text-sm text-gray-500">Create and manage property listings</p>
+    <DashboardLayout>
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-foreground">Properties</h1>
+            <p className="text-muted-foreground">Manage your property listings</p>
+          </div>
+          <Button onClick={() => navigate('/add-property')}>
+            Add Property
+          </Button>
+        </div>
+
+        {/* Filters */}
+        <Card>
+          <CardContent className="pt-6">
+            <form onSubmit={handleSearch} className="flex flex-col gap-4 sm:flex-row">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search by title or location..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+              <Select value={typeFilter} onValueChange={setTypeFilter}>
+                <SelectTrigger className="w-full sm:w-[180px]">
+                  <SelectValue placeholder="Property Type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Types</SelectItem>
+                  <SelectItem value="apartment">Apartment</SelectItem>
+                  <SelectItem value="villa">Villa</SelectItem>
+                  <SelectItem value="bungalow">Bungalow</SelectItem>
+                  <SelectItem value="townhouse">Townhouse</SelectItem>
+                  <SelectItem value="duplex">Duplex</SelectItem>
+                  <SelectItem value="triplex">Triplex</SelectItem>
+                </SelectContent>
+              </Select>
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className="w-full sm:w-[180px]">
+                  <SelectValue placeholder="Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Status</SelectItem>
+                  <SelectItem value="for-sale">For Sale</SelectItem>
+                  <SelectItem value="for-rent">For Rent</SelectItem>
+                  <SelectItem value="sold">Sold</SelectItem>
+                </SelectContent>
+              </Select>
+              <Button type="submit">Search</Button>
+            </form>
+          </CardContent>
+        </Card>
+
+        {/* Properties Grid */}
+        {loading ? (
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <Card key={i} className="animate-pulse">
+                <div className="h-48 rounded-t-lg bg-muted" />
+                <CardContent className="space-y-3 pt-4">
+                  <div className="h-4 w-3/4 rounded bg-muted" />
+                  <div className="h-3 w-1/2 rounded bg-muted" />
+                  <div className="h-3 w-1/3 rounded bg-muted" />
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        ) : properties.length === 0 ? (
+          <Card>
+            <CardContent className="py-12 text-center">
+              <p className="text-muted-foreground">No properties found</p>
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {properties.map((property) => (
+              <Card key={property._id} className="overflow-hidden transition-shadow hover:shadow-lg">
+                <div className="relative h-48 overflow-hidden bg-muted">
+                  {property.images?.[0] && (
+                    <img
+                      src={property.images[0]}
+                      alt={property.title}
+                      className="h-full w-full object-cover"
+                    />
+                  )}
+                </div>
+                <CardContent className="space-y-3 pt-4">
+                  <div>
+                    <h3 className="text-lg font-semibold text-foreground">{property.title}</h3>
+                    <p className="text-sm text-muted-foreground">{property.location}</p>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium text-primary">
+                      KSh {property.price.toLocaleString()}
+                    </span>
+                    <span className="rounded-full bg-secondary px-3 py-1 text-xs font-medium">
+                      {property.status}
+                    </span>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button variant="outline" size="sm" className="flex-1">
+                      <Eye className="mr-1 h-3 w-3" />
+                      View
+                    </Button>
+                    <Button variant="outline" size="sm" className="flex-1">
+                      <Edit className="mr-1 h-3 w-3" />
+                      Edit
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleDelete(property._id)}
+                    >
+                      <Trash2 className="h-3 w-3 text-destructive" />
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
+
+        {/* Pagination */}
+        <div className="flex justify-center gap-2">
+          <Button
+            variant="outline"
+            onClick={() => setPage(Math.max(1, page - 1))}
+            disabled={page === 1}
+          >
+            Previous
+          </Button>
+          <Button
+            variant="outline"
+            onClick={() => setPage(page + 1)}
+            disabled={properties.length < 10}
+          >
+            Next
+          </Button>
+        </div>
       </div>
-      <form onSubmit={save} className="card p-4 grid gap-3 max-w-4xl">
-        <input className="input" placeholder="Title" value={form.title} onChange={e=>setForm({ ...form, title: e.target.value })} required />
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-          <select className="input" value={form.type} onChange={e=>setForm({ ...form, type: e.target.value as Property['type'] })} required>
-            <option value="Apartment">Apartment</option>
-            <option value="Studio">Studio</option>
-            <option value="Duplex">Duplex</option>
-            <option value="Triplex">Triplex</option>
-            <option value="Bungalow">Bungalow</option>
-            <option value="Townhouse">Townhouse</option>
-            <option value="Villa">Villa</option>
-            <option value="Maisonette">Maisonette</option>
-          </select>
-          <select className="input" value={form.status} onChange={e=>setForm({ ...form, status: e.target.value as Property['status'] })} required>
-            <option value="For Sale">For Sale</option>
-            <option value="For Rent">For Rent</option>
-            <option value="Off-plan">Off-plan</option>
-          </select>
-          <select className="input" value={form.category} onChange={e=>setForm({ ...form, category: e.target.value as NonNullable<Property['category']> })}>
-            <option value="Luxury Villas">Luxury Villas</option>
-            <option value="Luxury Villas & Townhouses">Luxury Villas & Townhouses</option>
-            <option value="Modern Bungalows">Modern Bungalows</option>
-            <option value="Apartments & Studios">Apartments & Studios</option>
-          </select>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
-          <input className="input" placeholder="Price (KES)" type="number" value={form.price} onChange={e=>setForm({ ...form, price: Number(e.target.value) })} required />
-          <input className="input" placeholder="Bedrooms" type="number" value={form.bedrooms ?? ''} onChange={e=>setForm({ ...form, bedrooms: e.target.value === '' ? undefined : Number(e.target.value) })} />
-          <input className="input" placeholder="Bathrooms" type="number" value={form.bathrooms ?? ''} onChange={e=>setForm({ ...form, bathrooms: e.target.value === '' ? undefined : Number(e.target.value) })} />
-          <input className="input" placeholder="Size (sqft)" type="number" value={form.sqft ?? ''} onChange={e=>setForm({ ...form, sqft: e.target.value === '' ? undefined : Number(e.target.value) })} />
-        </div>
-        <input className="input" placeholder="Location" value={form.location} onChange={e=>setForm({ ...form, location: e.target.value })} required />
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          <select className="input" value={form.completion ?? ''} onChange={e=>setForm({ ...form, completion: (e.target.value || undefined) as Property['completion'] })}>
-            <option value="">Completion status</option>
-            <option value="Ready">Ready</option>
-            <option value="Under Construction">Under Construction</option>
-            <option value="Off-plan">Off-plan</option>
-          </select>
-          <input className="input" placeholder="Completion Date (YYYY-MM-DD)" type="date" value={form.completionDate || ''} onChange={e=>setForm({ ...form, completionDate: e.target.value })} />
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          <input className="input" placeholder="Deposit (e.g., 20%)" value={form.deposit || ''} onChange={e=>setForm({ ...form, deposit: e.target.value })} />
-          <input className="input" placeholder="Payment Plan" value={form.paymentPlan || ''} onChange={e=>setForm({ ...form, paymentPlan: e.target.value })} />
-        </div>
-        <textarea className="input min-h-28" placeholder="Description" value={form.description || ''} onChange={e=>setForm({ ...form, description: e.target.value })} />
-        <input className="input" placeholder="Features (comma-separated)" value={(form.features || []).join(', ')} onChange={e=>setForm({ ...form, features: e.target.value.split(',').map(s=>s.trim()).filter(Boolean) })} />
-        <input className="input" placeholder="Instagram URL (optional)" value={form.instagramUrl || ''} onChange={e=>setForm({ ...form, instagramUrl: e.target.value })} />
-        <div className="flex items-center gap-3">
-          <input
-            type="file"
-            multiple
-            onChange={async (e) => {
-              const files = e.target.files ? Array.from(e.target.files) : [];
-              if (!files.length) return;
-              const { data } = await uploadFiles(files);
-              const urls = (data.files || []).map((f: { url: string }) => f.url);
-              setForm(prev => ({ ...prev, images: [ ...(prev.images || []), ...urls ] }));
-            }}
-          />
-          <span className="text-sm text-gray-500">{(form.images || []).length} images</span>
-        </div>
-        <button className="btn btn-primary w-full md:w-auto" type="submit">{editingId ? 'Update' : 'Create'}</button>
-      </form>
-      <div className="card overflow-hidden">
-        <table className="min-w-full">
-          <thead className="bg-gray-50 border-b border-gray-200 text-left text-sm text-gray-600">
-            <tr>
-              <th className="px-4 py-2">Title</th>
-              <th className="px-4 py-2">Type</th>
-              <th className="px-4 py-2">Status</th>
-              <th className="px-4 py-2">Price</th>
-              <th className="px-4 py-2">Location</th>
-              <th className="px-4 py-2">Actions</th>
-          </tr>
-        </thead>
-          <tbody className="divide-y divide-gray-200 text-sm">
-          {items.map(p => (
-              <tr key={p._id} className="hover:bg-gray-50">
-                <td className="px-4 py-2">{p.title}</td>
-                <td className="px-4 py-2">{p.type}</td>
-                <td className="px-4 py-2">{p.status}</td>
-                <td className="px-4 py-2">{p.price.toLocaleString()}</td>
-                <td className="px-4 py-2">{p.location}</td>
-                <td className="px-4 py-2 space-x-2">
-                  <button className="btn border border-gray-300" onClick={()=>edit(p)}>Edit</button>
-                  <button className="btn border border-red-200 text-red-600 hover:bg-red-50" onClick={()=>remove(p._id)}>Delete</button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-      </div>
-    </div>
+    </DashboardLayout>
   );
 };
 
 export default Properties;
-
-

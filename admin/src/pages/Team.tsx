@@ -1,54 +1,96 @@
 import { useEffect, useState } from 'react';
-import { createTeam, deleteTeam, listTeam, updateTeam } from '../lib/api';
+import { DashboardLayout } from '@/components/DashboardLayout';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { PlusCircle } from 'lucide-react';
+import { axiosClient } from '@/utils/axiosClient';
+import { toast } from 'sonner';
 
-type Member = { _id?: string; name: string; role: string };
-const emptyForm: Member = { name: '', role: '' };
+interface TeamMember {
+  _id: string;
+  name: string;
+  role: string;
+  photo: string;
+  email?: string;
+  phone?: string;
+}
 
 const Team = () => {
-  const [items, setItems] = useState<Member[]>([]);
-  const [form, setForm] = useState<Member>(emptyForm);
-  const [editingId, setEditingId] = useState<string | null>(null);
+  const [members, setMembers] = useState<TeamMember[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const load = async () => {
-    const { data } = await listTeam();
-    setItems(data);
-  };
-  useEffect(()=>{ load(); }, []);
+  useEffect(() => {
+    fetchTeam();
+  }, []);
 
-  const save = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (editingId) await updateTeam(editingId, form); else await createTeam(form);
-    setForm(emptyForm); setEditingId(null); load();
+  const fetchTeam = async () => {
+    try {
+      const response = await axiosClient.get('/team');
+      setMembers(response.data);
+    } catch (error) {
+      toast.error('Failed to fetch team members');
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <div className="space-y-4">
-      <div>
-        <h2 className="text-xl font-semibold">Team</h2>
-        <p className="text-sm text-gray-500">Manage your team members</p>
+    <DashboardLayout>
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-foreground">Team</h1>
+            <p className="text-muted-foreground">Manage your team members</p>
+          </div>
+          <Button>
+            <PlusCircle className="mr-2 h-4 w-4" />
+            Add Member
+          </Button>
+        </div>
+
+        {loading ? (
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+            {[1, 2, 3, 4].map((i) => (
+              <Card key={i} className="animate-pulse">
+                <CardContent className="p-6 text-center">
+                  <div className="mx-auto mb-4 h-24 w-24 rounded-full bg-muted" />
+                  <div className="mx-auto mb-2 h-4 w-32 rounded bg-muted" />
+                  <div className="mx-auto h-3 w-24 rounded bg-muted" />
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        ) : members.length === 0 ? (
+          <Card>
+            <CardContent className="py-12 text-center">
+              <p className="text-muted-foreground">No team members yet</p>
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+            {members.map((member) => (
+              <Card key={member._id}>
+                <CardContent className="p-6 text-center">
+                  <div className="mx-auto mb-4 h-24 w-24 overflow-hidden rounded-full bg-muted">
+                    {member.photo && (
+                      <img
+                        src={member.photo}
+                        alt={member.name}
+                        className="h-full w-full object-cover"
+                      />
+                    )}
+                  </div>
+                  <h3 className="text-lg font-semibold text-foreground">{member.name}</h3>
+                  <p className="text-sm text-muted-foreground">{member.role}</p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
       </div>
-      <form onSubmit={save} className="card p-4 grid gap-3 max-w-md">
-        <input className="input" placeholder="Name" value={form.name} onChange={e=>setForm({ ...form, name: e.target.value })} required />
-        <input className="input" placeholder="Role" value={form.role} onChange={e=>setForm({ ...form, role: e.target.value })} required />
-        <button className="btn btn-primary w-full md:w-auto" type="submit">{editingId ? 'Update' : 'Create'}</button>
-      </form>
-      <div className="card">
-        <ul className="divide-y divide-gray-200">
-          {items.map(m => (
-            <li key={m._id} className="flex items-center justify-between px-4 py-3">
-              <span className="text-sm"><span className="font-medium">{m.name}</span> — {m.role}</span>
-              <div className="space-x-2">
-                <button className="btn border border-gray-300" onClick={()=>{ setForm({ name: m.name, role: m.role }); setEditingId(m._id || null); }}>Edit</button>
-                <button className="btn border border-red-200 text-red-600 hover:bg-red-50" onClick={()=>{ if(m._id) deleteTeam(m._id).then(load); }}>Delete</button>
-              </div>
-            </li>
-          ))}
-        </ul>
-      </div>
-    </div>
+    </DashboardLayout>
   );
 };
 
 export default Team;
-
-
