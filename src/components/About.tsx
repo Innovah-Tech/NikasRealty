@@ -105,7 +105,7 @@ const About = () => {
             <TeamMember
               name="Brian Wachira"
               title="Estate Agent"
-              image="https://randomuser.me/api/portraits/men/71.jpg"
+              image="/images/1000295242.jpg"
               bio="Brian is committed to delivering seamless real estate services, leveraging local knowledge and strong client relationships to achieve successful outcomes."
             />
           </div>
