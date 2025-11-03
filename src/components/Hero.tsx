@@ -1,6 +1,12 @@
 import { Button } from "@/components/ui/button";
 import { ArrowRight, MessageCircle } from "lucide-react";
 import heroImage from "@/assets/images/hero.jpg";
+import property1 from "@/assets/images/property1.jpg";
+import property2 from "@/assets/images/property2.jpg";
+import property3 from "@/assets/images/property3.jpg";
+import property4 from "@/assets/images/property4.jpg";
+import property5 from "@/assets/images/property5.jpg";
+import { useEffect, useState } from "react";
 
 const Hero = () => {
   const scrollToProperties = () => {
@@ -10,16 +16,29 @@ const Hero = () => {
     }
   };
 
+  const slides = [heroImage, property1, property2, property3, property4, property5];
+  const [index, setIndex] = useState(0);
+
+  useEffect(() => {
+    const id = window.setInterval(() => {
+      setIndex((i) => (i + 1) % slides.length);
+    }, 5000);
+    return () => window.clearInterval(id);
+  }, [slides.length]);
+
   return (
     <section id="home" className="relative min-h-screen flex items-center justify-center overflow-hidden">
-      {/* Background Image with Overlay */}
+      {/* Background Slideshow with Overlay */}
       <div className="absolute inset-0 z-0">
-        <img
-          src={heroImage}
-          alt="Luxury Modern Villa"
-          className="w-full h-full object-cover"
-          loading="eager"
-        />
+        {slides.map((src, i) => (
+          <img
+            key={i}
+            src={src}
+            alt="Luxury Property"
+            className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-[1200ms] ${i === index ? 'opacity-100' : 'opacity-0'}`}
+            loading={i === 0 ? 'eager' : 'lazy'}
+          />
+        ))}
         <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/50 to-black/70" />
       </div>
 

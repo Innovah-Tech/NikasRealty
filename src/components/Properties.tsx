@@ -12,6 +12,7 @@ import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
+import { useEffect, useCallback } from "react";
 
 const Properties = () => {
   const properties = [
@@ -138,6 +139,8 @@ const Properties = () => {
   return (
     <section id="properties" className="py-20 lg:py-32 bg-muted/30">
       <div className="container mx-auto px-4 lg:px-8">
+        {/* Featured Properties Slides */}
+        <FeaturedPropertiesSlides items={properties} />
         {/* Search and Filter Row */}
         <div className="flex flex-wrap gap-4 mb-10 items-end">
           <div className="flex-1 min-w-[200px]">
@@ -409,3 +412,61 @@ const PropertyDetails = ({ property }: { property: typeof properties[0] }) => (
 );
 
 export default Properties;
+
+// --- Slides: Featured Properties (no external deps) ---
+const FeaturedPropertiesSlides = ({ items }: { items: Array<{ id: number; title: string; image: string; price: string; location: string }>; }) => {
+  const [index, setIndex] = useState(0);
+  const last = items.length - 1;
+
+  const next = useCallback(() => setIndex((i) => (i >= last ? 0 : i + 1)), [last]);
+  const prev = useCallback(() => setIndex((i) => (i <= 0 ? last : i - 1)), [last]);
+
+  useEffect(() => {
+    const id = window.setInterval(next, 4000);
+    return () => window.clearInterval(id);
+  }, [next]);
+
+  return (
+    <div className="mb-12">
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-2xl font-bold text-foreground">Featured Properties</h3>
+        <div className="flex gap-2">
+          <button onClick={prev} className="h-9 w-9 rounded-md border border-border text-foreground hover:bg-accent hover:text-accent-foreground transition-smooth">‹</button>
+          <button onClick={next} className="h-9 w-9 rounded-md border border-border text-foreground hover:bg-accent hover:text-accent-foreground transition-smooth">›</button>
+        </div>
+      </div>
+      <div className="relative overflow-hidden rounded-xl">
+        {/* Fade slides */}
+        {items.map((p, i) => (
+          <div
+            key={p.id}
+            className={`absolute inset-0 transition-opacity duration-700 ease-out ${i === index ? 'opacity-100' : 'opacity-0'}`}
+          >
+            <div className="rounded-xl overflow-hidden shadow-card bg-card group cursor-pointer h-full">
+              <div className="relative h-56 sm:h-64 md:h-72 overflow-hidden">
+                <img src={p.image} alt={p.title} className="w-full h-full object-cover group-hover:scale-110 transition-smooth" />
+                <Badge className="absolute top-3 right-3 gradient-gold text-secondary font-semibold">Hot</Badge>
+              </div>
+              <div className="p-4">
+                <div className="text-sm text-muted-foreground flex items-center gap-1"><MapPin size={14} />{p.location}</div>
+                <div className="font-semibold text-foreground mt-1 group-hover:text-primary transition-smooth line-clamp-1">{p.title}</div>
+                <div className="text-primary font-bold mt-2">{p.price}</div>
+              </div>
+            </div>
+          </div>
+        ))}
+        {/* Dots */}
+        <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-2">
+          {items.map((_, i) => (
+            <button
+              key={i}
+              onClick={() => setIndex(i)}
+              className={`h-2 w-2 rounded-full transition-smooth ${i === index ? 'bg-primary' : 'bg-muted'}`}
+              aria-label={`Go to slide ${i + 1}`}
+            />
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
