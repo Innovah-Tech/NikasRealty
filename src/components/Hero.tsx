@@ -27,16 +27,20 @@ const Hero = () => {
   }, [slides.length]);
 
   return (
-    <section id="home" className="relative min-h-screen flex items-center justify-center overflow-hidden">
+    <section id="home" className="relative min-h-[100svh] flex items-center justify-center overflow-hidden">
       {/* Background Slideshow with Overlay */}
       <div className="absolute inset-0 z-0">
         {slides.map((src, i) => (
-          <img
+          <div
             key={i}
-            src={src}
-            alt="Luxury Property"
-            className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-[1200ms] ${i === index ? 'opacity-100' : 'opacity-0'}`}
-            loading={i === 0 ? 'eager' : 'lazy'}
+            aria-hidden={i !== index}
+            className={`absolute inset-0 transition-opacity duration-[1200ms] ${i === index ? 'opacity-100' : 'opacity-0'} transform-gpu will-change-opacity`}
+            style={{
+              backgroundImage: `url(${src})`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              backgroundRepeat: 'no-repeat',
+            }}
           />
         ))}
         <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/50 to-black/70" />
