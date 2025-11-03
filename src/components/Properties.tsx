@@ -156,12 +156,12 @@ const Properties = () => {
               <SelectContent>
                 <SelectItem value="all">All</SelectItem>
                 <SelectItem value="Apartment">Apartment</SelectItem>
-                <SelectItem value="Studio">Studio</SelectItem>
+                <SelectItem value="Mansion">Mansion</SelectItem>
+                <SelectItem value="Maisonette">Maisonette</SelectItem>
+                <SelectItem value="Townhouse">Townhouse</SelectItem>
+                <SelectItem value="Bungalow">Bungalow</SelectItem>
                 <SelectItem value="Duplex">Duplex</SelectItem>
                 <SelectItem value="Triplex">Triplex</SelectItem>
-                <SelectItem value="Bungalow">Bungalow</SelectItem>
-                <SelectItem value="Town House">Townhouse</SelectItem>
-                <SelectItem value="Duplex">Duplex</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -204,9 +204,14 @@ const Properties = () => {
                 <SelectItem value="Langata">Langata</SelectItem>
                 <SelectItem value="Ruiru">Ruiru</SelectItem>
                 <SelectItem value="Kikuyu">Kikuyu</SelectItem>
+                <SelectItem value="Kilimani">Kilimani</SelectItem>
+                <SelectItem value="Kileleshwa">Kileleshwa</SelectItem>
+                <SelectItem value="Syokimau">Syokimau</SelectItem>
                 <SelectItem value="Kabete">Kabete</SelectItem>
-                <SelectItem value="Mombasa Road">Mombasa Road</SelectItem>
-                <SelectItem value="Kiambu">Kiambu</SelectItem>
+                <SelectItem value="Muthaiga">Muthaiga</SelectItem>
+                <SelectItem value="Riverside">Riverside</SelectItem>
+                <SelectItem value="Kiambu Road">Kiambu Road</SelectItem>
+                <SelectItem value="Ngong">Ngong</SelectItem>
               </SelectContent>
             </Select>
           </div>

@@ -1,12 +1,14 @@
 import { useState, useEffect } from "react";
-import { Menu, X } from "lucide-react";
+import { Menu, X, Moon, Sun } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import logo from "@/assets/images/logo.png";
 import { Link, useNavigate } from "react-router-dom";
+import { useTheme } from "next-themes";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const { theme, setTheme } = useTheme();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -69,6 +71,15 @@ const Navbar = () => {
                 </button>
               )
             ))}
+            <button
+              aria-label="Toggle theme"
+              className="inline-flex h-10 w-10 items-center justify-center rounded-md border border-border bg-background text-foreground hover:bg-accent hover:text-accent-foreground transition-smooth"
+              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+            >
+              <Sun className="h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+              <Moon className="absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+              <span className="sr-only">Toggle theme</span>
+            </button>
             <Button
               onClick={() => window.open("https://wa.me/254710132320", "_blank")}
               className="gradient-gold text-secondary font-semibold shadow-luxury hover:scale-105 transition-smooth"
@@ -110,6 +121,17 @@ const Navbar = () => {
                   </button>
                 )
               ))}
+              <div className="px-4">
+                <button
+                  aria-label="Toggle theme"
+                  className="w-full inline-flex h-10 items-center justify-center rounded-md border border-border bg-background text-foreground hover:bg-accent hover:text-accent-foreground transition-smooth"
+                  onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+                >
+                  <Sun className="h-5 w-5 mr-2 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+                  <Moon className="h-5 w-5 mr-2 absolute rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+                  Toggle theme
+                </button>
+              </div>
               <div className="px-4">
                 <Button
                   onClick={() => window.open("https://wa.me/254710132320", "_blank")}

@@ -99,7 +99,7 @@ const About = () => {
             <TeamMember
               name="Monicah Githinji"
               title="Lead Estate Agent"
-              image="https://randomuser.me/api/portraits/women/47.jpg"
+              image="/images/1000292924.jpg"
               bio="Monicah is passionate about matching clients to the perfect property and is known for her expertise and client-first approach throughout all stages of the buying and selling experience."
             />
             <TeamMember
@@ -121,7 +121,7 @@ const TeamMember = ({ name, title, image, bio }: { name: string; title: string; 
     <img
       src={image}
       alt={name}
-      className="w-24 h-24 object-cover rounded-full border-4 border-primary shadow-md mb-2"
+      className="w-24 h-24 object-cover object-top rounded-full border-4 border-primary shadow-md mb-2"
       loading="lazy"
     />
     <div className="text-xl font-semibold text-foreground">{name}</div>
