@@ -18,7 +18,7 @@ All colors MUST be HSL.
     --popover: 0 0% 100%;
     --popover-foreground: 0 0% 11%;
 
-    --primary: 43 74% 52%; /* Luxury Gold */
+    --primary: 43 74% 42%; /* Dark Gold */
     --primary-foreground: 0 0% 100%;
 
     --secondary: 0 0% 11%; /* Deep Charcoal */
@@ -27,7 +27,7 @@ All colors MUST be HSL.
     --muted: 0 0% 96%;
     --muted-foreground: 0 0% 45%;
 
-    --accent: 43 74% 52%; /* Gold accent */
+    --accent: 43 74% 42%; /* Dark Gold accent */
     --accent-foreground: 0 0% 11%;
 
     --destructive: 0 84.2% 60.2%;
@@ -35,12 +35,12 @@ All colors MUST be HSL.
 
     --border: 0 0% 90%;
     --input: 0 0% 90%;
-    --ring: 43 74% 52%;
+    --ring: 43 74% 42%;
 
     --radius: 0.5rem;
     
     /* Luxury gradients */
-    --gradient-gold: linear-gradient(135deg, hsl(43 74% 52%), hsl(43 74% 62%));
+    --gradient-gold: linear-gradient(135deg, hsl(43 74% 38%), hsl(43 74% 48%));
     --gradient-dark: linear-gradient(180deg, hsl(0 0% 11%), hsl(0 0% 15%));
     --gradient-hero: linear-gradient(180deg, rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.3));
     
@@ -80,7 +80,7 @@ All colors MUST be HSL.
     --popover: 0 0% 15%;
     --popover-foreground: 0 0% 100%;
 
-    --primary: 43 74% 52%;
+    --primary: 43 74% 42%;
     --primary-foreground: 0 0% 11%;
 
     --secondary: 0 0% 20%;
@@ -89,7 +89,7 @@ All colors MUST be HSL.
     --muted: 0 0% 20%;
     --muted-foreground: 0 0% 65%;
 
-    --accent: 43 74% 52%;
+    --accent: 43 74% 42%;
     --accent-foreground: 0 0% 11%;
 
     --destructive: 0 62.8% 30.6%;
@@ -105,7 +105,7 @@ All colors MUST be HSL.
     --sidebar-accent: 0 0% 15%;
     --sidebar-accent-foreground: 0 0% 95%;
     --sidebar-border: 0 0% 15%;
-    --sidebar-ring: 43 74% 52%;
+    --sidebar-ring: 43 74% 42%;
   }
 }
 
