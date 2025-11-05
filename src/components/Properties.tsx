@@ -2,99 +2,17 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { MapPin, Bed, Bath, Square } from "lucide-react";
-import property1 from "@/assets/images/property1.jpg";
-import property2 from "@/assets/images/property2.jpg";
-import property3 from "@/assets/images/property3.jpg";
-import property4 from "@/assets/images/property4.jpg";
-import property5 from "@/assets/images/property5.jpg";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import { useEffect, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
+import { properties } from "@/data/properties";
+import { parsePrice } from "@/data/properties";
 
 const Properties = () => {
-  const properties = [
-    {
-      id: 1,
-      title: "3 Bedroom All Office Suite",
-      description: "Luxury apartment with modern office suite, perfect for professionals",
-      price: "KES 14M",
-      image: property1,
-      location: "Nairobi, Kenya",
-      bedrooms: 3,
-      bathrooms: 3,
-      size: "180 sqm",
-      featured: true,
-      type: "Modern Apartment",
-      status: "For Sale",
-      projectStage: "Ready",
-    },
-    {
-      id: 2,
-      title: "Luxury 2 & 3 Bedroom Apartments",
-      description: "Contemporary living spaces with premium finishes and city views",
-      price: "Starting KES 11.7M",
-      image: property2,
-      location: "Nairobi, Kenya",
-      bedrooms: 3,
-      bathrooms: 2,
-      size: "150 sqm",
-      featured: true,
-      type: "Premium Maisonette",
-      status: "For Sale",
-      projectStage: "Offplan",
-    },
-    {
-      id: 3,
-      title: "Contemporary Town House",
-      description: "Spacious town house with lush garden, suitable for family living.",
-      price: "KES 10M",
-      image: property3,
-      location: "Nairobi, Kenya",
-      bedrooms: 4,
-      bathrooms: 3,
-      size: "220 sqm",
-      featured: false,
-      type: "Town House",
-      status: "For Sale",
-      projectStage: "Ready",
-    },
-    {
-      id: 4,
-      title: "4 Bedroom Bungalow",
-      description: "Elegant bungalow with landscaped garden and modern African architecture",
-      price: "KES 14M",
-      image: property4,
-      location: "Nairobi, Kenya",
-      bedrooms: 4,
-      bathrooms: 3,
-      size: "250 sqm",
-      featured: false,
-      type: "Executive Bungalow",
-      status: "For Sale",
-      projectStage: "Ready",
-    },
-    {
-      id: 5,
-      title: "Elegant Duplex Home",
-      description: "A stylish duplex with a private entrance and rooftop views.",
-      price: "KES 18M",
-      image: property5,
-      location: "Nairobi, Kenya",
-      bedrooms: 5,
-      bathrooms: 4,
-      size: "365 sqm",
-      featured: true,
-      type: "Duplex",
-      status: "For Sale",
-      projectStage: "Offplan",
-    },
-  ];
-
-  const [selected, setSelected] = useState<null | typeof properties[0]>(null);
-  const [open, setOpen] = useState(false);
+  const navigate = useNavigate();
   const [search, setSearch] = useState("");
   const [bedrooms, setBedrooms] = useState("all");
   const [featuredOnly, setFeaturedOnly] = useState(false);
@@ -104,14 +22,6 @@ const Properties = () => {
   const [completion, setCompletion] = useState("all");
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 50000000]);
   const [sortBy, setSortBy] = useState("newest");
-
-  // Helper: parse numeric price from string like "KES 14M" or "Starting KES 11.7M"
-  const parsePrice = (val: string): number => {
-    const match = val.replace(/,/g, '').match(/([0-9]+\.?[0-9]*)\s*(M|m)?/);
-    if (!match) return 0;
-    const n = parseFloat(match[1]);
-    return match[2] ? n * 1000000 : n;
-  };
 
   // Filtering logic
   const filteredProperties = properties.filter((p) => {
@@ -281,6 +191,7 @@ const Properties = () => {
             <Card
               key={property.id}
               className="overflow-hidden group hover:shadow-luxury transition-smooth cursor-pointer"
+              onClick={() => navigate(`/properties/${property.id}`)}
             >
               {/* Image */}
               <div className="relative h-64 overflow-hidden">
@@ -303,7 +214,7 @@ const Properties = () => {
                 <div className="flex flex-wrap gap-2 mb-2">
                   <Badge variant="secondary" className="capitalize">{property.type}</Badge>
                   <Badge variant="outline" className="capitalize">{property.status}</Badge>
-                  <Badge variant="ghost" className="capitalize">{property.projectStage}</Badge>
+                  <Badge variant="outline" className="capitalize">{property.projectStage}</Badge>
                   {property.featured && (
                     <Badge className="gradient-gold text-secondary font-semibold">Featured</Badge>
                   )}
@@ -347,9 +258,9 @@ const Properties = () => {
               <CardFooter>
                 <Button
                   className="w-full gradient-gold text-secondary font-semibold hover:scale-105 transition-smooth"
-                  onClick={() => {
-                    setSelected(property);
-                    setOpen(true);
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigate(`/properties/${property.id}`);
                   }}
                 >
                   View Details
@@ -358,61 +269,12 @@ const Properties = () => {
             </Card>
           ))}
         </div>
-        <Dialog open={open} onOpenChange={setOpen}>
-          <DialogContent className="max-w-2xl w-full">
-            {selected && <PropertyDetails property={selected} />}
-          </DialogContent>
-        </Dialog>
       </div>
     </section>
   );
 };
 
-// Detailed Property Modal Content
-const PropertyDetails = ({ property }: { property: typeof properties[0] }) => (
-  <div>
-    <div className="mb-6">
-      <div className="flex flex-col md:flex-row gap-6">
-        <img src={property.image} alt={property.title} className="max-w-md w-full rounded-xl object-cover shadow-lg" />
-        <div className="flex-1 space-y-3">
-          <div className="flex flex-wrap gap-2 mb-2">
-            <Badge variant="secondary" className="capitalize">{property.type}</Badge>
-            <Badge variant="outline" className="capitalize">{property.status}</Badge>
-            <Badge variant="ghost" className="capitalize">{property.projectStage}</Badge>
-            {property.featured && (
-              <Badge className="gradient-gold text-secondary font-semibold">Featured</Badge>
-            )}
-          </div>
-          <h3 className="text-3xl font-bold text-primary mb-2">{property.title}</h3>
-          <p className="text-muted-foreground text-lg mb-4">{property.description}</p>
-          <div className="flex flex-wrap gap-4 items-center text-sm">
-            <span className="flex items-center gap-1"><MapPin size={16} /> {property.location}</span>
-            <span className="flex items-center gap-1"><Bed size={16} /> {property.bedrooms} Beds</span>
-            <span className="flex items-center gap-1"><Bath size={16} /> {property.bathrooms} Baths</span>
-            <span className="flex items-center gap-1"><Square size={16} /> {property.size}</span>
-          </div>
-          <div className="text-2xl font-bold text-primary border-t pt-4 mt-4">{property.price}</div>
-        </div>
-      </div>
-    </div>
-    {/* Gallery or More Images could go here */}
-    <div className="flex justify-end mt-4">
-      <Button
-        className="gradient-gold text-secondary font-semibold"
-        onClick={() => {
-          const message = `Hi Nikas Realty, I'm interested in ${property.title}.`;
-          const url = `https://wa.me/254710132320?text=${encodeURIComponent(message)}`;
-          window.open(url, "_blank");
-        }}
-      >
-        WhatsApp Agent
-      </Button>
-    </div>
-  </div>
-);
-
 export default Properties;
-
 // --- Slides: Featured Properties (no external deps) ---
 const FeaturedPropertiesSlides = ({ items }: { items: Array<{ id: number; title: string; image: string; price: string; location: string }>; }) => {
   const [index, setIndex] = useState(0);
