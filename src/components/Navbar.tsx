@@ -2,13 +2,15 @@ import { useState, useEffect } from "react";
 import { Menu, X, Moon, Sun } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import logo from "@/assets/images/logo.png";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useTheme } from "next-themes";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const { theme, setTheme } = useTheme();
+  const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -18,6 +20,18 @@ const Navbar = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  // Scroll to section after navigation
+  useEffect(() => {
+    if (location.hash) {
+      const element = document.querySelector(location.hash);
+      if (element) {
+        setTimeout(() => {
+          element.scrollIntoView({ behavior: "smooth" });
+        }, 100);
+      }
+    }
+  }, [location]);
+
   const navLinks = [
     { name: "Home", href: "#home", type: "anchor" },
     { name: "About Us", href: "#about", type: "anchor" },
@@ -26,13 +40,25 @@ const Navbar = () => {
     { name: "Blog", href: "/blog", type: "route" },
     { name: "Contact", href: "#contact", type: "anchor" },
   ];
-  const navigate = useNavigate();
 
-  const scrollToSection = (href: string) => {
-    const element = document.querySelector(href);
-    if (element) {
-      element.scrollIntoView({ behavior: "smooth" });
-      setIsOpen(false);
+  const handleAnchorClick = (href: string) => {
+    setIsOpen(false);
+    // If we're not on the home page, navigate to home first, then scroll
+    if (location.pathname !== "/") {
+      navigate("/");
+      // Wait for navigation to complete, then scroll
+      setTimeout(() => {
+        const element = document.querySelector(href);
+        if (element) {
+          element.scrollIntoView({ behavior: "smooth" });
+        }
+      }, 300);
+    } else {
+      // If we're on home page, just scroll
+      const element = document.querySelector(href);
+      if (element) {
+        element.scrollIntoView({ behavior: "smooth" });
+      }
     }
   };
 
@@ -45,9 +71,9 @@ const Navbar = () => {
       <div className="container mx-auto px-4 lg:px-8">
         <div className="flex items-center justify-between h-20">
           {/* Logo */}
-          <a href="#home" className="flex items-center space-x-3">
+          <Link to="/" className="flex items-center space-x-3" onClick={() => setIsOpen(false)}>
             <img src={logo} alt="Nikas Realty" className="h-12 w-auto" />
-          </a>
+          </Link>
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">
@@ -64,7 +90,7 @@ const Navbar = () => {
               ) : (
                 <button
                   key={link.name}
-                  onClick={() => scrollToSection(link.href)}
+                  onClick={() => handleAnchorClick(link.href)}
                   className="text-foreground hover:text-primary transition-smooth font-medium"
                 >
                   {link.name}
@@ -114,7 +140,7 @@ const Navbar = () => {
                 ) : (
                   <button
                     key={link.name}
-                    onClick={() => scrollToSection(link.href)}
+                    onClick={() => handleAnchorClick(link.href)}
                     className="text-foreground hover:text-primary transition-smooth font-medium text-left px-4"
                   >
                     {link.name}
