@@ -24,13 +24,11 @@ if (missing.length) {
   process.exit(1);
 }
 
-// --- Security Middleware ---
-app.use(helmet()); // sets secure HTTP headers
-
 // --- CORS ---
 const ALLOWED_ORIGINS = [process.env.FRONTEND_URL, process.env.ADMIN_URL].filter(Boolean);
 app.use(cors({
   origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin || ALLOWED_ORIGINS.includes(origin)) {
       callback(null, true);
     } else {
@@ -39,7 +37,15 @@ app.use(cors({
     }
   },
   credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
 }));
+
+// --- Security Middleware ---
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: "cross-origin" },
+  crossOriginEmbedderPolicy: false,
+})); // sets secure HTTP headers
 
 // --- Middleware ---
 app.use(express.json({ limit: '5mb' }));

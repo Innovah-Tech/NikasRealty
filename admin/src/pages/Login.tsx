@@ -21,7 +21,9 @@ const Login = () => {
       await login(email, password);
       toast.success('Welcome back!');
     } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Login failed. Please try again.');
+      console.error('Login error:', error);
+      const errorMessage = error.response?.data?.error || error.response?.data?.message || error.message || 'Login failed. Please try again.';
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }

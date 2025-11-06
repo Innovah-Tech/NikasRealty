@@ -33,23 +33,42 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   }, []);
 
-  const fetchUser = async () => {
+  const fetchUser = async (setLoadingState = true) => {
     try {
       const response = await axiosClient.get('/auth/me');
-      setUser(response.data);
+      setUser(response.data.user);
+      return response.data.user;
     } catch (error) {
       localStorage.removeItem('token');
+      setUser(null);
+      throw error;
     } finally {
-      setLoading(false);
+      if (setLoadingState) {
+        setLoading(false);
+      }
     }
   };
 
   const login = async (email: string, password: string) => {
-    const response = await axiosClient.post('/auth/login', { email, password });
-    const { token, user } = response.data;
-    localStorage.setItem('token', token);
-    setUser(user);
-    navigate('/dashboard');
+    try {
+      const response = await axiosClient.post('/auth/login', { email, password });
+      const { token } = response.data;
+      localStorage.setItem('token', token);
+      // Fetch user data after login (don't set loading state since we're navigating)
+      const userData = await fetchUser(false);
+      // Ensure user data was fetched successfully before navigation
+      if (userData) {
+        setLoading(false);
+        navigate('/dashboard');
+      } else {
+        throw new Error('Failed to fetch user data');
+      }
+    } catch (error) {
+      localStorage.removeItem('token');
+      setUser(null);
+      setLoading(false);
+      throw error;
+    }
   };
 
   const logout = () => {

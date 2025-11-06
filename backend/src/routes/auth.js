@@ -22,7 +22,16 @@ router.get('/me', async (req, res) => {
     if (!token) return res.status(401).json({ error: 'Unauthorized' });
     const payload = jwt.verify(token, process.env.JWT_SECRET);
     const user = await User.findById(payload.id).select('-password');
-    res.json({ user });
+    if (!user) return res.status(401).json({ error: 'User not found' });
+    // Transform MongoDB document to match frontend expectations
+    res.json({ 
+      user: {
+        id: user._id.toString(),
+        email: user.email,
+        role: user.role,
+        name: user.email.split('@')[0], // Use email prefix as name fallback
+      }
+    });
   } catch (e) {
     res.status(401).json({ error: 'Unauthorized' });
   }
