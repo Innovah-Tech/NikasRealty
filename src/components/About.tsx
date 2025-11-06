@@ -3,10 +3,10 @@ import aboutImage from "@/assets/images/about.jpg";
 
 const About = () => {
   const stats = [
-    { icon: Building2, value: "500+", label: "Properties Sold" },
-    { icon: Users, value: "1000+", label: "Happy Clients" },
-    { icon: Award, value: "15+", label: "Years Experience" },
+    { icon: Users, value: "100+", label: "Happy Clients" },
+    { icon: Award, value: "6+", label: "Years Experience" },
     { icon: TrendingUp, value: "98%", label: "Success Rate" },
+    { icon: Building2, value: "500+", label: "Properties Sold" },
   ];
 
   return (
