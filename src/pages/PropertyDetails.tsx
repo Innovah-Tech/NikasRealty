@@ -31,26 +31,15 @@ const PropertyDetailsPage = () => {
       <main className="container mx-auto px-4 lg:px-8 py-10">
         <div className="mb-6">
           <Button 
+            type="button"
             variant="outline" 
-            onClick={() => {
-              // Navigate to home page first
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
               navigate("/");
-              // Wait for navigation to complete, then scroll to properties section
-              setTimeout(() => {
-                const element = document.querySelector("#properties");
-                if (element) {
-                  // Scroll with offset for navbar
-                  const elementPosition = element.getBoundingClientRect().top + window.pageYOffset;
-                  const offsetPosition = elementPosition - 80; // Account for navbar height
-                  window.scrollTo({
-                    top: offsetPosition,
-                    behavior: "smooth"
-                  });
-                }
-              }, 300);
             }}
           >
-            Back to Properties
+            Back to Home
           </Button>
         </div>
 
