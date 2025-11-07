@@ -30,15 +30,9 @@ const PropertyDetailsPage = () => {
       <Navbar />
       <main className="container mx-auto px-4 lg:px-8 py-10">
         <div className="mb-6">
-          <Button variant="outline" onClick={() => {
-            navigate("/");
-            setTimeout(() => {
-              const element = document.querySelector("#properties");
-              if (element) {
-                element.scrollIntoView({ behavior: "smooth" });
-              }
-            }, 100);
-          }}>Back to Properties</Button>
+          <Button variant="outline" onClick={() => navigate("/#properties")}>
+            Back to Properties
+          </Button>
         </div>
 
         <div className="grid gap-8 md:grid-cols-2">
