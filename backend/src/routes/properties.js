@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import Property from '../models/Property.js';
+import Property from '../storage/Property.js';
 import { requireAuth, requireAdmin } from '../middleware/auth.js';
 
 const router = Router();
@@ -21,7 +21,7 @@ router.get('/', async (req, res) => {
   const query = {};
   if (type) query.type = type;
   if (status) query.status = status;
-  if (location) query.location = new RegExp(String(location), 'i');
+  if (location) query.location = String(location);
   if (category) query.category = category;
   if (completion) query.completion = completion;
   if (bedrooms) {
@@ -38,10 +38,20 @@ router.get('/', async (req, res) => {
     if (maxPrice) query.price.$lte = Number(maxPrice);
   }
 
+  let items = await Property.find(query);
+  
+  // Sort results
   const sortBy = ['createdAt', 'price'].includes(String(sort)) ? String(sort) : 'createdAt';
   const sortOrder = String(order).toLowerCase() === 'asc' ? 1 : -1;
+  
+  items.sort((a, b) => {
+    const aVal = a[sortBy];
+    const bVal = b[sortBy];
+    if (aVal < bVal) return -1 * sortOrder;
+    if (aVal > bVal) return 1 * sortOrder;
+    return 0;
+  });
 
-  const items = await Property.find(query).sort({ [sortBy]: sortOrder });
   res.json(items);
 });
 
@@ -52,11 +62,13 @@ router.post('/', requireAuth, requireAdmin, async (req, res) => {
 
 router.put('/:id', requireAuth, requireAdmin, async (req, res) => {
   const updated = await Property.findByIdAndUpdate(req.params.id, req.body, { new: true });
+  if (!updated) return res.status(404).json({ error: 'Property not found' });
   res.json(updated);
 });
 
 router.delete('/:id', requireAuth, requireAdmin, async (req, res) => {
-  await Property.findByIdAndDelete(req.params.id);
+  const deleted = await Property.findByIdAndDelete(req.params.id);
+  if (!deleted) return res.status(404).json({ error: 'Property not found' });
   res.status(204).end();
 });
 

@@ -7,7 +7,6 @@ import express from 'express';
 import cors from 'cors';
 import morgan from 'morgan';
 import helmet from 'helmet';
-import './db.js'; // This connects to MongoDB
 import authRoutes from './routes/auth.js';
 import propertyRoutes from './routes/properties.js';
 import teamRoutes from './routes/team.js';
@@ -17,7 +16,7 @@ import uploadRoutes from './routes/upload.js';
 const app = express();
 
 // --- Validate env vars ---
-const requiredEnv = ['MONGODB_URI', 'JWT_SECRET'];
+const requiredEnv = ['JWT_SECRET'];
 const missing = requiredEnv.filter((key) => !process.env[key]);
 if (missing.length) {
   console.error(`❌ Missing environment variables: ${missing.join(', ')}`);

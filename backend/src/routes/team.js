@@ -1,11 +1,13 @@
 import { Router } from 'express';
-import Team from '../models/Team.js';
+import Team from '../storage/Team.js';
 import { requireAuth, requireAdmin } from '../middleware/auth.js';
 
 const router = Router();
 
 router.get('/', async (req, res) => {
-  const items = await Team.find().sort({ createdAt: -1 });
+  let items = await Team.find();
+  // Sort by createdAt descending
+  items.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
   res.json(items);
 });
 
@@ -16,11 +18,13 @@ router.post('/', requireAuth, requireAdmin, async (req, res) => {
 
 router.put('/:id', requireAuth, requireAdmin, async (req, res) => {
   const updated = await Team.findByIdAndUpdate(req.params.id, req.body, { new: true });
+  if (!updated) return res.status(404).json({ error: 'Team member not found' });
   res.json(updated);
 });
 
 router.delete('/:id', requireAuth, requireAdmin, async (req, res) => {
-  await Team.findByIdAndDelete(req.params.id);
+  const deleted = await Team.findByIdAndDelete(req.params.id);
+  if (!deleted) return res.status(404).json({ error: 'Team member not found' });
   res.status(204).end();
 });
 

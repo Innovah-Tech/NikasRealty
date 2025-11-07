@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import User from '../models/User.js';
+import User from '../storage/User.js';
 
 const router = Router();
 
@@ -21,9 +21,10 @@ router.get('/me', async (req, res) => {
     const token = header.startsWith('Bearer ') ? header.slice(7) : null;
     if (!token) return res.status(401).json({ error: 'Unauthorized' });
     const payload = jwt.verify(token, process.env.JWT_SECRET);
-    const user = await User.findById(payload.id).select('-password');
+    const user = await User.findById(payload.id);
     if (!user) return res.status(401).json({ error: 'User not found' });
-    // Transform MongoDB document to match frontend expectations
+    // Transform to match frontend expectations
+    const { password, ...userWithoutPassword } = user;
     res.json({ 
       user: {
         id: user._id.toString(),

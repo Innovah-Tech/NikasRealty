@@ -1,8 +1,7 @@
 import dotenv from 'dotenv';
 dotenv.config();
-import './db.js';
 import bcrypt from 'bcrypt';
-import User from './models/User.js';
+import User from './storage/User.js';
 
 async function seedAdmin() {
   const email = process.env.SEED_ADMIN_EMAIL || 'admin@nikasrealty.co.ke';
