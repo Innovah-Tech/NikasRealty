@@ -7,6 +7,8 @@ import express from 'express';
 import cors from 'cors';
 import morgan from 'morgan';
 import helmet from 'helmet';
+import bcrypt from 'bcrypt';
+import User from './storage/User.js';
 import authRoutes from './routes/auth.js';
 import propertyRoutes from './routes/properties.js';
 import teamRoutes from './routes/team.js';
@@ -65,6 +67,23 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: err.message });
 });
 
+// --- Initialize Admin User ---
+async function initializeAdmin() {
+  const email = process.env.SEED_ADMIN_EMAIL || 'admin@nikasrealty.co.ke';
+  const password = process.env.SEED_ADMIN_PASSWORD || '1250012093AcePortgasNikas';
+  const existing = await User.findOne({ email });
+  if (!existing) {
+    const hash = await bcrypt.hash(password, 10);
+    await User.create({ email, password: hash, role: 'admin' });
+    console.log('✅ Admin user created:', email);
+  } else {
+    console.log('✅ Admin user already exists:', email);
+  }
+}
+
 // --- Start Server ---
 const port = process.env.PORT || 4000;
-app.listen(port, () => console.log(`✅ API running on port ${port}`));
+app.listen(port, async () => {
+  console.log(`✅ API running on port ${port}`);
+  await initializeAdmin();
+});
