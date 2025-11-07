@@ -37,6 +37,13 @@ const PropertyDetailsPage = () => {
               e.preventDefault();
               e.stopPropagation();
               navigate("/");
+              // Small delay to ensure the page has loaded before scrolling
+              setTimeout(() => {
+                const element = document.querySelector("#properties");
+                if (element) {
+                  element.scrollIntoView({ behavior: "smooth" });
+                }
+              }, 100);
             }}
           >
             Back to Home
