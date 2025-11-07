@@ -101,12 +101,14 @@ const About = () => {
               title="Lead Estate Agent"
               image="/images/1000292924.jpg"
               bio="Monicah is passionate about matching clients to the perfect property and is known for her expertise and client-first approach throughout all stages of the buying and selling experience."
+              objectPosition="object-top"
             />
             <TeamMember
               name="Brian Wachira"
               title="Estate Agent"
               image="/images/1000295242.jpg"
               bio="Brian is committed to delivering seamless real estate services, leveraging local knowledge and strong client relationships to achieve successful outcomes."
+              objectPosition="object-center"
             />
           </div>
         </div>
@@ -116,12 +118,12 @@ const About = () => {
 };
 
 // Simple Team Member Card component
-const TeamMember = ({ name, title, image, bio }: { name: string; title: string; image: string; bio: string }) => (
+const TeamMember = ({ name, title, image, bio, objectPosition = "object-center" }: { name: string; title: string; image: string; bio: string; objectPosition?: string }) => (
   <div className="bg-card rounded-xl shadow-card p-6 max-w-xs flex flex-col items-center text-center gap-3">
     <img
       src={image}
       alt={name}
-      className="w-24 h-24 object-cover object-center rounded-full border-4 border-primary shadow-md mb-2"
+      className={`w-24 h-24 object-cover ${objectPosition} rounded-full border-4 border-primary shadow-md mb-2`}
       loading="lazy"
     />
     <div className="text-xl font-semibold text-foreground">{name}</div>
