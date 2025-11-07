@@ -121,7 +121,7 @@ const TeamMember = ({ name, title, image, bio }: { name: string; title: string; 
     <img
       src={image}
       alt={name}
-      className="w-24 h-24 object-cover object-top rounded-full border-4 border-primary shadow-md mb-2"
+      className="w-24 h-24 object-cover object-center rounded-full border-4 border-primary shadow-md mb-2"
       loading="lazy"
     />
     <div className="text-xl font-semibold text-foreground">{name}</div>
