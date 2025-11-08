@@ -67,12 +67,13 @@ const Navbar = () => {
       className={`fixed top-0 left-0 right-0 z-50 transition-smooth ${
         isScrolled ? "bg-background/95 backdrop-blur-md shadow-card" : "bg-transparent"
       }`}
+      style={{ minHeight: '6rem' }}
     >
       <div className="container mx-auto px-4 lg:px-8">
-        <div className="flex items-center justify-between h-20">
+        <div className="flex items-center justify-between h-24">
           {/* Logo */}
-          <Link to="/" className="flex items-center space-x-3" onClick={() => setIsOpen(false)}>
-            <img src={logo} alt="Nikas Realty" className="h-20 w-auto" />
+          <Link to="/" className="flex items-center space-x-3 bg-white/90 backdrop-blur-sm p-2 rounded-lg shadow-sm hover:shadow-md transition-shadow" onClick={() => setIsOpen(false)}>
+            <img src={logo} alt="Nikas Realty" className="h-24 w-auto" />
           </Link>
 
           {/* Desktop Navigation */}

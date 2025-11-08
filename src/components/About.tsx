@@ -1,5 +1,5 @@
 import { Building2, Award, Users, TrendingUp } from "lucide-react";
-import logo from "@/assets/images/logo.png";
+import aboutImage from "@/assets/images/about.jpg";
 
 const About = () => {
   const stats = [
@@ -17,9 +17,9 @@ const About = () => {
           <div className="relative order-2 lg:order-1">
             <div className="relative rounded-2xl overflow-hidden shadow-luxury">
               <img
-                src={logo}
-                alt="Nikas Realty Logo"
-                className="w-full h-full object-contain p-10 bg-white"
+                src={aboutImage}
+                alt="Professional Real Estate Consultation"
+                className="w-full h-full object-cover"
                 loading="lazy"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-secondary/80 to-transparent" />
