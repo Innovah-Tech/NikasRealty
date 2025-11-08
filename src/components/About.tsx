@@ -1,5 +1,5 @@
 import { Building2, Award, Users, TrendingUp } from "lucide-react";
-import aboutImage from "@/assets/images/about.jpg";
+import logo from "@/assets/images/logo.png";
 
 const About = () => {
   const stats = [
@@ -17,9 +17,9 @@ const About = () => {
           <div className="relative order-2 lg:order-1">
             <div className="relative rounded-2xl overflow-hidden shadow-luxury">
               <img
-                src={aboutImage}
-                alt="Professional Real Estate Consultation"
-                className="w-full h-full object-cover"
+                src={logo}
+                alt="Nikas Realty Logo"
+                className="w-full h-full object-contain p-10 bg-white"
                 loading="lazy"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-secondary/80 to-transparent" />
@@ -78,17 +78,11 @@ const About = () => {
           </div>
           <div>
             <h3 className="text-2xl font-bold text-primary mb-3">Our Vision</h3>
-            <p className="text-muted-foreground leading-relaxed text-sm">To be Kenya’s most trusted real estate partner, known for innovation, ethics, and creating real value for our clients and communities.</p>
+            <p className="text-muted-foreground leading-relaxed text-sm">To be Kenya’s most trusted real estate partner, delivering exceptional value, service, and innovation to our clients and communities.</p>
           </div>
           <div>
             <h3 className="text-2xl font-bold text-primary mb-3">Our Values</h3>
-            <ul className="text-muted-foreground leading-relaxed text-sm text-left mx-auto max-w-xs space-y-1">
-              <li>• Integrity in every transaction</li>
-              <li>• Client success first</li>
-              <li>• Market expertise and learning</li>
-              <li>• Transparency and trust</li>
-              <li>• Community-driven growth</li>
-            </ul>
+            <p className="text-muted-foreground leading-relaxed text-sm">Integrity, Excellence, Customer Focus, Innovation, and Community.</p>
           </div>
         </div>
 

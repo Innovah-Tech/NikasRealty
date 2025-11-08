@@ -30,7 +30,17 @@ const PropertyDetailsPage = () => {
       <Navbar />
       <main className="container mx-auto px-4 lg:px-8 py-10">
         <div className="mb-6">
-          <Button variant="outline" onClick={() => navigate(-1)}>Back</Button>
+          <Button 
+            type="button"
+            variant="outline" 
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              navigate("/");
+            }}
+          >
+            Back to Home
+          </Button>
         </div>
 
         <div className="grid gap-8 md:grid-cols-2">
