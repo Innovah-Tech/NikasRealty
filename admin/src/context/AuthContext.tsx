@@ -43,8 +43,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         throw new Error('Invalid response format');
       }
     } catch (error: any) {
-      console.error('❌ Failed to fetch user:', error);
-      console.error('Response:', error.response?.data);
+      if (import.meta.env.DEV) {
+        console.error('❌ Failed to fetch user:', error);
+        console.error('Response:', error.response?.data);
+      }
       localStorage.removeItem('token');
       setUser(null);
       throw error;
@@ -61,7 +63,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setUser(null);
     
     try {
-      console.log('🔐 Attempting login for:', email);
+      if (import.meta.env.DEV) {
+        console.log('🔐 Attempting login for:', email);
+      }
       
       // Step 1: Authenticate and get token
       const response = await axiosClient.post('/auth/login', { email, password });
@@ -71,7 +75,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
       
       const { token } = response.data;
-      console.log('✅ Login successful, token received');
+      if (import.meta.env.DEV) {
+        console.log('✅ Login successful, token received');
+      }
       
       // Step 2: Store token temporarily (will be removed if fetchUser fails)
       localStorage.setItem('token', token);
@@ -84,14 +90,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           throw new Error('Failed to fetch user data');
         }
         
-        console.log('✅ User data fetched:', userData.email);
+        if (import.meta.env.DEV) {
+          console.log('✅ User data fetched:', userData.email);
+        }
         
         // Only navigate if everything succeeded
         setLoading(false);
         navigate('/dashboard');
       } catch (fetchError: any) {
         // If fetchUser fails, remove the token and rethrow
-        console.error('❌ Failed to fetch user after login:', fetchError);
+        if (import.meta.env.DEV) {
+          console.error('❌ Failed to fetch user after login:', fetchError);
+        }
         localStorage.removeItem('token');
         setUser(null);
         setLoading(false);
@@ -111,9 +121,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setUser(null);
       setLoading(false);
       
-      console.error('❌ Login failed:', error);
-      console.error('Response:', error.response?.data);
-      console.error('Status:', error.response?.status);
+      if (import.meta.env.DEV) {
+        console.error('❌ Login failed:', error);
+        console.error('Response:', error.response?.data);
+        console.error('Status:', error.response?.status);
+      }
       
       // Re-throw the error so the Login component can handle it
       throw error;

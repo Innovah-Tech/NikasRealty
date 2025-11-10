@@ -64,9 +64,21 @@ app.use('/api/team', teamRoutes);
 app.use('/api/services', serviceRoutes);
 app.use('/api/upload', uploadRoutes);
 
+// --- 404 Handler for unmatched routes ---
+app.use('/api/*', (req, res) => {
+  console.log(`❌ 404 - Route not found: ${req.method} ${req.originalUrl}`);
+  console.log('   Available routes:');
+  console.log('   - GET /api/health');
+  console.log('   - POST /api/auth/login');
+  console.log('   - GET /api/auth/me');
+  res.status(404).json({ error: 'Route not found', path: req.originalUrl });
+});
+
 // --- Error Handler ---
 app.use((err, req, res, next) => {
   console.error('❌ Error:', err.message);
+  console.error('   Path:', req.originalUrl);
+  console.error('   Method:', req.method);
   res.status(500).json({ error: err.message });
 });
 

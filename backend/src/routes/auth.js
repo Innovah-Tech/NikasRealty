@@ -5,8 +5,17 @@ import User from '../storage/User.js';
 
 const router = Router();
 
+// Log all requests to auth routes
+router.use((req, res, next) => {
+  console.log(`📥 Auth route: ${req.method} ${req.path}`);
+  console.log('   Full URL:', req.originalUrl);
+  next();
+});
+
 router.post('/login', async (req, res) => {
   try {
+    console.log('🔐 Login request received');
+    console.log('   Email:', req.body?.email);
     const { email, password } = req.body;
     
     // Validate input

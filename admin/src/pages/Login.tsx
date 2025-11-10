@@ -20,7 +20,9 @@ const Login = () => {
     const apiUrl = import.meta.env.VITE_API_URL;
     if (!apiUrl || apiUrl.includes('localhost')) {
       setApiConfigError(true);
-      console.error('API URL not configured:', apiUrl);
+      if (import.meta.env.DEV) {
+        console.error('API URL not configured:', apiUrl);
+      }
     }
   }, []);
 
@@ -41,7 +43,9 @@ const Login = () => {
       // (login function handles navigation, so this won't execute if there's an error)
       toast.success('Welcome back!');
     } catch (error: any) {
-      console.error('Login error:', error);
+      if (import.meta.env.DEV) {
+        console.error('Login error:', error);
+      }
       let errorMessage = 'Login failed. Please try again.';
       
       // Handle different error types
