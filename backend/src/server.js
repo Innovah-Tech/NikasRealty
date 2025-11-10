@@ -26,13 +26,27 @@ if (missing.length) {
 }
 
 // --- CORS ---
-const ALLOWED_ORIGINS = [process.env.FRONTEND_URL, process.env.ADMIN_URL].filter(Boolean);
+// Normalize URLs (remove trailing slashes) for consistent matching
+const normalizeUrl = (url) => url ? url.replace(/\/$/, '') : null;
+const ALLOWED_ORIGINS = [
+  normalizeUrl(process.env.FRONTEND_URL),
+  normalizeUrl(process.env.ADMIN_URL)
+].filter(Boolean);
+
 console.log('🌐 Allowed CORS origins:', ALLOWED_ORIGINS.length > 0 ? ALLOWED_ORIGINS : 'None configured');
 
 app.use(cors({
   origin: function (origin, callback) {
     // Allow requests with no origin (like mobile apps or curl requests)
-    if (!origin || ALLOWED_ORIGINS.includes(origin)) {
+    if (!origin) {
+      callback(null, true);
+      return;
+    }
+    
+    // Normalize the incoming origin (remove trailing slash)
+    const normalizedOrigin = normalizeUrl(origin);
+    
+    if (ALLOWED_ORIGINS.includes(normalizedOrigin)) {
       callback(null, true);
     } else {
       console.warn(`⚠️ Blocked by CORS: ${origin}`);
