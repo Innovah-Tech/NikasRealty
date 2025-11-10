@@ -27,6 +27,8 @@ if (missing.length) {
 
 // --- CORS ---
 const ALLOWED_ORIGINS = [process.env.FRONTEND_URL, process.env.ADMIN_URL].filter(Boolean);
+console.log('🌐 Allowed CORS origins:', ALLOWED_ORIGINS.length > 0 ? ALLOWED_ORIGINS : 'None configured');
+
 app.use(cors({
   origin: function (origin, callback) {
     // Allow requests with no origin (like mobile apps or curl requests)
@@ -34,6 +36,7 @@ app.use(cors({
       callback(null, true);
     } else {
       console.warn(`⚠️ Blocked by CORS: ${origin}`);
+      console.warn(`   Allowed origins: ${ALLOWED_ORIGINS.join(', ') || 'None'}`);
       callback(new Error('Not allowed by CORS'));
     }
   },
