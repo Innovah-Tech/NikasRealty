@@ -22,7 +22,21 @@ const Login = () => {
       toast.success('Welcome back!');
     } catch (error: any) {
       console.error('Login error:', error);
-      const errorMessage = error.response?.data?.error || error.response?.data?.message || error.message || 'Login failed. Please try again.';
+      let errorMessage = 'Login failed. Please try again.';
+      
+      if (error.response?.status === 404) {
+        errorMessage = 'API endpoint not found. Please check your backend configuration.';
+        console.error('404 Error - Check if VITE_API_URL is set correctly in Vercel environment variables.');
+      } else if (error.response?.status === 401) {
+        errorMessage = error.response?.data?.error || 'Invalid email or password.';
+      } else if (error.response?.data?.error) {
+        errorMessage = error.response.data.error;
+      } else if (error.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
       toast.error(errorMessage);
     } finally {
       setLoading(false);
