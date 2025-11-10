@@ -83,7 +83,8 @@ async function initializeAdmin() {
 
 // --- Start Server ---
 const port = process.env.PORT || 4000;
-app.listen(port, async () => {
-  console.log(`✅ API running on port ${port}`);
+const host = process.env.HOST || '0.0.0.0';
+app.listen(port, host, async () => {
+  console.log(`✅ API running on ${host}:${port}`);
   await initializeAdmin();
 });
