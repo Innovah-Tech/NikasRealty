@@ -57,6 +57,9 @@ app.use(morgan('dev'));
 app.use('/uploads', express.static('uploads'));
 
 // --- Routes ---
+// Root health check (for Render/load balancers)
+app.get('/', (req, res) => res.json({ status: 'ok', message: 'API is running 🚀' }));
+app.get('/health', (req, res) => res.json({ status: 'ok', message: 'API is running 🚀' }));
 app.get('/api/health', (req, res) => res.json({ status: 'ok', message: 'API is running 🚀' }));
 app.use('/api/auth', authRoutes);
 app.use('/api/properties', propertyRoutes);
@@ -99,7 +102,44 @@ async function initializeAdmin() {
 // --- Start Server ---
 const port = process.env.PORT || 4000;
 const host = process.env.HOST || '0.0.0.0';
-app.listen(port, host, async () => {
-  console.log(`✅ API running on ${host}:${port}`);
-  await initializeAdmin();
+
+// Ensure port is a number
+const portNumber = typeof port === 'string' ? parseInt(port, 10) : port;
+
+console.log(`🚀 Starting server on ${host}:${portNumber}`);
+console.log(`   PORT environment variable: ${process.env.PORT || 'not set (using default 4000)'}`);
+console.log(`   HOST environment variable: ${process.env.HOST || 'not set (using default 0.0.0.0)'}`);
+
+// Start server
+const server = app.listen(portNumber, host, async () => {
+  console.log(`✅ API running on ${host}:${portNumber}`);
+  console.log(`   Server is listening and ready to accept connections`);
+  
+  // Initialize admin user (don't block server startup if this fails)
+  try {
+    await initializeAdmin();
+  } catch (error) {
+    console.error('⚠️ Failed to initialize admin user:', error);
+    console.error('   Server will continue running, but admin user may not exist');
+  }
+});
+
+// Handle server errors
+server.on('error', (error) => {
+  if (error.code === 'EADDRINUSE') {
+    console.error(`❌ Port ${portNumber} is already in use`);
+    process.exit(1);
+  } else {
+    console.error('❌ Server error:', error);
+    process.exit(1);
+  }
+});
+
+// Graceful shutdown
+process.on('SIGTERM', () => {
+  console.log('🛑 SIGTERM received, shutting down gracefully');
+  server.close(() => {
+    console.log('✅ Server closed');
+    process.exit(0);
+  });
 });
