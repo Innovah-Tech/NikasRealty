@@ -4,6 +4,25 @@ import { requireAuth, requireAdmin } from '../middleware/auth.js';
 
 const router = Router();
 
+// Stats endpoint - must be before the root route to avoid conflicts
+router.get('/stats', async (req, res) => {
+  try {
+    const allProperties = await Property.find({});
+    const total = allProperties.length;
+    const sales = allProperties.filter(p => p.type === 'sale' || p.category === 'sale').length;
+    const rentals = allProperties.filter(p => p.type === 'rent' || p.category === 'rent').length;
+    
+    res.json({
+      total,
+      sales,
+      rentals,
+    });
+  } catch (error) {
+    console.error('Error fetching property stats:', error);
+    res.status(500).json({ error: 'Failed to fetch statistics' });
+  }
+});
+
 router.get('/', async (req, res) => {
   const {
     type,

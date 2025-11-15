@@ -14,6 +14,7 @@ import propertyRoutes from './routes/properties.js';
 import teamRoutes from './routes/team.js';
 import serviceRoutes from './routes/services.js';
 import uploadRoutes from './routes/upload.js';
+import requestRoutes from './routes/requests.js';
 
 const app = express();
 
@@ -80,6 +81,7 @@ app.use('/api/properties', propertyRoutes);
 app.use('/api/team', teamRoutes);
 app.use('/api/services', serviceRoutes);
 app.use('/api/upload', uploadRoutes);
+app.use('/api/requests', requestRoutes);
 
 // --- 404 Handler for unmatched routes ---
 app.use('/api/*', (req, res) => {
@@ -88,6 +90,8 @@ app.use('/api/*', (req, res) => {
   console.log('   - GET /api/health');
   console.log('   - POST /api/auth/login');
   console.log('   - GET /api/auth/me');
+  console.log('   - GET /api/properties/stats');
+  console.log('   - GET /api/requests/stats');
   res.status(404).json({ error: 'Route not found', path: req.originalUrl });
 });
 
