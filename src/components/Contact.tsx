@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
-import { Phone, Mail, Instagram, Video, MessageCircle, MapPin } from "lucide-react";
+import { Phone, Mail, Instagram, Video, Send, MapPin } from "lucide-react";
 import { toast } from "sonner";
 
 const Contact = () => {
@@ -13,19 +13,42 @@ const Contact = () => {
     phone: "",
     message: "",
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // WhatsApp message format
-    const message = `Hi! I'm ${formData.name}. ${formData.message}. You can reach me at ${formData.email} or ${formData.phone}.`;
-    const whatsappUrl = `https://wa.me/254710132320?text=${encodeURIComponent(message)}`;
-    
-    window.open(whatsappUrl, "_blank");
-    toast.success("Redirecting to WhatsApp...");
-    
-    // Reset form
-    setFormData({ name: "", email: "", phone: "", message: "" });
+    setIsSubmitting(true);
+
+    try {
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000/api';
+      const response = await fetch(`${API_URL}/requests`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          phone: formData.phone,
+          message: formData.message,
+        }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to submit form');
+      }
+
+      toast.success("Message sent successfully! We'll get back to you soon.");
+      
+      // Reset form
+      setFormData({ name: "", email: "", phone: "", message: "" });
+    } catch (error) {
+      console.error('Error submitting form:', error);
+      toast.error(error instanceof Error ? error.message : "Failed to send message. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const contactInfo = [
@@ -90,14 +113,13 @@ const Contact = () => {
 
                 <div>
                   <label className="text-sm font-semibold text-foreground mb-2 block">
-                    Email Address
+                    Email Address (Optional)
                   </label>
                   <Input
                     type="email"
                     placeholder="john@example.com"
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    required
                     className="h-12"
                   />
                 </div>
@@ -131,10 +153,11 @@ const Contact = () => {
 
                 <Button
                   type="submit"
-                  className="w-full gradient-gold text-secondary font-semibold h-12 text-lg shadow-luxury hover:scale-105 transition-smooth"
+                  disabled={isSubmitting}
+                  className="w-full gradient-gold text-secondary font-semibold h-12 text-lg shadow-luxury hover:scale-105 transition-smooth disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <MessageCircle className="mr-2" size={20} />
-                  Chat on WhatsApp
+                  <Send className="mr-2" size={20} />
+                  {isSubmitting ? "Sending..." : "Send Message"}
                 </Button>
               </form>
             </CardContent>

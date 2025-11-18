@@ -73,7 +73,7 @@ const Navbar = () => {
         <div className="flex items-center justify-between h-24">
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-3 bg-white/90 backdrop-blur-sm p-2 rounded-lg shadow-sm hover:shadow-md transition-shadow" onClick={() => setIsOpen(false)}>
-            <img src={logo} alt="Nikas Realty" className="h-24 w-auto" />
+            <img src={logo} alt="Nikas Realty" className="h-16 w-auto" />
           </Link>
 
           {/* Desktop Navigation */}

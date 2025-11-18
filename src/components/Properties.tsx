@@ -53,7 +53,7 @@ const Properties = () => {
         <FeaturedPropertiesSlides items={properties} />
         {/* Search and Filter Row */}
         <div className="flex flex-wrap gap-4 mb-10 items-end">
-          <div className="flex-1 min-w-[200px]">
+          <div className="flex-1 w-full sm:min-w-[200px] sm:w-auto">
             <Input
               placeholder="Search by title or location..."
               value={search}
@@ -61,7 +61,7 @@ const Properties = () => {
               className=""
             />
           </div>
-          <div className="min-w-[160px]">
+          <div className="w-full sm:min-w-[160px] sm:w-auto">
             <Select value={propertyType} onValueChange={setPropertyType}>
               <SelectTrigger>
                 <SelectValue placeholder="Property Type" />
@@ -78,7 +78,7 @@ const Properties = () => {
               </SelectContent>
             </Select>
           </div>
-          <div className="min-w-[130px]">
+          <div className="w-full sm:min-w-[130px] sm:w-auto">
             <Select value={bedrooms} onValueChange={setBedrooms}>
               <SelectTrigger>
                 <SelectValue placeholder="Bedrooms" />
@@ -94,7 +94,7 @@ const Properties = () => {
               </SelectContent>
             </Select>
           </div>
-          <div className="min-w-[140px]">
+          <div className="w-full sm:min-w-[140px] sm:w-auto">
             <Select value={status} onValueChange={setStatus}>
               <SelectTrigger>
                 <SelectValue placeholder="Status" />
@@ -107,7 +107,7 @@ const Properties = () => {
               </SelectContent>
             </Select>
           </div>
-          <div className="min-w-[160px]">
+          <div className="w-full sm:min-w-[160px] sm:w-auto">
             <Select value={location} onValueChange={setLocation}>
               <SelectTrigger>
                 <SelectValue placeholder="Location" />
@@ -128,7 +128,7 @@ const Properties = () => {
               </SelectContent>
             </Select>
           </div>
-          <div className="min-w-[160px]">
+          <div className="w-full sm:min-w-[160px] sm:w-auto">
             <Select value={completion} onValueChange={setCompletion}>
               <SelectTrigger>
                 <SelectValue placeholder="Completion" />
@@ -141,7 +141,7 @@ const Properties = () => {
               </SelectContent>
             </Select>
           </div>
-          <div className="flex-1 min-w-[220px]">
+          <div className="flex-1 w-full sm:min-w-[220px] sm:w-auto">
             <div className="text-xs text-muted-foreground mb-1">Price Range (KES)</div>
             <Slider value={priceRange} onValueChange={(v)=>setPriceRange([v[0], v[1]] as [number, number])} min={0} max={50000000} step={500000} />
             <div className="flex justify-between text-xs mt-1">
@@ -149,7 +149,7 @@ const Properties = () => {
               <span>{priceRange[1].toLocaleString()}</span>
             </div>
           </div>
-          <div className="min-w-[160px]">
+          <div className="w-full sm:min-w-[160px] sm:w-auto">
             <Select value={sortBy} onValueChange={setSortBy}>
               <SelectTrigger>
                 <SelectValue placeholder="Sort By" />
