@@ -95,7 +95,7 @@ const Footer = () => {
                   href="tel:+254710132320"
                   className="hover:text-primary transition-smooth"
                 >
-                  📞 0710 132 320
+                  Phone: 0710 132 320
                 </a>
               </li>
               <li>
@@ -103,7 +103,7 @@ const Footer = () => {
                   href="mailto:nikasrealty@gmail.com"
                   className="hover:text-primary transition-smooth"
                 >
-                  📩 nikasrealty@gmail.com
+                  Email: nikasrealty@gmail.com
                 </a>
               </li>
               <li>
@@ -113,7 +113,7 @@ const Footer = () => {
                   rel="noopener noreferrer"
                   className="hover:text-primary transition-smooth"
                 >
-                  📍 Westland Arcade, Nairobi, Westlands, Kenya
+                  Address: Westland Arcade, Nairobi, Westlands, Kenya
                 </a>
               </li>
             </ul>
@@ -145,7 +145,7 @@ const Footer = () => {
         {/* Bottom Bar */}
         <div className="pt-8 border-t border-white/10 text-center">
           <p className="text-white/60 text-sm">
-            © 2025 Nikas Realty. All rights reserved.
+            (c) 2025 Nikas Realty. All rights reserved.
           </p>
         </div>
       </div>

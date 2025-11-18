@@ -165,8 +165,8 @@ const AdminEditBlog = () => {
                     </Select>
                     <p className="text-xs text-muted-foreground">
                       {formData.status === "published" 
-                        ? "✅ This blog will appear on the public blog page immediately" 
-                        : "⚠️ Draft blogs are not visible on the public blog page"}
+                        ? "This blog will appear on the public blog page immediately" 
+                        : "Draft blogs are not visible on the public blog page"}
                     </p>
                   </div>
                   <div className="space-y-2">

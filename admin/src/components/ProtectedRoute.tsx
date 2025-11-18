@@ -5,7 +5,7 @@ export const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { isAuthenticated, loading, user } = useAuth();
 
   if (import.meta.env.DEV) {
-    console.log('🔒 ProtectedRoute check:', { loading, isAuthenticated, hasUser: !!user });
+    console.log('ProtectedRoute check:', { loading, isAuthenticated, hasUser: !!user });
   }
 
   if (loading) {
@@ -18,13 +18,13 @@ export const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 
   if (!isAuthenticated) {
     if (import.meta.env.DEV) {
-      console.log('❌ Not authenticated, redirecting to login');
+      console.log('Not authenticated, redirecting to login');
     }
     return <Navigate to="/login" replace />;
   }
 
   if (import.meta.env.DEV) {
-    console.log('✅ Authenticated, rendering protected content');
+    console.log('Authenticated, rendering protected content');
   }
 
   return <>{children}</>;

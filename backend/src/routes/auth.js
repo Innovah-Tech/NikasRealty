@@ -7,14 +7,14 @@ const router = Router();
 
 // Log all requests to auth routes
 router.use((req, res, next) => {
-  console.log(`📥 Auth route: ${req.method} ${req.path}`);
+  console.log(`Auth route: ${req.method} ${req.path}`);
   console.log('   Full URL:', req.originalUrl);
   next();
 });
 
 router.post('/login', async (req, res) => {
   try {
-    console.log('🔐 Login request received');
+    console.log('Login request received');
     console.log('   Email:', req.body?.email);
     const { email, password } = req.body;
     
@@ -36,31 +36,31 @@ router.post('/login', async (req, res) => {
     // Find user
     const user = await User.findOne({ email });
     if (!user) {
-      console.log(`❌ Login attempt failed: User not found - ${email}`);
+      console.log(`Login attempt failed: User not found - ${email}`);
       return res.status(401).json({ error: 'Invalid credentials' });
     }
     
     // Verify password
     if (!user.password) {
-      console.error(`❌ Login error: User has no password hash - ${email}`);
+      console.error(`Login error: User has no password hash - ${email}`);
       return res.status(500).json({ error: 'Internal server error' });
     }
     
     const ok = await bcrypt.compare(password, user.password);
     if (!ok) {
-      console.log(`❌ Login attempt failed: Invalid password - ${email}`);
+      console.log(`Login attempt failed: Invalid password - ${email}`);
       return res.status(401).json({ error: 'Invalid credentials' });
     }
     
     // Ensure only admin users can log in
     if (user.role !== 'admin') {
-      console.log(`❌ Login attempt failed: Non-admin user - ${email} (role: ${user.role})`);
+      console.log(`Login attempt failed: Non-admin user - ${email} (role: ${user.role})`);
       return res.status(403).json({ error: 'Access denied. Admin access required.' });
     }
     
     // Generate token
     if (!process.env.JWT_SECRET) {
-      console.error('❌ JWT_SECRET is not set!');
+      console.error('JWT_SECRET is not set!');
       return res.status(500).json({ error: 'Internal server error' });
     }
     
@@ -70,10 +70,10 @@ router.post('/login', async (req, res) => {
       { expiresIn: '7d' }
     );
     
-    console.log(`✅ Login successful: ${email} (${user.role})`);
+    console.log(`Login successful: ${email} (${user.role})`);
     res.json({ token });
   } catch (error) {
-    console.error('❌ Login error:', error);
+    console.error('Login error:', error);
     console.error('Error stack:', error.stack);
     
     // Don't expose internal error details to client
@@ -87,12 +87,12 @@ router.get('/me', async (req, res) => {
     const token = header.startsWith('Bearer ') ? header.slice(7) : null;
     
     if (!token) {
-      console.log('❌ /me request failed: No token provided');
+      console.log('/me request failed: No token provided');
       return res.status(401).json({ error: 'Unauthorized' });
     }
     
     if (!process.env.JWT_SECRET) {
-      console.error('❌ JWT_SECRET is not set!');
+      console.error('JWT_SECRET is not set!');
       return res.status(500).json({ error: 'Internal server error' });
     }
     
@@ -101,10 +101,10 @@ router.get('/me', async (req, res) => {
       payload = jwt.verify(token, process.env.JWT_SECRET);
     } catch (jwtError) {
       if (jwtError.name === 'TokenExpiredError') {
-        console.log('❌ /me request failed: Token expired');
+        console.log('/me request failed: Token expired');
         return res.status(401).json({ error: 'Token expired' });
       } else if (jwtError.name === 'JsonWebTokenError') {
-        console.log('❌ /me request failed: Invalid token');
+        console.log('/me request failed: Invalid token');
         return res.status(401).json({ error: 'Invalid token' });
       } else {
         throw jwtError;
@@ -112,20 +112,20 @@ router.get('/me', async (req, res) => {
     }
     
     if (!payload.id) {
-      console.error('❌ /me request failed: Token payload missing id');
+      console.error('/me request failed: Token payload missing id');
       return res.status(401).json({ error: 'Invalid token payload' });
     }
     
     const user = await User.findById(payload.id);
     
     if (!user) {
-      console.log(`❌ /me request failed: User not found - ID: ${payload.id}`);
+      console.log(`/me request failed: User not found - ID: ${payload.id}`);
       return res.status(401).json({ error: 'User not found' });
     }
     
     // Transform to match frontend expectations
     const { password, ...userWithoutPassword } = user;
-    console.log(`✅ /me request successful: ${user.email}`);
+    console.log(`/me request successful: ${user.email}`);
     res.json({ 
       user: {
         id: user._id.toString(),
@@ -135,7 +135,7 @@ router.get('/me', async (req, res) => {
       }
     });
   } catch (e) {
-    console.error('❌ /me request error:', e);
+    console.error('/me request error:', e);
     console.error('Error stack:', e.stack);
     res.status(500).json({ error: 'Internal server error' });
   }

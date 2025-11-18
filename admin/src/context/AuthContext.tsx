@@ -44,7 +44,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
     } catch (error: any) {
       if (import.meta.env.DEV) {
-        console.error('❌ Failed to fetch user:', error);
+        console.error('Failed to fetch user:', error);
         console.error('Response:', error.response?.data);
       }
       localStorage.removeItem('token');
@@ -64,7 +64,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     
     try {
       if (import.meta.env.DEV) {
-        console.log('🔐 Attempting login for:', email);
+        console.log('Attempting login for:', email);
       }
       
       // Step 1: Authenticate and get token
@@ -76,7 +76,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       
       const { token } = response.data;
       if (import.meta.env.DEV) {
-        console.log('✅ Login successful, token received');
+        console.log('Login successful, token received');
       }
       
       // Step 2: Store token temporarily (will be removed if fetchUser fails)
@@ -91,7 +91,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         }
         
         if (import.meta.env.DEV) {
-          console.log('✅ User data fetched:', userData.email);
+          console.log('User data fetched:', userData.email);
         }
         
         // Ensure user state is set before navigation
@@ -99,21 +99,21 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setLoading(false);
         
         if (import.meta.env.DEV) {
-          console.log('✅ Setting user and navigating to dashboard');
+          console.log('Setting user and navigating to dashboard');
           console.log('User data:', userData);
         }
         
         // Use setTimeout to ensure state updates are processed
         setTimeout(() => {
           if (import.meta.env.DEV) {
-            console.log('🚀 Navigating to /dashboard');
+            console.log('Navigating to /dashboard');
           }
           navigate('/dashboard', { replace: true });
         }, 100);
       } catch (fetchError: any) {
         // If fetchUser fails, remove the token and rethrow
         if (import.meta.env.DEV) {
-          console.error('❌ Failed to fetch user after login:', fetchError);
+          console.error('Failed to fetch user after login:', fetchError);
         }
         localStorage.removeItem('token');
         setUser(null);
@@ -135,7 +135,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setLoading(false);
       
       if (import.meta.env.DEV) {
-        console.error('❌ Login failed:', error);
+        console.error('Login failed:', error);
         console.error('Response:', error.response?.data);
         console.error('Status:', error.response?.status);
       }

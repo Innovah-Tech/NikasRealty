@@ -103,7 +103,7 @@ const Login = () => {
                 <p className="font-semibold mb-1">VITE_API_URL is not set in Vercel.</p>
                 <p className="text-sm mb-2">To fix this:</p>
                 <ol className="text-sm list-decimal list-inside space-y-1">
-                  <li>Go to Vercel Dashboard → Your Project → Settings → Environment Variables</li>
+                  <li>Go to Vercel Dashboard -> Your Project -> Settings -> Environment Variables</li>
                   <li>Add: <code className="bg-muted px-1 rounded">VITE_API_URL</code> = <code className="bg-muted px-1 rounded">https://your-backend.onrender.com/api</code></li>
                   <li>Select "Production" environment</li>
                   <li>Redeploy your project</li>

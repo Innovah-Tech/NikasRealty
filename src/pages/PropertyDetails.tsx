@@ -222,7 +222,7 @@ const PropertyDetailsPage = () => {
                 <ul className="space-y-3">
                   {property.features.map((feature, index) => (
                     <li key={index} className="flex items-start gap-3 text-muted-foreground">
-                      <span className="text-primary mt-1 text-lg">•</span>
+                      <span className="text-primary mt-1 text-lg">-</span>
                       <span className="text-base">{feature}</span>
                     </li>
                   ))}
@@ -237,7 +237,7 @@ const PropertyDetailsPage = () => {
                 <ul className="space-y-3">
                   {property.paymentOptions.map((option, index) => (
                     <li key={index} className="flex items-start gap-3 text-muted-foreground">
-                      <span className="text-primary mt-1 text-lg">•</span>
+                      <span className="text-primary mt-1 text-lg">-</span>
                       <span className="text-base">{option}</span>
                     </li>
                   ))}

@@ -30,13 +30,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const login = async (email: string, password: string) => {
     try {
       if (import.meta.env.DEV) {
-        console.log('🔐 Attempting login for:', email);
+        console.log('Attempting login for:', email);
       }
       
       const authUser = await firebaseAuth.login(email, password);
       
       if (import.meta.env.DEV) {
-        console.log('✅ Login successful:', authUser.email);
+        console.log('Login successful:', authUser.email);
       }
       
       setUser(authUser);
@@ -45,7 +45,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       // Navigate to dashboard
       setTimeout(() => {
         if (import.meta.env.DEV) {
-          console.log('🚀 Navigating to /admin/dashboard');
+          console.log('Navigating to /admin/dashboard');
         }
         navigate('/admin/dashboard', { replace: true });
       }, 100);
@@ -53,7 +53,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setLoading(false);
       
       if (import.meta.env.DEV) {
-        console.error('❌ Login failed:', error);
+        console.error('Login failed:', error);
       }
       
       // Re-throw the error so the Login component can handle it

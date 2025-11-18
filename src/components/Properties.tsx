@@ -383,8 +383,8 @@ const FeaturedPropertiesSlides = ({
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-2xl font-bold text-foreground">Featured Properties</h3>
         <div className="flex gap-2">
-          <button onClick={prev} className="h-9 w-9 rounded-md border border-border text-foreground hover:bg-accent hover:text-accent-foreground transition-smooth">‹</button>
-          <button onClick={next} className="h-9 w-9 rounded-md border border-border text-foreground hover:bg-accent hover:text-accent-foreground transition-smooth">›</button>
+          <button onClick={prev} className="h-9 w-9 rounded-md border border-border text-foreground hover:bg-accent hover:text-accent-foreground transition-smooth">{'<'}</button>
+          <button onClick={next} className="h-9 w-9 rounded-md border border-border text-foreground hover:bg-accent hover:text-accent-foreground transition-smooth">{'>'}</button>
         </div>
       </div>
       <div className="relative overflow-hidden rounded-xl">

@@ -4,15 +4,14 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Building2, AlertCircle } from 'lucide-react';
+import { Building2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { isUsingFallbackApiUrl } from '@/config/api';
 
 const AdminLogin = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const [apiConfigError, setApiConfigError] = useState(false);
   const { login } = useAuth();
 
   // Set generic page title
@@ -24,16 +23,11 @@ const AdminLogin = () => {
   }, []);
 
   useEffect(() => {
-    // Only show error in production if VITE_API_URL is not set
-    // In development, localhost is fine
-    const apiUrl = import.meta.env.VITE_API_URL;
-    const isProduction = import.meta.env.PROD;
-    
-    if (isProduction && !apiUrl) {
-      setApiConfigError(true);
-    } else if (import.meta.env.DEV) {
-      // In development, log but don't show error
-      console.log('🔗 API URL:', apiUrl || 'http://localhost:4000/api (default)');
+    if (import.meta.env.DEV) {
+      const apiUrl = isUsingFallbackApiUrl()
+        ? 'https://your-backend.onrender.com/api (fallback)'
+        : import.meta.env.VITE_API_URL;
+      console.log('API URL:', apiUrl);
     }
   }, []);
 
@@ -59,24 +53,10 @@ const AdminLogin = () => {
       }
       let errorMessage = 'Login failed. Please try again.';
       
-      // Handle different error types
       if (error.code === 'ERR_NETWORK' || error.message?.includes('Network Error')) {
         errorMessage = 'Network error. Please check your internet connection and try again.';
-        // Only show config error in production
-        if (import.meta.env.PROD && !import.meta.env.VITE_API_URL) {
-          errorMessage = 'API URL not configured. Please set VITE_API_URL in Vercel environment variables.';
-          setApiConfigError(true);
-        } else if (import.meta.env.DEV) {
-          errorMessage = 'Cannot connect to backend. Make sure the backend server is running on http://localhost:4000';
-        }
       } else if (error.response?.status === 404) {
-        // Only show config error in production
-        if (import.meta.env.PROD && !import.meta.env.VITE_API_URL) {
-          errorMessage = 'API URL not configured. Please set VITE_API_URL in Vercel environment variables.';
-          setApiConfigError(true);
-        } else {
-          errorMessage = 'API endpoint not found. Please check your backend configuration.';
-        }
+        errorMessage = 'API endpoint not found. Please check your backend configuration.';
       } else if (error.response?.status === 400) {
         errorMessage = error.response?.data?.error || 'Invalid request. Please check your input.';
       } else if (error.response?.status === 401) {
@@ -110,22 +90,6 @@ const AdminLogin = () => {
           <CardDescription>Sign in to your account</CardDescription>
         </CardHeader>
         <CardContent>
-          {apiConfigError && (
-            <Alert variant="destructive" className="mb-4">
-              <AlertCircle className="h-4 w-4" />
-              <AlertTitle>Configuration Error</AlertTitle>
-              <AlertDescription className="mt-2">
-                <p className="font-semibold mb-1">VITE_API_URL is not set in Vercel.</p>
-                <p className="text-sm mb-2">To fix this:</p>
-                <ol className="text-sm list-decimal list-inside space-y-1">
-                  <li>Go to Vercel Dashboard → Your Project → Settings → Environment Variables</li>
-                  <li>Add: <code className="bg-muted px-1 rounded">VITE_API_URL</code> = <code className="bg-muted px-1 rounded">https://your-backend.onrender.com/api</code></li>
-                  <li>Select "Production" environment</li>
-                  <li>Redeploy your project</li>
-                </ol>
-              </AlertDescription>
-            </Alert>
-          )}
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>

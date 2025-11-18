@@ -24,7 +24,7 @@ const app = express();
 const requiredEnv = ['JWT_SECRET'];
 const missing = requiredEnv.filter((key) => !process.env[key]);
 if (missing.length) {
-  console.error(`❌ Missing environment variables: ${missing.join(', ')}`);
+  console.error(`Error: Missing environment variables: ${missing.join(', ')}`);
   process.exit(1);
 }
 
@@ -36,7 +36,7 @@ const ALLOWED_ORIGINS = [
   normalizeUrl(process.env.ADMIN_URL)
 ].filter(Boolean);
 
-console.log('🌐 Allowed CORS origins:', ALLOWED_ORIGINS.length > 0 ? ALLOWED_ORIGINS : 'None configured');
+console.log('Allowed CORS origins:', ALLOWED_ORIGINS.length > 0 ? ALLOWED_ORIGINS : 'None configured');
 
 app.use(cors({
   origin: function (origin, callback) {
@@ -52,7 +52,7 @@ app.use(cors({
     if (ALLOWED_ORIGINS.includes(normalizedOrigin)) {
       callback(null, true);
     } else {
-      console.warn(`⚠️ Blocked by CORS: ${origin}`);
+      console.warn(`Warning: Blocked by CORS: ${origin}`);
       console.warn(`   Allowed origins: ${ALLOWED_ORIGINS.join(', ') || 'None'}`);
       callback(new Error('Not allowed by CORS'));
     }
@@ -75,9 +75,9 @@ app.use('/uploads', express.static('uploads'));
 
 // --- Routes ---
 // Root health check (for Render/load balancers)
-app.get('/', (req, res) => res.json({ status: 'ok', message: 'API is running 🚀' }));
-app.get('/health', (req, res) => res.json({ status: 'ok', message: 'API is running 🚀' }));
-app.get('/api/health', (req, res) => res.json({ status: 'ok', message: 'API is running 🚀' }));
+app.get('/', (req, res) => res.json({ status: 'ok', message: 'API is running' }));
+app.get('/health', (req, res) => res.json({ status: 'ok', message: 'API is running' }));
+app.get('/api/health', (req, res) => res.json({ status: 'ok', message: 'API is running' }));
 app.use('/api/auth', authRoutes);
 app.use('/api/properties', propertyRoutes);
 app.use('/api/team', teamRoutes);
@@ -88,7 +88,7 @@ app.use('/api/blogs', blogRoutes);
 
 // --- 404 Handler for unmatched routes ---
 app.use('/api/*', (req, res) => {
-  console.log(`❌ 404 - Route not found: ${req.method} ${req.originalUrl}`);
+  console.log(`Error: 404 - Route not found: ${req.method} ${req.originalUrl}`);
   console.log('   Available routes:');
   console.log('   - GET /api/health');
   console.log('   - POST /api/auth/login');
@@ -100,7 +100,7 @@ app.use('/api/*', (req, res) => {
 
 // --- Error Handler ---
 app.use((err, req, res, next) => {
-  console.error('❌ Error:', err.message);
+  console.error('Error:', err.message);
   console.error('   Path:', req.originalUrl);
   console.error('   Method:', req.method);
   res.status(500).json({ error: err.message });
@@ -114,9 +114,9 @@ async function initializeAdmin() {
   if (!existing) {
     const hash = await bcrypt.hash(password, 10);
     await User.create({ email, password: hash, role: 'admin' });
-    console.log('✅ Admin user created:', email);
+        console.log('Admin user created:', email);
   } else {
-    console.log('✅ Admin user already exists:', email);
+        console.log('Admin user already exists:', email);
   }
 }
 
@@ -125,7 +125,7 @@ async function initializeProperties() {
   try {
     const existing = await Property.find({});
     if (existing.length > 0) {
-      console.log(`✅ Properties already exist (${existing.length} found).`);
+          console.log(`Properties already exist (${existing.length} found).`);
       return;
     }
 
@@ -198,13 +198,13 @@ async function initializeProperties() {
 
     for (const propertyData of properties) {
       await Property.create(propertyData);
-      console.log(`✅ Seeded property: ${propertyData.title}`);
+          console.log(`Seeded property: ${propertyData.title}`);
     }
 
-    console.log(`✅ Successfully seeded ${properties.length} properties!`);
+        console.log(`Successfully seeded ${properties.length} properties!`);
   } catch (error) {
-    console.error('⚠️ Failed to seed properties:', error);
-    console.error('   Server will continue running, but properties may not be seeded');
+        console.error('Warning: Failed to seed properties:', error);
+        console.error('   Server will continue running, but properties may not be seeded');
   }
 }
 
@@ -215,13 +215,13 @@ const host = process.env.HOST || '0.0.0.0';
 // Ensure port is a number
 const portNumber = typeof port === 'string' ? parseInt(port, 10) : port;
 
-console.log(`🚀 Starting server on ${host}:${portNumber}`);
+console.log(`Starting server on ${host}:${portNumber}`);
 console.log(`   PORT environment variable: ${process.env.PORT || 'not set (using default 4000)'}`);
 console.log(`   HOST environment variable: ${process.env.HOST || 'not set (using default 0.0.0.0)'}`);
 
 // Start server
 const server = app.listen(portNumber, host, async () => {
-  console.log(`✅ API running on ${host}:${portNumber}`);
+  console.log(`API running on ${host}:${portNumber}`);
   console.log(`   Server is listening and ready to accept connections`);
   
   // Initialize admin user and properties (don't block server startup if this fails)
@@ -229,27 +229,27 @@ const server = app.listen(portNumber, host, async () => {
     await initializeAdmin();
     await initializeProperties();
   } catch (error) {
-    console.error('⚠️ Failed to initialize:', error);
-    console.error('   Server will continue running, but initialization may be incomplete');
+        console.error('Warning: Failed to initialize:', error);
+        console.error('   Server will continue running, but initialization may be incomplete');
   }
 });
 
 // Handle server errors
 server.on('error', (error) => {
   if (error.code === 'EADDRINUSE') {
-    console.error(`❌ Port ${portNumber} is already in use`);
+    console.error(`Error: Port ${portNumber} is already in use`);
     process.exit(1);
   } else {
-    console.error('❌ Server error:', error);
+    console.error('Server error:', error);
     process.exit(1);
   }
 });
 
 // Graceful shutdown
 process.on('SIGTERM', () => {
-  console.log('🛑 SIGTERM received, shutting down gracefully');
+  console.log('SIGTERM received, shutting down gracefully');
   server.close(() => {
-    console.log('✅ Server closed');
+    console.log('Server closed');
     process.exit(0);
   });
 });

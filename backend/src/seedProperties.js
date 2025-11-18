@@ -72,20 +72,20 @@ async function seedProperties() {
     // Check if properties already exist
     const existing = await Property.find({});
     if (existing.length > 0) {
-      console.log(`✅ Properties already exist (${existing.length} found). Skipping seed.`);
+      console.log(`Properties already exist (${existing.length} found). Skipping seed.`);
       process.exit(0);
     }
 
     // Add properties
     for (const propertyData of properties) {
       await Property.create(propertyData);
-      console.log(`✅ Added property: ${propertyData.title}`);
+      console.log(`Added property: ${propertyData.title}`);
     }
 
-    console.log(`\n✅ Successfully seeded ${properties.length} properties!`);
+    console.log(`\nSuccessfully seeded ${properties.length} properties!`);
     process.exit(0);
   } catch (error) {
-    console.error('❌ Error seeding properties:', error);
+    console.error('Error seeding properties:', error);
     process.exit(1);
   }
 }

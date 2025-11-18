@@ -5,10 +5,10 @@ const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000/api'
 
 // Only log API URL in development
 if (import.meta.env.DEV) {
-  console.log('🔗 API Base URL:', API_BASE_URL);
+  console.log('API Base URL:', API_BASE_URL);
 } else if (!import.meta.env.VITE_API_URL) {
   // Only show error if VITE_API_URL is missing in production
-  console.error('❌ VITE_API_URL is not set! API calls will fail.');
+  console.error('VITE_API_URL is not set! API calls will fail.');
 }
 
 // Ensure the URL doesn't have a trailing slash
@@ -31,7 +31,7 @@ axiosClient.interceptors.request.use(
     // Only log requests in development
     if (import.meta.env.DEV) {
       const fullUrl = `${config.baseURL}${config.url}`;
-      console.log(`📤 ${config.method?.toUpperCase()} ${fullUrl}`);
+      console.log(`${config.method?.toUpperCase()} ${fullUrl}`);
     }
     return config;
   },
@@ -48,12 +48,12 @@ axiosClient.interceptors.response.use(
     if (import.meta.env.DEV) {
       if (error.response?.status === 404 || error.code === 'ERR_NETWORK') {
         const fullUrl = error.config ? `${error.config.baseURL}${error.config.url}` : 'Unknown URL';
-        console.error('❌ Request Failed:', fullUrl);
+        console.error('Error: Request failed:', fullUrl);
         console.error('Status:', error.response?.status || 'Network Error');
         
         // Check if VITE_API_URL is missing or pointing to localhost
         if (!import.meta.env.VITE_API_URL || API_BASE_URL.includes('localhost')) {
-          console.error('⚠️ VITE_API_URL environment variable is not set or is using localhost!');
+          console.error('Warning: VITE_API_URL environment variable is not set or is using localhost!');
           console.error('Current API URL:', API_BASE_URL);
         }
       }
@@ -61,7 +61,7 @@ axiosClient.interceptors.response.use(
       // In production, only log critical configuration errors
       if ((error.response?.status === 404 || error.code === 'ERR_NETWORK') && 
           (!import.meta.env.VITE_API_URL || API_BASE_URL.includes('localhost'))) {
-        console.error('❌ API configuration error: VITE_API_URL is not set correctly.');
+        console.error('Error: API configuration issue. VITE_API_URL is not set correctly.');
       }
     }
     
