@@ -1,8 +1,9 @@
-import property1 from "@/assets/images/property1.jpg";
-import property2 from "@/assets/images/property2.jpg";
-import property3 from "@/assets/images/property3.jpg";
-import property4 from "@/assets/images/property4.jpg";
-import property5 from "@/assets/images/property5.jpg";
+// Import images with correct paths
+const property1 = "/images/property1.jpg";
+const property2 = "/images/property2.jpg";
+const property3 = "/images/property3.jpg";
+const property4 = "/images/property4.jpg";
+const property5 = "/images/property5.jpg";
 
 export type Property = {
   id: number;
@@ -10,6 +11,7 @@ export type Property = {
   description: string;
   price: string;
   image: string;
+  gallery?: string[];
   location: string;
   bedrooms: number;
   bathrooms: number;
@@ -18,84 +20,89 @@ export type Property = {
   type: string;
   status: string;
   projectStage?: string;
+  features?: string[];
+  paymentOptions?: string[];
+  completionDate?: string;
 };
 
 export const properties: Property[] = [
   {
-    id: 1,
-    title: "3 Bedroom All Office Suite",
-    description: "Luxury apartment with modern office suite, perfect for professionals",
-    price: "KES 14M",
-    image: property1,
-    location: "Nairobi, Kenya",
-    bedrooms: 3,
-    bathrooms: 3,
-    size: "180 sqm",
-    featured: true,
-    type: "Modern Apartment",
-    status: "For Sale",
-    projectStage: "Ready",
-  },
-  {
     id: 2,
-    title: "Luxury 2 & 3 Bedroom Apartments",
-    description: "Contemporary living spaces with premium finishes and city views",
-    price: "Starting KES 11.7M",
-    image: property2,
-    location: "Nairobi, Kenya",
-    bedrooms: 3,
-    bathrooms: 2,
-    size: "150 sqm",
+    title: "4-Bedroom Luxury Townhouses in Langata",
+    description: "Imagine waking up in a modern 4-bedroom all-ensuite townhouse, sipping coffee on your sun-lit terrace, then heading to the gym or pool just a few steps from your door. Perfectly set in Langata, opposite Wilson Airport, this gated community blends convenience, style, and security. Choose between spacious duplexes (2,650 sqft) or grand triplexes (3,750 sqft) — each designed with open-plan layouts, high-gloss kitchens, ensuite bedrooms, sleek finishes, and eco-friendly touches like solar heating. Triplex comes with a family and a study room.",
+    price: "KES 35.9M",
+    image: "/images/langata/1000293347.jpg",
+    gallery: [
+      "/images/langata/1000293347.jpg",
+      "/images/langata/1000293353.jpg",
+      "/images/langata/1000293361.jpg",
+      "/images/langata/1000293372.jpg",
+      "/images/langata/1000293378.jpg",
+      "/images/langata/1000293380.jpg",
+      "/images/langata/1000293382.jpg",
+      "/images/langata/1000293384.jpg"
+    ],
+    location: "Langata, Nairobi",
+    bedrooms: 4,
+    bathrooms: 5,
+    size: "2,650 - 3,750 sqft",
     featured: true,
-    type: "Premium Maisonette",
+    type: "Townhouse",
     status: "For Sale",
     projectStage: "Offplan",
+    features: [
+      "Prime location opposite Wilson Airport",
+      "Spacious duplexes (2,650 sqft) and triplexes (3,750 sqft)",
+      "High-gloss kitchens with modern appliances",
+      "All bedrooms ensuite",
+      "Eco-friendly design with solar heating",
+      "Triplex includes family room and study"
+    ],
+    paymentOptions: [
+      "20% deposit and balance till completion",
+      "Flexible payment plans available"
+    ],
+    completionDate: "June 2026"
   },
   {
-    id: 3,
-    title: "Contemporary Town House",
-    description: "Spacious town house with lush garden, suitable for family living.",
-    price: "KES 10M",
-    image: property3,
-    location: "Nairobi, Kenya",
+    id: 1,
+    title: "4-Bedroom Maisonettes with DSQ",
+    description: "Contemporary 4-Bedroom Maisonettes with DSQ in a Serene Gated Community – Ruiru. Discover a modern lifestyle in this stunning new development located just 800 metres off the Eastern Bypass, Ruiru. This exclusive estate features 18 units in Phase 1 and 19 units in Phase 2, each thoughtfully designed to blend comfort, space, and sophistication. Every home has been tastefully crafted with residents in mind, combining contemporary architecture, generous natural lighting, and elegant finishes for a truly elevated living experience.",
+    price: "KES 17.5M",
+    image: "/images/ruiru-maisonette/1000297404.jpg",
+    gallery: [
+      "/images/ruiru-maisonette/1000297404.jpg",
+      "/images/ruiru-maisonette/1000297400.jpg",
+      "/images/ruiru-maisonette/1000297396.jpg",
+      "/images/ruiru-maisonette/1000297392.jpg",
+      "/images/ruiru-maisonette/1000297388.jpg",
+      "/images/ruiru-maisonette/1000297384.jpg",
+      "/images/ruiru-maisonette/1000297380.jpg",
+      "/images/ruiru-maisonette/1000297376.jpg"
+    ],
+    location: "Ruiru, Kenya",
     bedrooms: 4,
-    bathrooms: 3,
-    size: "220 sqm",
-    featured: false,
-    type: "Town House",
-    status: "For Sale",
-    projectStage: "Ready",
-  },
-  {
-    id: 4,
-    title: "4 Bedroom Bungalow",
-    description: "Elegant bungalow with landscaped garden and modern African architecture",
-    price: "KES 14M",
-    image: property4,
-    location: "Nairobi, Kenya",
-    bedrooms: 4,
-    bathrooms: 3,
-    size: "250 sqm",
-    featured: false,
-    type: "Executive Bungalow",
-    status: "For Sale",
-    projectStage: "Ready",
-  },
-  {
-    id: 5,
-    title: "Elegant Duplex Home",
-    description: "A stylish duplex with a private entrance and rooftop views.",
-    price: "KES 18M",
-    image: property5,
-    location: "Nairobi, Kenya",
-    bedrooms: 5,
-    bathrooms: 4,
-    size: "365 sqm",
+    bathrooms: 5, // 4 ensuite + 1 in DSQ
+    size: "240 sqm",
     featured: true,
-    type: "Duplex",
+    type: "Maisonette",
     status: "For Sale",
     projectStage: "Offplan",
-  },
+    features: [
+      "4 spacious bedrooms (all ensuite)",
+      "Detached Servant Quarter (DSQ)",
+      "Family room for extra comfort and privacy",
+      "Fully fitted kitchen with pantry",
+      "Rooftop lounge – perfect for relaxation or entertaining",
+      "Elegant pergola design for a touch of outdoor luxury"
+    ],
+    paymentOptions: [
+      "Off-Plan Purchase: Ksh 17.5M – 60% deposit, 40% upon handover",
+      "Installment Plan: Ksh 18M – 30% deposit, balance within 6 months",
+      "Mortgage Option: Ksh 18.5M"
+    ],
+    completionDate: "June 2026"
+  }
 ];
 
 export const parsePrice = (val: string): number => {
