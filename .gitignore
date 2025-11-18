@@ -17,6 +17,7 @@ pnpm-debug.log*
 # Env files
 .env
 .env.*
+firebase.env
 backend/.env
 admin/.env
 frontend/.env
