@@ -1,6 +1,16 @@
 import { useState, useEffect } from "react";
 import { Menu, X, Moon, Sun } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import logo from "@/assets/images/logo.png";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useTheme } from "next-themes";
@@ -8,6 +18,9 @@ import { useTheme } from "next-themes";
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isSignInOpen, setIsSignInOpen] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const { theme, setTheme } = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
@@ -62,6 +75,15 @@ const Navbar = () => {
     }
   };
 
+  const handleSignIn = (e: React.FormEvent) => {
+    e.preventDefault();
+    // TODO: Implement sign in logic
+    console.log("Sign in:", { email, password });
+    setIsSignInOpen(false);
+    setEmail("");
+    setPassword("");
+  };
+
   return (
     <nav
       className={`fixed top-0 left-0 right-0 z-50 transition-smooth ${
@@ -108,10 +130,10 @@ const Navbar = () => {
               <span className="sr-only">Toggle theme</span>
             </button>
             <Button
-              onClick={() => window.open("https://wa.me/254710132320", "_blank")}
+              onClick={() => setIsSignInOpen(true)}
               className="gradient-gold text-secondary font-semibold shadow-luxury hover:scale-105 transition-smooth"
             >
-              WhatsApp Us
+              Sign In
             </Button>
           </div>
 
@@ -161,16 +183,62 @@ const Navbar = () => {
               </div>
               <div className="px-4">
                 <Button
-                  onClick={() => window.open("https://wa.me/254710132320", "_blank")}
+                  onClick={() => {
+                    setIsSignInOpen(true);
+                    setIsOpen(false);
+                  }}
                   className="w-full gradient-gold text-secondary font-semibold shadow-luxury"
                 >
-                  WhatsApp Us
+                  Sign In
                 </Button>
               </div>
             </div>
           </div>
         )}
       </div>
+
+      {/* Sign In Dialog */}
+      <Dialog open={isSignInOpen} onOpenChange={setIsSignInOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Sign In</DialogTitle>
+            <DialogDescription>
+              Enter your email and password to sign in to your account.
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleSignIn}>
+            <div className="grid gap-4 py-4">
+              <div className="grid gap-2">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="your.email@example.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="password">Password</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  placeholder="Enter your password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button type="submit" className="gradient-gold text-secondary font-semibold shadow-luxury">
+                Sign In
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </nav>
   );
 };

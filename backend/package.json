@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "node --watch src/server.js",
     "start": "node src/server.js",
-    "build": "echo 'No build step required for Node.js backend'"
+    "build": "echo 'No build step required for Node.js backend'",
+    "seed:properties": "node src/seedProperties.js"
   },
   "dependencies": {
     "bcrypt": "^5.1.1",

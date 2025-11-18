@@ -2,17 +2,34 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { MapPin, Bed, Bath, Square } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
-import { useEffect, useCallback } from "react";
+import { useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { properties } from "@/data/properties";
-import { parsePrice } from "@/data/properties";
+
+interface Property {
+  _id: string;
+  title: string;
+  description: string;
+  price: number;
+  images: string[];
+  location: string;
+  bedrooms?: number;
+  bathrooms?: number;
+  size?: string;
+  featured?: boolean;
+  type: string;
+  status: string;
+  projectStage?: string;
+  completion?: string;
+}
 
 const Properties = () => {
   const navigate = useNavigate();
+  const [properties, setProperties] = useState<Property[]>([]);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [bedrooms, setBedrooms] = useState("all");
   const [featuredOnly, setFeaturedOnly] = useState(false);
@@ -23,28 +40,55 @@ const Properties = () => {
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 50000000]);
   const [sortBy, setSortBy] = useState("newest");
 
+  useEffect(() => {
+    fetchProperties();
+  }, []);
+
+  const fetchProperties = async () => {
+    setLoading(true);
+    try {
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000/api';
+      const response = await fetch(`${API_URL}/properties`);
+      if (!response.ok) throw new Error('Failed to fetch properties');
+      const data = await response.json();
+      setProperties(Array.isArray(data) ? data : []);
+    } catch (error) {
+      console.error('Error fetching properties:', error);
+      setProperties([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Filtering logic
   const filteredProperties = properties.filter((p) => {
     const matchesSearch =
       p.title.toLowerCase().includes(search.toLowerCase()) ||
       p.location.toLowerCase().includes(search.toLowerCase());
-    const matchesBedrooms = bedrooms === "all" ? true : String(p.bedrooms) === bedrooms;
+    const matchesBedrooms = bedrooms === "all" ? true : String(p.bedrooms || 0) === bedrooms;
     const matchesFeatured = featuredOnly ? p.featured : true;
     const matchesType = propertyType === "all" ? true : p.type === propertyType;
     const matchesStatus = status === "all" ? true : p.status === status;
     const matchesLocation = location === "all" ? true : p.location.toLowerCase().includes(location.toLowerCase());
-    const matchesCompletion = completion === "all" ? true : (p.projectStage?.toLowerCase() || '') === completion.toLowerCase();
-    const priceNum = parsePrice(p.price);
+    const matchesCompletion = completion === "all" ? true : (p.projectStage?.toLowerCase() || p.completion?.toLowerCase() || '') === completion.toLowerCase();
+    const priceNum = p.price || 0;
     const matchesPrice = priceNum >= priceRange[0] && priceNum <= priceRange[1];
     return matchesSearch && matchesBedrooms && matchesFeatured && matchesType && matchesStatus && matchesLocation && matchesCompletion && matchesPrice;
   });
 
   const sortedProperties = [...filteredProperties].sort((a, b) => {
-    if (sortBy === 'price-asc') return (parsePrice(a.price) - parsePrice(b.price));
-    if (sortBy === 'price-desc') return (parsePrice(b.price) - parsePrice(a.price));
-    // default newest first — no createdAt on mock, so keep original order
+    if (sortBy === 'price-asc') return (a.price || 0) - (b.price || 0);
+    if (sortBy === 'price-desc') return (b.price || 0) - (a.price || 0);
+    // default newest first
     return 0;
   });
+
+  const formatPrice = (price: number) => {
+    if (price >= 1000000) {
+      return `KES ${(price / 1000000).toFixed(1)}M`;
+    }
+    return `KES ${price.toLocaleString()}`;
+  };
 
   return (
     <section id="properties" className="py-20 lg:py-32 bg-muted/30">
