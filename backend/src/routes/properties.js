@@ -74,6 +74,19 @@ router.get('/', async (req, res) => {
   res.json(items);
 });
 
+router.get('/:id', async (req, res) => {
+  try {
+    const property = await Property.findById(req.params.id);
+    if (!property) {
+      return res.status(404).json({ error: 'Property not found' });
+    }
+    res.json(property);
+  } catch (error) {
+    console.error('Error fetching property:', error);
+    res.status(500).json({ error: 'Failed to fetch property' });
+  }
+});
+
 router.post('/', requireAuth, requireAdmin, async (req, res) => {
   const created = await Property.create(req.body);
   res.status(201).json(created);
