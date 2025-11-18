@@ -13,6 +13,9 @@ import AddProperty from "./pages/AddProperty";
 import Team from "./pages/Team";
 import Requests from "./pages/Requests";
 import Settings from "./pages/Settings";
+import Blogs from "./pages/Blogs";
+import AddBlog from "./pages/AddBlog";
+import EditBlog from "./pages/EditBlog";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -69,6 +72,30 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <Requests />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/blogs"
+              element={
+                <ProtectedRoute>
+                  <Blogs />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/add-blog"
+              element={
+                <ProtectedRoute>
+                  <AddBlog />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/edit-blog/:id"
+              element={
+                <ProtectedRoute>
+                  <EditBlog />
                 </ProtectedRoute>
               }
             />

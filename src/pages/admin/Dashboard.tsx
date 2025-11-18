@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
-import { DashboardLayout } from '@/components/DashboardLayout';
+import { DashboardLayout } from '@/components/admin/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Building2, DollarSign, Home, MessageSquare, FileText } from 'lucide-react';
-import { axiosClient } from '@/utils/axiosClient';
+import { propertiesService } from '@/services/firestore/properties';
+import { requestsService } from '@/services/firestore/requests';
+import { blogsService } from '@/services/firestore/blogs';
 import { toast } from 'sonner';
 
 interface Stats {
@@ -14,7 +16,7 @@ interface Stats {
   publishedBlogs: number;
 }
 
-const Dashboard = () => {
+const AdminDashboard = () => {
   const [stats, setStats] = useState<Stats>({
     totalProperties: 0,
     totalSales: 0,
@@ -31,19 +33,19 @@ const Dashboard = () => {
 
   const fetchStats = async () => {
     try {
-      const [propertiesRes, requestsRes, blogsRes] = await Promise.all([
-        axiosClient.get('/properties/stats'),
-        axiosClient.get('/requests/stats'),
-        axiosClient.get('/blogs/stats/summary').catch(() => ({ data: { total: 0, published: 0 } })),
+      const [propertiesStats, requestsStats, blogsStats] = await Promise.all([
+        propertiesService.getStats(),
+        requestsService.getStats(),
+        blogsService.getStats().catch(() => ({ total: 0, published: 0 })),
       ]);
 
       setStats({
-        totalProperties: propertiesRes.data.total || 0,
-        totalSales: propertiesRes.data.sales || 0,
-        totalRentals: propertiesRes.data.rentals || 0,
-        totalRequests: requestsRes.data.total || 0,
-        totalBlogs: blogsRes.data.total || 0,
-        publishedBlogs: blogsRes.data.published || 0,
+        totalProperties: propertiesStats.total || 0,
+        totalSales: propertiesStats.sales || 0,
+        totalRentals: propertiesStats.rentals || 0,
+        totalRequests: requestsStats.total || 0,
+        totalBlogs: blogsStats.total || 0,
+        publishedBlogs: blogsStats.published || 0,
       });
     } catch (error) {
       toast.error('Failed to fetch statistics');
@@ -120,7 +122,7 @@ const Dashboard = () => {
           <p className="text-muted-foreground">Overview of your real estate portfolio</p>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {cards.map((card) => (
             <Card key={card.title}>
               <CardHeader className="flex flex-row items-center justify-between pb-2">
@@ -151,4 +153,4 @@ const Dashboard = () => {
   );
 };
 
-export default Dashboard;
+export default AdminDashboard;

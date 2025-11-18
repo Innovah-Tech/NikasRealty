@@ -1,18 +1,33 @@
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { MapPin, Bed, Bath, Square } from "lucide-react";
-import { useState } from "react";
+import { MapPin, Bed, Bath, Square, Loader2 } from "lucide-react";
+import { useState, useEffect, useCallback } from "react";
 import { Input } from "@/components/ui/input";
-import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectTrigger,
+  SelectContent,
+  SelectItem,
+  SelectValue,
+} from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
-import { useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { properties } from "@/data/properties";
+import { propertiesService, type Property } from "@/services/firestore/properties";
 import { parsePrice } from "@/data/properties";
+import { getFallbackProperties } from "@/utils/fallbackProperties";
 
 const Properties = () => {
   const navigate = useNavigate();
+  const [allProperties, setAllProperties] = useState<Property[]>([]);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [bedrooms, setBedrooms] = useState("all");
   const [featuredOnly, setFeaturedOnly] = useState(false);
@@ -23,34 +38,78 @@ const Properties = () => {
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 50000000]);
   const [sortBy, setSortBy] = useState("newest");
 
-  // Filtering logic
-  const filteredProperties = properties.filter((p) => {
+  useEffect(() => {
+    const fallback = getFallbackProperties();
+    const fetchAll = async () => {
+      try {
+        const data = await propertiesService.getAll();
+        if (data.length === 0) {
+          console.warn("No properties found in Firestore. Falling back to static data.");
+          setAllProperties(fallback);
+        } else {
+          setAllProperties(data);
+        }
+      } catch (error) {
+        console.error("Failed to fetch properties:", error);
+        setAllProperties(fallback);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchAll();
+  }, []);
+
+  const filteredProperties = allProperties.filter((p) => {
     const matchesSearch =
-      p.title.toLowerCase().includes(search.toLowerCase()) ||
-      p.location.toLowerCase().includes(search.toLowerCase());
+      p.title?.toLowerCase().includes(search.toLowerCase()) ||
+      p.location?.toLowerCase().includes(search.toLowerCase());
     const matchesBedrooms = bedrooms === "all" ? true : String(p.bedrooms) === bedrooms;
     const matchesFeatured = featuredOnly ? p.featured : true;
     const matchesType = propertyType === "all" ? true : p.type === propertyType;
     const matchesStatus = status === "all" ? true : p.status === status;
-    const matchesLocation = location === "all" ? true : p.location.toLowerCase().includes(location.toLowerCase());
-    const matchesCompletion = completion === "all" ? true : (p.projectStage?.toLowerCase() || '') === completion.toLowerCase();
-    const priceNum = parsePrice(p.price);
+    const matchesLocation = location === "all" ? true : p.location?.toLowerCase().includes(location.toLowerCase());
+    const matchesCompletion =
+      completion === "all"
+        ? true
+        : (p.projectStage?.toLowerCase() || "").includes(completion.toLowerCase());
+    const priceNum = typeof p.price === "number" ? p.price : parsePrice(String(p.price));
     const matchesPrice = priceNum >= priceRange[0] && priceNum <= priceRange[1];
-    return matchesSearch && matchesBedrooms && matchesFeatured && matchesType && matchesStatus && matchesLocation && matchesCompletion && matchesPrice;
+    return (
+      matchesSearch &&
+      matchesBedrooms &&
+      matchesFeatured &&
+      matchesType &&
+      matchesStatus &&
+      matchesLocation &&
+      matchesCompletion &&
+      matchesPrice
+    );
   });
 
   const sortedProperties = [...filteredProperties].sort((a, b) => {
-    if (sortBy === 'price-asc') return (parsePrice(a.price) - parsePrice(b.price));
-    if (sortBy === 'price-desc') return (parsePrice(b.price) - parsePrice(a.price));
-    // default newest first — no createdAt on mock, so keep original order
+    const priceA = typeof a.price === "number" ? a.price : parsePrice(String(a.price));
+    const priceB = typeof b.price === "number" ? b.price : parsePrice(String(b.price));
+    if (sortBy === "price-asc") return priceA - priceB;
+    if (sortBy === "price-desc") return priceB - priceA;
     return 0;
   });
+
+  const featuredSlides = (allProperties.length ? allProperties : []).slice(0, 5).map((p) => ({
+    id: p.id || Math.random(),
+    title: p.title || "Property",
+    image: p.images?.[0] || p.image || "/images/property1.jpg",
+    price:
+      typeof p.price === "number"
+        ? `KES ${p.price.toLocaleString()}`
+        : p.price || "KES 0",
+    location: p.location || "Nairobi",
+  }));
 
   return (
     <section id="properties" className="py-20 lg:py-32 bg-muted/30">
       <div className="container mx-auto px-4 lg:px-8">
         {/* Featured Properties Slides */}
-        <FeaturedPropertiesSlides items={properties} />
+        <FeaturedPropertiesSlides items={featuredSlides} />
         {/* Search and Filter Row */}
         <div className="flex flex-wrap gap-4 mb-10 items-end">
           <div className="flex-1 min-w-[200px]">
@@ -184,90 +243,114 @@ const Properties = () => {
 
         {/* Properties Grid */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {sortedProperties.length === 0 && (
-            <div className="col-span-full text-center text-muted-foreground py-8 text-lg">No properties match your search.</div>
-          )}
-          {sortedProperties.map((property) => (
-            <Card
-              key={property.id}
-              className="overflow-hidden group hover:shadow-luxury transition-smooth cursor-pointer"
-              onClick={() => navigate(`/properties/${property.id}`)}
-            >
-              {/* Image */}
-              <div className="relative h-64 overflow-hidden">
-                <img
-                  src={property.image}
-                  alt={property.title}
-                  className="w-full h-full object-cover group-hover:scale-110 transition-smooth"
-                  loading="lazy"
-                />
-                {property.featured && (
-                  <Badge className="absolute top-4 right-4 gradient-gold text-secondary font-semibold">
-                    Featured
-                  </Badge>
-                )}
-              </div>
+          {loading ? (
+            <div className="col-span-full flex justify-center py-12">
+              <Loader2 className="h-10 w-10 animate-spin text-primary" />
+            </div>
+          ) : sortedProperties.length === 0 ? (
+            <div className="col-span-full text-center text-muted-foreground py-8 text-lg">
+              No properties match your search.
+            </div>
+          ) : (
+            sortedProperties.map((property) => {
+              const mainImage = property.images?.[0] || property.image || "/images/property1.jpg";
+              const displayPrice =
+                typeof property.price === "number"
+                  ? `KES ${property.price.toLocaleString()}`
+                  : property.price;
 
-              {/* Content */}
-              <CardHeader>
-                {/* Classification badges */}
-                <div className="flex flex-wrap gap-2 mb-2">
-                  <Badge variant="secondary" className="capitalize">{property.type}</Badge>
-                  <Badge variant="outline" className="capitalize">{property.status}</Badge>
-                  <Badge variant="outline" className="capitalize">{property.projectStage}</Badge>
-                  {property.featured && (
-                    <Badge className="gradient-gold text-secondary font-semibold">Featured</Badge>
-                  )}
-                </div>
-                <CardTitle className="text-xl group-hover:text-primary transition-smooth">
-                  {property.title}
-                </CardTitle>
-                <CardDescription className="flex items-center gap-1 text-muted-foreground">
-                  <MapPin size={16} />
-                  {property.location}
-                </CardDescription>
-              </CardHeader>
-
-              <CardContent className="space-y-4">
-                <p className="text-muted-foreground text-sm line-clamp-2">
-                  {property.description}
-                </p>
-
-                {/* Property Details */}
-                <div className="flex items-center justify-between text-sm text-muted-foreground">
-                  <div className="flex items-center gap-1">
-                    <Bed size={16} />
-                    <span>{property.bedrooms} Beds</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Bath size={16} />
-                    <span>{property.bathrooms} Baths</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Square size={16} />
-                    <span>{property.size}</span>
-                  </div>
-                </div>
-
-                {/* Price */}
-                <div className="pt-4 border-t border-border">
-                  <p className="text-2xl font-bold text-primary">{property.price}</p>
-                </div>
-              </CardContent>
-
-              <CardFooter>
-                <Button
-                  className="w-full gradient-gold text-secondary font-semibold hover:scale-105 transition-smooth"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    navigate(`/properties/${property.id}`);
-                  }}
+              return (
+                <Card
+                  key={property.id}
+                  className="overflow-hidden group hover:shadow-luxury transition-smooth cursor-pointer"
+                  onClick={() => navigate(`/properties/${property.id}`)}
                 >
-                  View Details
-                </Button>
-              </CardFooter>
-            </Card>
-          ))}
+                  {/* Image */}
+                  <div className="relative h-64 overflow-hidden">
+                    <img
+                      src={mainImage}
+                      alt={property.title}
+                      className="w-full h-full object-cover group-hover:scale-110 transition-smooth"
+                      loading="lazy"
+                    />
+                    {property.featured && (
+                      <Badge className="absolute top-4 right-4 gradient-gold text-secondary font-semibold">
+                        Featured
+                      </Badge>
+                    )}
+                  </div>
+
+                  {/* Content */}
+                  <CardHeader>
+                    <div className="flex flex-wrap gap-2 mb-2">
+                      {property.type && (
+                        <Badge variant="secondary" className="capitalize">
+                          {property.type}
+                        </Badge>
+                      )}
+                      {property.status && (
+                        <Badge variant="outline" className="capitalize">
+                          {property.status}
+                        </Badge>
+                      )}
+                      {property.projectStage && (
+                        <Badge variant="outline" className="capitalize">
+                          {property.projectStage}
+                        </Badge>
+                      )}
+                      {property.featured && (
+                        <Badge className="gradient-gold text-secondary font-semibold">Featured</Badge>
+                      )}
+                    </div>
+                    <CardTitle className="text-xl group-hover:text-primary transition-smooth">
+                      {property.title}
+                    </CardTitle>
+                    <CardDescription className="flex items-center gap-1 text-muted-foreground">
+                      <MapPin size={16} />
+                      {property.location}
+                    </CardDescription>
+                  </CardHeader>
+
+                  <CardContent className="space-y-4">
+                    <p className="text-muted-foreground text-sm line-clamp-2">{property.description}</p>
+
+                    {/* Property Details */}
+                    <div className="flex items-center justify-between text-sm text-muted-foreground">
+                      <div className="flex items-center gap-1">
+                        <Bed size={16} />
+                        <span>{property.bedrooms ?? "-"} Beds</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Bath size={16} />
+                        <span>{property.bathrooms ?? "-"} Baths</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Square size={16} />
+                        <span>{property.size ?? "N/A"}</span>
+                      </div>
+                    </div>
+
+                    {/* Price */}
+                    <div className="pt-4 border-t border-border">
+                      <p className="text-2xl font-bold text-primary">{displayPrice}</p>
+                    </div>
+                  </CardContent>
+
+                  <CardFooter>
+                    <Button
+                      className="w-full gradient-gold text-secondary font-semibold hover:scale-105 transition-smooth"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigate(`/properties/${property.id}`);
+                      }}
+                    >
+                      View Details
+                    </Button>
+                  </CardFooter>
+                </Card>
+              );
+            })
+          )}
         </div>
       </div>
     </section>
@@ -276,7 +359,14 @@ const Properties = () => {
 
 export default Properties;
 // --- Slides: Featured Properties (no external deps) ---
-const FeaturedPropertiesSlides = ({ items }: { items: Array<{ id: number; title: string; image: string; price: string; location: string }>; }) => {
+const FeaturedPropertiesSlides = ({
+  items,
+}: {
+  items: Array<{ id: string | number; title: string; image: string; price: string; location: string }>;
+}) => {
+  if (items.length === 0) {
+    return null;
+  }
   const [index, setIndex] = useState(0);
   const last = items.length - 1;
 

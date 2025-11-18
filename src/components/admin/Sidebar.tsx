@@ -15,13 +15,13 @@ import { Button } from '@/components/ui/button';
 import { useState } from 'react';
 
 const navigation = [
-  { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-  { name: 'Properties', href: '/properties', icon: Building2 },
-  { name: 'Add Property', href: '/add-property', icon: PlusCircle },
-  { name: 'Blogs', href: '/blogs', icon: FileText },
-  { name: 'Requests', href: '/requests', icon: MessageSquare },
-  { name: 'Team', href: '/team', icon: Users },
-  { name: 'Settings', href: '/settings', icon: Settings },
+  { name: 'Dashboard', href: '/admin/dashboard', icon: LayoutDashboard },
+  { name: 'Properties', href: '/admin/properties', icon: Building2 },
+  { name: 'Add Property', href: '/admin/add-property', icon: PlusCircle },
+  { name: 'Blogs', href: '/admin/blogs', icon: FileText },
+  { name: 'Requests', href: '/admin/requests', icon: MessageSquare },
+  { name: 'Team', href: '/admin/team', icon: Users },
+  { name: 'Settings', href: '/admin/settings', icon: Settings },
 ];
 
 export const Sidebar = () => {
@@ -88,3 +88,4 @@ export const Sidebar = () => {
     </>
   );
 };
+

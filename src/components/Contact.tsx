@@ -19,27 +19,16 @@ const Contact = () => {
     e.preventDefault();
     setIsSubmitting(true);
 
-    try {
-      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000/api';
-      const response = await fetch(`${API_URL}/requests`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          name: formData.name,
-          email: formData.email,
-          phone: formData.phone,
-          message: formData.message,
-        }),
-      });
+        try {
+          const { requestsService } = await import('@/services/firestore/requests');
+          await requestsService.create({
+            name: formData.name,
+            email: formData.email || undefined,
+            phone: formData.phone,
+            message: formData.message,
+          });
 
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Failed to submit form');
-      }
-
-      toast.success("Message sent successfully! We'll get back to you soon.");
+          toast.success("Message sent successfully! We'll get back to you soon.");
       
       // Reset form
       setFormData({ name: "", email: "", phone: "", message: "" });

@@ -20,7 +20,7 @@ export const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
     if (import.meta.env.DEV) {
       console.log('❌ Not authenticated, redirecting to login');
     }
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/admin/login" replace />;
   }
 
   if (import.meta.env.DEV) {
@@ -29,3 +29,4 @@ export const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 
   return <>{children}</>;
 };
+

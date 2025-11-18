@@ -52,6 +52,12 @@ router.post('/login', async (req, res) => {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
     
+    // Ensure only admin users can log in
+    if (user.role !== 'admin') {
+      console.log(`❌ Login attempt failed: Non-admin user - ${email} (role: ${user.role})`);
+      return res.status(403).json({ error: 'Access denied. Admin access required.' });
+    }
+    
     // Generate token
     if (!process.env.JWT_SECRET) {
       console.error('❌ JWT_SECRET is not set!');

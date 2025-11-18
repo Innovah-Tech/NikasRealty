@@ -18,7 +18,7 @@ All colors MUST be HSL.
     --popover: 0 0% 100%;
     --popover-foreground: 0 0% 11%;
 
-    --primary: 43 85% 35%; /* Darker Gold */
+    --primary: 43 74% 60%; /* Harvest Gold */
     --primary-foreground: 0 0% 100%;
 
     --secondary: 0 0% 11%; /* Deep Charcoal */
@@ -27,7 +27,7 @@ All colors MUST be HSL.
     --muted: 0 0% 96%;
     --muted-foreground: 0 0% 45%;
 
-    --accent: 43 85% 35%; /* Darker Gold accent */
+    --accent: 43 74% 60%; /* Harvest Gold accent */
     --accent-foreground: 0 0% 11%;
 
     --destructive: 0 84.2% 60.2%;
@@ -35,17 +35,17 @@ All colors MUST be HSL.
 
     --border: 0 0% 90%;
     --input: 0 0% 90%;
-    --ring: 43 85% 35%;
+    --ring: 43 74% 60%;
 
     --radius: 0.5rem;
     
     /* Luxury gradients */
-    --gradient-gold: linear-gradient(135deg, hsl(43 85% 30%), hsl(43 85% 40%));
+    --gradient-gold: linear-gradient(135deg, hsl(43 74% 50%), hsl(43 74% 70%));
     --gradient-dark: linear-gradient(180deg, hsl(0 0% 11%), hsl(0 0% 15%));
     --gradient-hero: linear-gradient(180deg, rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.3));
     
     /* Elegant shadows */
-    --shadow-luxury: 0 10px 40px -10px hsl(43 74% 52% / 0.3);
+    --shadow-luxury: 0 10px 40px -10px hsl(43 74% 60% / 0.3);
     --shadow-card: 0 4px 20px -2px rgba(0, 0, 0, 0.1);
     
     /* Smooth transitions */
@@ -80,7 +80,7 @@ All colors MUST be HSL.
     --popover: 0 0% 15%;
     --popover-foreground: 0 0% 100%;
 
-    --primary: 43 74% 42%;
+    --primary: 43 74% 60%;
     --primary-foreground: 0 0% 11%;
 
     --secondary: 0 0% 20%;
@@ -89,7 +89,7 @@ All colors MUST be HSL.
     --muted: 0 0% 20%;
     --muted-foreground: 0 0% 65%;
 
-    --accent: 43 74% 42%;
+    --accent: 43 74% 60%;
     --accent-foreground: 0 0% 11%;
 
     --destructive: 0 62.8% 30.6%;
@@ -97,7 +97,7 @@ All colors MUST be HSL.
 
     --border: 0 0% 20%;
     --input: 0 0% 20%;
-    --ring: 43 74% 52%;
+    --ring: 43 74% 60%;
     --sidebar-background: 0 0% 11%;
     --sidebar-foreground: 0 0% 95%;
     --sidebar-primary: 43 74% 52%;

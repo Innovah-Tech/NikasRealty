@@ -15,6 +15,7 @@ import teamRoutes from './routes/team.js';
 import serviceRoutes from './routes/services.js';
 import uploadRoutes from './routes/upload.js';
 import requestRoutes from './routes/requests.js';
+import blogRoutes from './routes/blogs.js';
 import Property from './storage/Property.js';
 
 const app = express();
@@ -83,6 +84,7 @@ app.use('/api/team', teamRoutes);
 app.use('/api/services', serviceRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/requests', requestRoutes);
+app.use('/api/blogs', blogRoutes);
 
 // --- 404 Handler for unmatched routes ---
 app.use('/api/*', (req, res) => {

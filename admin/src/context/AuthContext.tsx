@@ -94,9 +94,22 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           console.log('✅ User data fetched:', userData.email);
         }
         
-        // Only navigate if everything succeeded
+        // Ensure user state is set before navigation
+        setUser(userData);
         setLoading(false);
-        navigate('/dashboard');
+        
+        if (import.meta.env.DEV) {
+          console.log('✅ Setting user and navigating to dashboard');
+          console.log('User data:', userData);
+        }
+        
+        // Use setTimeout to ensure state updates are processed
+        setTimeout(() => {
+          if (import.meta.env.DEV) {
+            console.log('🚀 Navigating to /dashboard');
+          }
+          navigate('/dashboard', { replace: true });
+        }, 100);
       } catch (fetchError: any) {
         // If fetchUser fails, remove the token and rethrow
         if (import.meta.env.DEV) {
