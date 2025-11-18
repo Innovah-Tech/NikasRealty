@@ -2,25 +2,28 @@ import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
+import { getAnalytics } from 'firebase/analytics';
 
-// Your Firebase configuration
-// Replace these with your actual Firebase project credentials
+// Firebase configuration (hardcoded per request)
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "your-api-key",
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || "your-project.firebaseapp.com",
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || "your-project-id",
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || "your-project.appspot.com",
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "your-sender-id",
-  appId: import.meta.env.VITE_FIREBASE_APP_ID || "your-app-id"
+  apiKey: 'AIzaSyAgnkCrU_CuNP1EtNA9HG7P42uYOx-LeZk',
+  authDomain: 'nikas-db432.firebaseapp.com',
+  projectId: 'nikas-db432',
+  storageBucket: 'nikas-db432.firebasestorage.app',
+  messagingSenderId: '31056432402',
+  appId: '1:31056432402:web:9c06fabbf234a13509f7cb',
+  measurementId: 'G-PERDJVZ0SX',
 };
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
+const analytics = typeof window !== 'undefined' ? getAnalytics(app) : undefined;
 
 // Initialize Firebase services
 export const auth = getAuth(app);
 export const db = getFirestore(app);
 export const storage = getStorage(app);
+export const firebaseAnalytics = analytics;
 
 export default app;
 
