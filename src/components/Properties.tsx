@@ -2,34 +2,17 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { MapPin, Bed, Bath, Square } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
-import { useCallback } from "react";
+import { useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-
-interface Property {
-  _id: string;
-  title: string;
-  description: string;
-  price: number;
-  images: string[];
-  location: string;
-  bedrooms?: number;
-  bathrooms?: number;
-  size?: string;
-  featured?: boolean;
-  type: string;
-  status: string;
-  projectStage?: string;
-  completion?: string;
-}
+import { properties } from "@/data/properties";
+import { parsePrice } from "@/data/properties";
 
 const Properties = () => {
   const navigate = useNavigate();
-  const [properties, setProperties] = useState<Property[]>([]);
-  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [bedrooms, setBedrooms] = useState("all");
   const [featuredOnly, setFeaturedOnly] = useState(false);
@@ -40,55 +23,28 @@ const Properties = () => {
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 50000000]);
   const [sortBy, setSortBy] = useState("newest");
 
-  useEffect(() => {
-    fetchProperties();
-  }, []);
-
-  const fetchProperties = async () => {
-    setLoading(true);
-    try {
-      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000/api';
-      const response = await fetch(`${API_URL}/properties`);
-      if (!response.ok) throw new Error('Failed to fetch properties');
-      const data = await response.json();
-      setProperties(Array.isArray(data) ? data : []);
-    } catch (error) {
-      console.error('Error fetching properties:', error);
-      setProperties([]);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   // Filtering logic
   const filteredProperties = properties.filter((p) => {
     const matchesSearch =
       p.title.toLowerCase().includes(search.toLowerCase()) ||
       p.location.toLowerCase().includes(search.toLowerCase());
-    const matchesBedrooms = bedrooms === "all" ? true : String(p.bedrooms || 0) === bedrooms;
+    const matchesBedrooms = bedrooms === "all" ? true : String(p.bedrooms) === bedrooms;
     const matchesFeatured = featuredOnly ? p.featured : true;
     const matchesType = propertyType === "all" ? true : p.type === propertyType;
     const matchesStatus = status === "all" ? true : p.status === status;
     const matchesLocation = location === "all" ? true : p.location.toLowerCase().includes(location.toLowerCase());
-    const matchesCompletion = completion === "all" ? true : (p.projectStage?.toLowerCase() || p.completion?.toLowerCase() || '') === completion.toLowerCase();
-    const priceNum = p.price || 0;
+    const matchesCompletion = completion === "all" ? true : (p.projectStage?.toLowerCase() || '') === completion.toLowerCase();
+    const priceNum = parsePrice(p.price);
     const matchesPrice = priceNum >= priceRange[0] && priceNum <= priceRange[1];
     return matchesSearch && matchesBedrooms && matchesFeatured && matchesType && matchesStatus && matchesLocation && matchesCompletion && matchesPrice;
   });
 
   const sortedProperties = [...filteredProperties].sort((a, b) => {
-    if (sortBy === 'price-asc') return (a.price || 0) - (b.price || 0);
-    if (sortBy === 'price-desc') return (b.price || 0) - (a.price || 0);
-    // default newest first
+    if (sortBy === 'price-asc') return (parsePrice(a.price) - parsePrice(b.price));
+    if (sortBy === 'price-desc') return (parsePrice(b.price) - parsePrice(a.price));
+    // default newest first — no createdAt on mock, so keep original order
     return 0;
   });
-
-  const formatPrice = (price: number) => {
-    if (price >= 1000000) {
-      return `KES ${(price / 1000000).toFixed(1)}M`;
-    }
-    return `KES ${price.toLocaleString()}`;
-  };
 
   return (
     <section id="properties" className="py-20 lg:py-32 bg-muted/30">
@@ -97,7 +53,7 @@ const Properties = () => {
         <FeaturedPropertiesSlides items={properties} />
         {/* Search and Filter Row */}
         <div className="flex flex-wrap gap-4 mb-10 items-end">
-          <div className="flex-1 w-full sm:min-w-[200px] sm:w-auto">
+          <div className="flex-1 min-w-[200px]">
             <Input
               placeholder="Search by title or location..."
               value={search}
@@ -105,7 +61,7 @@ const Properties = () => {
               className=""
             />
           </div>
-          <div className="w-full sm:min-w-[160px] sm:w-auto">
+          <div className="min-w-[160px]">
             <Select value={propertyType} onValueChange={setPropertyType}>
               <SelectTrigger>
                 <SelectValue placeholder="Property Type" />
@@ -122,7 +78,7 @@ const Properties = () => {
               </SelectContent>
             </Select>
           </div>
-          <div className="w-full sm:min-w-[130px] sm:w-auto">
+          <div className="min-w-[130px]">
             <Select value={bedrooms} onValueChange={setBedrooms}>
               <SelectTrigger>
                 <SelectValue placeholder="Bedrooms" />
@@ -138,7 +94,7 @@ const Properties = () => {
               </SelectContent>
             </Select>
           </div>
-          <div className="w-full sm:min-w-[140px] sm:w-auto">
+          <div className="min-w-[140px]">
             <Select value={status} onValueChange={setStatus}>
               <SelectTrigger>
                 <SelectValue placeholder="Status" />
@@ -151,7 +107,7 @@ const Properties = () => {
               </SelectContent>
             </Select>
           </div>
-          <div className="w-full sm:min-w-[160px] sm:w-auto">
+          <div className="min-w-[160px]">
             <Select value={location} onValueChange={setLocation}>
               <SelectTrigger>
                 <SelectValue placeholder="Location" />
@@ -172,7 +128,7 @@ const Properties = () => {
               </SelectContent>
             </Select>
           </div>
-          <div className="w-full sm:min-w-[160px] sm:w-auto">
+          <div className="min-w-[160px]">
             <Select value={completion} onValueChange={setCompletion}>
               <SelectTrigger>
                 <SelectValue placeholder="Completion" />
@@ -185,7 +141,7 @@ const Properties = () => {
               </SelectContent>
             </Select>
           </div>
-          <div className="flex-1 w-full sm:min-w-[220px] sm:w-auto">
+          <div className="flex-1 min-w-[220px]">
             <div className="text-xs text-muted-foreground mb-1">Price Range (KES)</div>
             <Slider value={priceRange} onValueChange={(v)=>setPriceRange([v[0], v[1]] as [number, number])} min={0} max={50000000} step={500000} />
             <div className="flex justify-between text-xs mt-1">
@@ -193,7 +149,7 @@ const Properties = () => {
               <span>{priceRange[1].toLocaleString()}</span>
             </div>
           </div>
-          <div className="w-full sm:min-w-[160px] sm:w-auto">
+          <div className="min-w-[160px]">
             <Select value={sortBy} onValueChange={setSortBy}>
               <SelectTrigger>
                 <SelectValue placeholder="Sort By" />
