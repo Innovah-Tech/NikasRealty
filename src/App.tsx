@@ -19,6 +19,7 @@ import AdminAddProperty from "./pages/admin/AddProperty";
 import AdminBlogs from "./pages/admin/Blogs";
 import AdminAddBlog from "./pages/admin/AddBlog";
 import AdminEditBlog from "./pages/admin/EditBlog";
+import AdminEditProperty from "./pages/admin/EditProperty";
 import AdminRequests from "./pages/admin/Requests";
 import AdminTeam from "./pages/admin/Team";
 import AdminSettings from "./pages/admin/Settings";
@@ -64,6 +65,14 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <AdminAddProperty />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/edit-property/:id"
+              element={
+                <ProtectedRoute>
+                  <AdminEditProperty />
                 </ProtectedRoute>
               }
             />

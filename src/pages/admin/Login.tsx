@@ -30,6 +30,13 @@ const AdminLogin = () => {
       return;
     }
     
+    // Block specific email from admin login
+    const normalizedEmail = email.trim().toLowerCase();
+    if (normalizedEmail === 'admin@nikasrealty.co.ke') {
+      toast.error('This email is not authorized for admin access');
+      return;
+    }
+    
     setLoading(true);
 
     try {

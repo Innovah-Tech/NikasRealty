@@ -25,6 +25,12 @@ const mapFirebaseUser = (user: FirebaseUser | null): AuthUser | null => {
 export const firebaseAuth = {
   // Login with email and password
   async login(email: string, password: string): Promise<AuthUser> {
+    // Block specific email from admin login
+    const normalizedEmail = email.trim().toLowerCase();
+    if (normalizedEmail === 'admin@nikasrealty.co.ke') {
+      throw new Error('This email is not authorized for admin access');
+    }
+    
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const user = mapFirebaseUser(userCredential.user);
