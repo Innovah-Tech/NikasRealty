@@ -9,14 +9,10 @@ interface CloudinaryConfig {
   uploadPreset: string;
 }
 
-// Get Cloudinary config from environment or use defaults
+// Get Cloudinary config - hardcoded values
 const getCloudinaryConfig = (): CloudinaryConfig => {
-  const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME || '';
-  const uploadPreset = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET || '';
-  
-  if (!cloudName || !uploadPreset) {
-    throw new Error('Cloudinary configuration missing. Please set VITE_CLOUDINARY_CLOUD_NAME and VITE_CLOUDINARY_UPLOAD_PRESET');
-  }
+  const cloudName = 'dc7jf9inl';
+  const uploadPreset = 'nikasrealty';
   
   return { cloudName, uploadPreset };
 };
@@ -47,7 +43,7 @@ export const imageHosting = {
         
         // Provide helpful error messages for common issues
         if (errorMessage.includes('whitelisted') || errorMessage.includes('unsigned')) {
-          const uploadPreset = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET || 'nikasrealty';
+          const uploadPreset = 'nikasrealty';
           errorMessage = `Upload preset must be configured for unsigned uploads. Please check Cloudinary settings: Settings → Upload → Upload presets → Edit "${uploadPreset}" preset → Set Signing mode to "Unsigned"`;
         }
         

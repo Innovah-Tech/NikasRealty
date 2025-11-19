@@ -3,10 +3,10 @@ import { storage, auth } from '@/lib/firebase';
 import { imageHosting } from './imageHosting';
 
 // Use Cloudinary for image hosting (free tier, no backend needed)
-// Fallback to Firebase Storage if Cloudinary is not configured
+// Hardcoded Cloudinary configuration
 const useCloudinary = (): boolean => {
-  const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
-  const uploadPreset = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
+  const cloudName = 'dc7jf9inl';
+  const uploadPreset = 'nikasrealty';
   return !!(cloudName && uploadPreset);
 };
 

@@ -91,12 +91,18 @@ const AdminProperties = () => {
         page,
         limit: 10,
       });
-      setProperties(response || []);
+      
+      // Filter out fallback properties (they shouldn't be in Firestore, but just in case)
+      const firestoreProperties = (response || []).filter(
+        (p) => p.id && !p.id.startsWith('fallback-')
+      );
+      
+      setProperties(firestoreProperties);
       
       if (import.meta.env.DEV) {
-        console.log('Properties set in state:', response?.length || 0);
-        if (response && response.length > 0) {
-          console.log('Sample property:', response[0]);
+        console.log('Properties set in state:', firestoreProperties.length);
+        if (firestoreProperties.length > 0) {
+          console.log('Sample property:', firestoreProperties[0]);
         }
       }
     } catch (error: any) {
@@ -110,14 +116,21 @@ const AdminProperties = () => {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this property?')) return;
+    if (!id || id.startsWith('fallback-')) {
+      toast.error('Cannot delete fallback properties');
+      return;
+    }
+
+    if (!confirm('Are you sure you want to delete this property? This action cannot be undone.')) return;
 
     try {
       await propertiesService.delete(id);
       toast.success('Property deleted successfully');
       fetchProperties();
-    } catch (error) {
-      toast.error('Failed to delete property');
+    } catch (error: any) {
+      console.error('Delete error:', error);
+      const errorMessage = error?.message || 'Failed to delete property';
+      toast.error(errorMessage);
     }
   };
 
@@ -364,6 +377,8 @@ const AdminProperties = () => {
                       variant="outline"
                       size="sm"
                       onClick={() => property.id && handleDelete(property.id)}
+                      disabled={!property.id || property.id.startsWith('fallback-')}
+                      title={property.id?.startsWith('fallback-') ? 'Cannot delete fallback properties' : 'Delete property'}
                     >
                       <Trash2 className="h-3 w-3 text-destructive" />
                     </Button>
