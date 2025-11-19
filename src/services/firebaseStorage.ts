@@ -1,30 +1,83 @@
 import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
-import { storage } from '@/lib/firebase';
+import { storage, auth } from '@/lib/firebase';
+import { imageHosting } from './imageHosting';
+
+// Use Cloudinary for image hosting (free tier, no backend needed)
+// Fallback to Firebase Storage if Cloudinary is not configured
+const useCloudinary = (): boolean => {
+  const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
+  const uploadPreset = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
+  return !!(cloudName && uploadPreset);
+};
 
 export const firebaseStorage = {
-  // Upload a file to Firebase Storage
+  // Upload a file - uses Cloudinary if configured, otherwise Firebase Storage
   async uploadFile(file: File, path: string): Promise<string> {
+    // Use Cloudinary if configured
+    if (useCloudinary()) {
+      try {
+        return await imageHosting.uploadImage(file);
+      } catch (error: any) {
+        console.error('Cloudinary upload failed, falling back to Firebase:', error);
+        // Fall through to Firebase Storage
+      }
+    }
+
+    // Fallback to Firebase Storage
     try {
+      // Check if user is authenticated
+      if (!auth.currentUser) {
+        throw new Error('You must be logged in to upload files');
+      }
+
       const storageRef = ref(storage, path);
       await uploadBytes(storageRef, file);
       const downloadURL = await getDownloadURL(storageRef);
       return downloadURL;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error uploading file:', error);
-      throw error;
+      
+      // Provide more helpful error messages
+      if (error.code === 'storage/unauthorized') {
+        throw new Error('You do not have permission to upload files. Please check Firebase Storage rules.');
+      } else if (error.code === 'storage/canceled') {
+        throw new Error('Upload was canceled');
+      } else if (error.code === 'storage/unknown') {
+        throw new Error('An unknown error occurred. This might be a CORS issue. Please check Firebase Storage CORS configuration.');
+      } else if (error.message) {
+        throw error;
+      } else {
+        throw new Error('Failed to upload file. Please check your internet connection and try again.');
+      }
     }
   },
 
   // Upload multiple files
   async uploadFiles(files: File[], basePath: string): Promise<string[]> {
+    // Use Cloudinary if configured
+    if (useCloudinary()) {
+      try {
+        return await imageHosting.uploadImages(files);
+      } catch (error: any) {
+        console.error('Cloudinary upload failed, falling back to Firebase:', error);
+        // Fall through to Firebase Storage
+      }
+    }
+
+    // Fallback to Firebase Storage
     try {
+      // Check if user is authenticated
+      if (!auth.currentUser) {
+        throw new Error('You must be logged in to upload files');
+      }
+
       const uploadPromises = files.map((file, index) => {
-        const fileName = `${Date.now()}-${index}-${file.name}`;
+        const fileName = `${Date.now()}-${index}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
         const path = `${basePath}/${fileName}`;
         return this.uploadFile(file, path);
       });
       return await Promise.all(uploadPromises);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error uploading files:', error);
       throw error;
     }

@@ -6,7 +6,6 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Building2 } from 'lucide-react';
 import { toast } from 'sonner';
-import { isUsingFallbackApiUrl } from '@/config/api';
 
 const AdminLogin = () => {
   const [email, setEmail] = useState('');
@@ -20,15 +19,6 @@ const AdminLogin = () => {
     return () => {
       document.title = 'Nikas Realty - We Turn Dreams Into Reality';
     };
-  }, []);
-
-  useEffect(() => {
-    if (import.meta.env.DEV) {
-      const apiUrl = isUsingFallbackApiUrl()
-        ? 'https://your-backend.onrender.com/api (fallback)'
-        : import.meta.env.VITE_API_URL;
-      console.log('API URL:', apiUrl);
-    }
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -51,24 +41,17 @@ const AdminLogin = () => {
       if (import.meta.env.DEV) {
         console.error('Login error:', error);
       }
+      // Firebase Auth errors
       let errorMessage = 'Login failed. Please try again.';
       
-      if (error.code === 'ERR_NETWORK' || error.message?.includes('Network Error')) {
-        errorMessage = 'Network error. Please check your internet connection and try again.';
-      } else if (error.response?.status === 404) {
-        errorMessage = 'API endpoint not found. Please check your backend configuration.';
-      } else if (error.response?.status === 400) {
-        errorMessage = error.response?.data?.error || 'Invalid request. Please check your input.';
-      } else if (error.response?.status === 401) {
-        errorMessage = error.response?.data?.error || 'Invalid email or password.';
-      } else if (error.response?.status === 500) {
-        errorMessage = 'Server error. Please try again later.';
-      } else if (error.response?.status >= 500) {
-        errorMessage = 'Server error. Please try again later.';
-      } else if (error.response?.data?.error) {
-        errorMessage = error.response.data.error;
-      } else if (error.response?.data?.message) {
-        errorMessage = error.response.data.message;
+      if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
+        errorMessage = 'Invalid email or password.';
+      } else if (error.code === 'auth/invalid-email') {
+        errorMessage = 'Invalid email format.';
+      } else if (error.code === 'auth/too-many-requests') {
+        errorMessage = 'Too many failed attempts. Please try again later.';
+      } else if (error.code === 'auth/network-request-failed') {
+        errorMessage = 'Network error. Please check your internet connection.';
       } else if (error.message) {
         errorMessage = error.message;
       }

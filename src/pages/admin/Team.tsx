@@ -3,17 +3,8 @@ import { DashboardLayout } from "@/components/admin/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { PlusCircle } from "lucide-react";
-import { axiosClient } from "@/utils/axiosClient";
+import { teamService, type TeamMember } from "@/services/firestore/team";
 import { toast } from "sonner";
-
-interface TeamMember {
-  _id: string;
-  name: string;
-  role: string;
-  photo: string;
-  email?: string;
-  phone?: string;
-}
 
 const AdminTeam = () => {
   const [members, setMembers] = useState<TeamMember[]>([]);
@@ -25,8 +16,8 @@ const AdminTeam = () => {
 
   const fetchTeam = async () => {
     try {
-      const response = await axiosClient.get("/team");
-      setMembers(response.data);
+      const data = await teamService.getAll();
+      setMembers(data);
     } catch (error) {
       toast.error("Failed to fetch team members");
       console.error(error);
@@ -70,7 +61,7 @@ const AdminTeam = () => {
         ) : (
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
             {members.map((member) => (
-              <Card key={member._id}>
+              <Card key={member.id}>
                 <CardContent className="p-6 text-center">
                   <div className="mx-auto mb-4 h-24 w-24 overflow-hidden rounded-full bg-muted">
                     {member.photo && (

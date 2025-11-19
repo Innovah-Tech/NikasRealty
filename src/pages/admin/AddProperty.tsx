@@ -72,13 +72,21 @@ const AdminAddProperty = () => {
         Array.from(files),
         `properties/${Date.now()}`
       );
+      
+      if (import.meta.env.DEV) {
+        console.log('Images uploaded to Cloudinary:', urls);
+      }
+      
       setImages((prev) => [...prev, ...urls]);
-      toast.success("Images uploaded successfully");
-    } catch (error) {
-      toast.error("Failed to upload images");
-      console.error(error);
+      toast.success(`Successfully uploaded ${urls.length} image${urls.length > 1 ? 's' : ''} to Cloudinary`);
+    } catch (error: any) {
+      const errorMessage = error?.message || "Failed to upload images";
+      toast.error(errorMessage);
+      console.error("Upload error:", error);
     } finally {
       setUploading(false);
+      // Reset input so same file can be selected again
+      e.target.value = '';
     }
   };
 
@@ -91,7 +99,21 @@ const AdminAddProperty = () => {
     setSubmitting(true);
 
     try {
-      await propertiesService.create({
+      // Ensure images array contains Cloudinary URLs
+      const imageUrls = images.length > 0 ? images : [];
+      
+      if (import.meta.env.DEV) {
+        console.log('Creating property with images:', imageUrls);
+        imageUrls.forEach((url, index) => {
+          if (url.includes('cloudinary.com')) {
+            console.log(`Image ${index + 1}: Cloudinary URL ✓`);
+          } else {
+            console.warn(`Image ${index + 1}: Not a Cloudinary URL:`, url);
+          }
+        });
+      }
+
+      const result = await propertiesService.create({
         title: formData.title,
         description: formData.description,
         type: formData.type,
@@ -101,14 +123,16 @@ const AdminAddProperty = () => {
         features: formData.features
           ? formData.features.split(",").map((f) => f.trim()).filter(Boolean)
           : [],
-        images,
+        images: imageUrls,
       });
 
-      toast.success("Property added successfully");
+      console.log('Property created successfully:', result);
+      toast.success(`Property "${formData.title}" added successfully with ${imageUrls.length} image${imageUrls.length !== 1 ? 's' : ''}!`);
       navigate("/admin/properties");
-    } catch (error) {
-      toast.error("Failed to add property");
-      console.error(error);
+    } catch (error: any) {
+      console.error('Error creating property:', error);
+      const errorMessage = error?.message || "Failed to add property";
+      toast.error(errorMessage);
     } finally {
       setSubmitting(false);
     }

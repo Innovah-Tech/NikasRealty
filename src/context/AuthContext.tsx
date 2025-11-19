@@ -65,12 +65,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       await firebaseAuth.logout();
       setUser(null);
-      navigate('/admin/login');
+      navigate('/', { replace: true });
     } catch (error) {
       console.error('Logout error:', error);
       // Still clear user and navigate even if logout fails
       setUser(null);
-      navigate('/admin/login');
+      navigate('/', { replace: true });
     }
   };
 

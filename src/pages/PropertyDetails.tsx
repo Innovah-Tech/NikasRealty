@@ -57,6 +57,16 @@ const PropertyDetailsPage = () => {
       : property?.image
       ? [property.image]
       : ["/images/property1.jpg"];
+  
+  if (import.meta.env.DEV && property) {
+    console.log('Property details images:', {
+      propertyId: property.id,
+      imagesArray: property.images,
+      imageField: property.image,
+      gallery: property.gallery,
+      finalImages: images
+    });
+  }
 
   const openLightbox = (index: number) => {
     setSelectedImage(index);

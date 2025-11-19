@@ -57,79 +57,244 @@ export const propertiesService = {
     page?: number;
     limit?: number;
   }) {
-    try {
-      let q = query(collection(db, COLLECTION_NAME));
+      try {
+        if (import.meta.env.DEV) {
+          console.log('Fetching properties with filters:', filters);
+        }
+        
+        // Try optimized query first (if indexes exist)
+        try {
+          let q = query(collection(db, COLLECTION_NAME));
 
-      // Apply filters
-      if (filters?.type && filters.type !== 'all') {
-        q = query(q, where('type', '==', filters.type));
-      }
-      if (filters?.status && filters.status !== 'all') {
-        q = query(q, where('status', '==', filters.status));
-      }
-      if (filters?.featured !== undefined) {
-        q = query(q, where('featured', '==', filters.featured));
-      }
-      if (filters?.minPrice) {
-        q = query(q, where('price', '>=', filters.minPrice));
-      }
-      if (filters?.maxPrice) {
-        q = query(q, where('price', '<=', filters.maxPrice));
-      }
+        // Apply simple filters that work well with indexes
+        if (filters?.type && filters.type !== 'all') {
+          q = query(q, where('type', '==', filters.type));
+        }
+        if (filters?.status && filters.status !== 'all') {
+          q = query(q, where('status', '==', filters.status));
+        }
+        if (filters?.featured !== undefined) {
+          q = query(q, where('featured', '==', filters.featured));
+        }
 
-      // Apply sorting
-      if (filters?.sortBy) {
-        const sortOrder = filters.order === 'desc' ? 'desc' : 'asc';
-        q = query(q, orderBy(filters.sortBy, sortOrder));
+        // Try to apply sorting if we have minimal filters
+        if (filters?.sortBy && (!filters?.type || filters.type === 'all') && (!filters?.status || filters.status === 'all')) {
+          const sortOrder = filters.order === 'desc' ? 'desc' : 'asc';
+          q = query(q, orderBy(filters.sortBy, sortOrder));
+        } else if (filters?.sortBy) {
+          // If we have filters, try orderBy on createdAt (most common index)
+          q = query(q, orderBy('createdAt', 'desc'));
+        }
+
+        // Apply pagination
+        if (filters?.limit) {
+          q = query(q, limit(filters.limit * 2)); // Get more to account for client-side filtering
+        }
+
+          const querySnapshot = await getDocs(q);
+          let properties = querySnapshot.docs.map(doc => {
+            const data = doc.data();
+            return {
+              id: doc.id,
+              ...data,
+              // Ensure images array is properly set
+              images: data.images || (data.image ? [data.image] : []),
+              createdAt: data.createdAt?.toDate(),
+              updatedAt: data.updatedAt?.toDate(),
+            };
+          }) as Property[];
+
+          if (import.meta.env.DEV) {
+            console.log(`Fetched ${properties.length} properties from Firestore`);
+            if (properties.length > 0) {
+              const sample = properties[0];
+              console.log('Sample property structure:', {
+                id: sample.id,
+                title: sample.title,
+                images: sample.images,
+                image: sample.image,
+                hasImages: !!sample.images && sample.images.length > 0
+              });
+            }
+          }
+
+          // Apply remaining filters client-side
+          properties = this.applyClientSideFilters(properties, filters);
+
+        // Apply pagination after filtering
+        if (filters?.page && filters?.limit) {
+          const startIndex = (filters.page - 1) * filters.limit;
+          properties = properties.slice(startIndex, startIndex + filters.limit);
+        }
+
+        return properties;
+      } catch (indexError: any) {
+        // If composite index is missing, fetch all and filter/order client-side
+        if (indexError.code === 'failed-precondition' || indexError.message?.includes('index')) {
+          console.warn('Firestore composite index missing, filtering client-side:', indexError.message);
+          const querySnapshot = await getDocs(collection(db, COLLECTION_NAME));
+          let properties = querySnapshot.docs.map(doc => {
+            const data = doc.data();
+            return {
+              id: doc.id,
+              ...data,
+              // Ensure images array is properly set
+              images: data.images || (data.image ? [data.image] : []),
+              createdAt: data.createdAt?.toDate(),
+              updatedAt: data.updatedAt?.toDate(),
+            };
+          }) as Property[];
+
+          if (import.meta.env.DEV) {
+            console.log(`Fetched ${properties.length} properties from Firestore (fallback mode)`);
+            if (properties.length > 0) {
+              const sample = properties[0];
+              console.log('Sample property structure (fallback):', {
+                id: sample.id,
+                title: sample.title,
+                images: sample.images,
+                image: sample.image,
+                hasImages: !!sample.images && sample.images.length > 0
+              });
+            }
+          }
+
+          // Apply all filters and sorting client-side
+          properties = this.applyClientSideFilters(properties, filters);
+
+          // Apply pagination
+          if (filters?.page && filters?.limit) {
+            const startIndex = (filters.page - 1) * filters.limit;
+            properties = properties.slice(startIndex, startIndex + filters.limit);
+          }
+
+          return properties;
+        }
+        throw indexError;
       }
-
-      // Apply pagination
-      if (filters?.limit) {
-        q = query(q, limit(filters.limit));
-      }
-
-      const querySnapshot = await getDocs(q);
-      let properties = querySnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data(),
-        createdAt: doc.data().createdAt?.toDate(),
-        updatedAt: doc.data().updatedAt?.toDate(),
-      })) as Property[];
-
-      // Apply search filter (client-side for text search)
-      if (filters?.search) {
-        const searchLower = filters.search.toLowerCase();
-        properties = properties.filter(p => 
-          p.title?.toLowerCase().includes(searchLower) ||
-          p.location?.toLowerCase().includes(searchLower)
-        );
-      }
-
-      // Apply location filter (client-side for partial matching)
-      if (filters?.location && filters.location !== 'all') {
-        const locationLower = filters.location.toLowerCase();
-        properties = properties.filter(p => 
-          p.location?.toLowerCase().includes(locationLower)
-        );
-      }
-
-      // Apply bedrooms filter
-      if (filters?.bedrooms && filters.bedrooms !== 'all') {
-        properties = properties.filter(p => p.bedrooms === parseInt(filters.bedrooms!));
-      }
-
-      // Apply completion filter
-      if (filters?.completion && filters.completion !== 'all') {
-        properties = properties.filter(p => 
-          (p.projectStage || p.completion || '').toLowerCase() === filters.completion!.toLowerCase()
-        );
-      }
-
-      return properties;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching properties:', error);
+      
+      // Provide helpful error messages
+      if (error.code === 'permission-denied') {
+        throw new Error('Permission denied. Please check Firestore security rules allow read access to the "properties" collection.');
+      } else if (error.code === 'unavailable') {
+        throw new Error('Firestore is unavailable. Please check your internet connection and Firebase configuration.');
+      } else if (error.code === 'unauthenticated') {
+        throw new Error('Authentication required. Please check Firebase Auth configuration.');
+      }
+      
       throw error;
     }
+  },
+
+  // Helper method to apply client-side filters
+  applyClientSideFilters(properties: Property[], filters?: {
+    search?: string;
+    type?: string;
+    status?: string;
+    location?: string;
+    bedrooms?: string;
+    completion?: string;
+    minPrice?: number;
+    maxPrice?: number;
+    featured?: boolean;
+    sortBy?: string;
+    order?: 'asc' | 'desc';
+  }): Property[] {
+    let filtered = [...properties];
+
+    // Apply type filter (only if specified and not 'all')
+    if (filters?.type && filters.type !== 'all' && filters.type !== undefined) {
+      filtered = filtered.filter(p => p.type === filters.type);
+    }
+
+    // Apply status filter (only if specified and not 'all')
+    if (filters?.status && filters.status !== 'all' && filters.status !== undefined) {
+      filtered = filtered.filter(p => p.status === filters.status);
+    }
+
+    // Apply featured filter
+    if (filters?.featured !== undefined) {
+      filtered = filtered.filter(p => p.featured === filters.featured);
+    }
+
+    // Apply price filters (only if specified)
+    if (filters?.minPrice !== undefined && filters.minPrice > 0) {
+      filtered = filtered.filter(p => {
+        const price = typeof p.price === 'number' ? p.price : parseFloat(String(p.price).replace(/[^0-9.]/g, '')) || 0;
+        return price >= filters.minPrice!;
+      });
+    }
+    if (filters?.maxPrice !== undefined && filters.maxPrice < 500000000) {
+      filtered = filtered.filter(p => {
+        const price = typeof p.price === 'number' ? p.price : parseFloat(String(p.price).replace(/[^0-9.]/g, '')) || 0;
+        return price <= filters.maxPrice!;
+      });
+    }
+
+    // Apply search filter
+    if (filters?.search) {
+      const searchLower = filters.search.toLowerCase();
+      filtered = filtered.filter(p => 
+        p.title?.toLowerCase().includes(searchLower) ||
+        p.location?.toLowerCase().includes(searchLower) ||
+        p.description?.toLowerCase().includes(searchLower)
+      );
+    }
+
+    // Apply location filter
+    if (filters?.location && filters.location !== 'all') {
+      const locationLower = filters.location.toLowerCase();
+      filtered = filtered.filter(p => 
+        p.location?.toLowerCase().includes(locationLower)
+      );
+    }
+
+    // Apply bedrooms filter
+    if (filters?.bedrooms && filters.bedrooms !== 'all') {
+      filtered = filtered.filter(p => p.bedrooms === parseInt(filters.bedrooms!));
+    }
+
+    // Apply completion filter
+    if (filters?.completion && filters.completion !== 'all') {
+      filtered = filtered.filter(p => 
+        (p.projectStage || p.completion || '').toLowerCase() === filters.completion!.toLowerCase()
+      );
+    }
+
+    // Apply sorting
+    if (filters?.sortBy) {
+      const sortOrder = filters.order === 'desc' ? 'desc' : 'asc';
+      filtered.sort((a, b) => {
+        let aValue: any;
+        let bValue: any;
+
+        if (filters.sortBy === 'price') {
+          aValue = typeof a.price === 'number' ? a.price : parseFloat(String(a.price).replace(/[^0-9.]/g, '')) || 0;
+          bValue = typeof b.price === 'number' ? b.price : parseFloat(String(b.price).replace(/[^0-9.]/g, '')) || 0;
+        } else if (filters.sortBy === 'createdAt') {
+          aValue = a.createdAt ? (a.createdAt instanceof Date ? a.createdAt.getTime() : new Date(a.createdAt).getTime()) : 0;
+          bValue = b.createdAt ? (b.createdAt instanceof Date ? b.createdAt.getTime() : new Date(b.createdAt).getTime()) : 0;
+        } else {
+          aValue = (a as any)[filters.sortBy] || '';
+          bValue = (b as any)[filters.sortBy] || '';
+        }
+
+        if (aValue < bValue) return sortOrder === 'asc' ? -1 : 1;
+        if (aValue > bValue) return sortOrder === 'asc' ? 1 : -1;
+        return 0;
+      });
+    } else {
+      // Default sort by createdAt descending
+      filtered.sort((a, b) => {
+        const aDate = a.createdAt ? (a.createdAt instanceof Date ? a.createdAt.getTime() : new Date(a.createdAt).getTime()) : 0;
+        const bDate = b.createdAt ? (b.createdAt instanceof Date ? b.createdAt.getTime() : new Date(b.createdAt).getTime()) : 0;
+        return bDate - aDate;
+      });
+    }
+
+    return filtered;
   },
 
   // Get single property
@@ -139,12 +304,27 @@ export const propertiesService = {
       const docSnap = await getDoc(docRef);
       
       if (docSnap.exists()) {
-        return {
+        const data = docSnap.data();
+        const property = {
           id: docSnap.id,
-          ...docSnap.data(),
-          createdAt: docSnap.data().createdAt?.toDate(),
-          updatedAt: docSnap.data().updatedAt?.toDate(),
+          ...data,
+          // Ensure images array is properly set
+          images: data.images || (data.image ? [data.image] : []),
+          createdAt: data.createdAt?.toDate(),
+          updatedAt: data.updatedAt?.toDate(),
         } as Property;
+        
+        if (import.meta.env.DEV) {
+          console.log('Property fetched by ID:', {
+            id: property.id,
+            title: property.title,
+            images: property.images,
+            image: property.image,
+            hasImages: !!property.images && property.images.length > 0
+          });
+        }
+        
+        return property;
       }
       return null;
     } catch (error) {
@@ -156,16 +336,44 @@ export const propertiesService = {
   // Create property
   async create(property: Omit<Property, 'id' | 'createdAt' | 'updatedAt'>) {
     try {
+      // Ensure images array is properly set
+      const imagesArray = property.images && property.images.length > 0 
+        ? property.images 
+        : property.image 
+        ? [property.image] 
+        : [];
+      
       const propertyData = {
         ...property,
-        image: property.image || property.images?.[0] || "",
+        images: imagesArray, // Store images array
+        image: imagesArray[0] || "", // Store first image as main image for backward compatibility
         createdAt: Timestamp.now(),
         updatedAt: Timestamp.now(),
       };
+      
+      if (import.meta.env.DEV) {
+        console.log('Creating property with data:', propertyData);
+        if (imagesArray.length > 0) {
+          console.log('Property images (Cloudinary URLs):', imagesArray);
+        }
+      }
+      
       const docRef = await addDoc(collection(db, COLLECTION_NAME), propertyData);
-      return { id: docRef.id, ...propertyData };
-    } catch (error) {
+      const createdProperty = { id: docRef.id, ...propertyData };
+      
+      if (import.meta.env.DEV) {
+        console.log('Property created successfully with ID:', docRef.id);
+        console.log('Images stored:', createdProperty.images);
+      }
+      
+      return createdProperty;
+    } catch (error: any) {
       console.error('Error creating property:', error);
+      if (error.code === 'permission-denied') {
+        throw new Error('Permission denied. Please check Firestore security rules.');
+      } else if (error.code === 'unavailable') {
+        throw new Error('Firestore is unavailable. Please check your internet connection.');
+      }
       throw error;
     }
   },

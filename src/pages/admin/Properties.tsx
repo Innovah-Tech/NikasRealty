@@ -6,10 +6,10 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Slider } from '@/components/ui/slider';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Edit, Eye, Trash2, Search } from 'lucide-react';
+import { Edit, Eye, Trash2, Search, RefreshCw, X } from 'lucide-react';
 import { propertiesService, type Property } from '@/services/firestore/properties';
 import { toast } from 'sonner';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 const AdminProperties = () => {
   const [properties, setProperties] = useState<Property[]>([]);
@@ -20,11 +20,17 @@ const AdminProperties = () => {
   const [bedroomsFilter, setBedroomsFilter] = useState('all');
   const [locationFilter, setLocationFilter] = useState('all');
   const [completionFilter, setCompletionFilter] = useState('all');
-  const [priceRange, setPriceRange] = useState<[number, number]>([0, 50000000]);
+  const [priceRange, setPriceRange] = useState<[number, number]>([0, 500000000]); // 500M max
   const [sortBy, setSortBy] = useState('newest');
   const [featuredOnly, setFeaturedOnly] = useState(false);
   const [page, setPage] = useState(1);
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Refresh when component mounts or location changes (e.g., coming back from add property)
+  useEffect(() => {
+    fetchProperties();
+  }, [location.pathname]);
 
   useEffect(() => {
     fetchProperties();
@@ -38,20 +44,37 @@ const AdminProperties = () => {
     priceRange,
     sortBy,
     featuredOnly,
+    search,
   ]);
+
+  const clearFilters = () => {
+    setSearch('');
+    setTypeFilter('all');
+    setStatusFilter('all');
+    setBedroomsFilter('all');
+    setLocationFilter('all');
+    setCompletionFilter('all');
+    setPriceRange([0, 500000000]); // 500M max
+    setFeaturedOnly(false);
+    setPage(1);
+  };
 
   const fetchProperties = async () => {
     setLoading(true);
     try {
+      // Don't apply price filter if range is at max (shows all properties)
+      const maxPriceFilter = priceRange[1] >= 500000000 ? undefined : priceRange[1];
+      const minPriceFilter = priceRange[0] <= 0 ? undefined : priceRange[0];
+      
       const response = await propertiesService.getAll({
-        search,
-        type: typeFilter,
-        status: statusFilter,
-        bedrooms: bedroomsFilter,
-        location: locationFilter,
-        completion: completionFilter,
-        minPrice: priceRange[0],
-        maxPrice: priceRange[1],
+        search: search || undefined,
+        type: typeFilter === 'all' ? undefined : typeFilter,
+        status: statusFilter === 'all' ? undefined : statusFilter,
+        bedrooms: bedroomsFilter === 'all' ? undefined : bedroomsFilter,
+        location: locationFilter === 'all' ? undefined : locationFilter,
+        completion: completionFilter === 'all' ? undefined : completionFilter,
+        minPrice: minPriceFilter,
+        maxPrice: maxPriceFilter,
         sortBy:
           sortBy === 'price-asc' || sortBy === 'price-desc'
             ? 'price'
@@ -68,10 +91,19 @@ const AdminProperties = () => {
         page,
         limit: 10,
       });
-      setProperties(response);
-    } catch (error) {
-      toast.error('Failed to fetch properties');
-      console.error(error);
+      setProperties(response || []);
+      
+      if (import.meta.env.DEV) {
+        console.log('Properties set in state:', response?.length || 0);
+        if (response && response.length > 0) {
+          console.log('Sample property:', response[0]);
+        }
+      }
+    } catch (error: any) {
+      console.error('Error fetching properties:', error);
+      const errorMessage = error?.message || 'Failed to fetch properties';
+      toast.error(errorMessage);
+      setProperties([]); // Set empty array on error
     } finally {
       setLoading(false);
     }
@@ -102,9 +134,15 @@ const AdminProperties = () => {
             <h1 className="text-3xl font-bold text-foreground">Properties</h1>
             <p className="text-muted-foreground">Manage your property listings</p>
           </div>
-          <Button onClick={() => navigate('/admin/add-property')}>
-            Add Property
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={fetchProperties} size="sm">
+              <RefreshCw className="mr-2 h-4 w-4" />
+              Refresh
+            </Button>
+            <Button onClick={() => navigate('/admin/add-property')}>
+              Add Property
+            </Button>
+          </div>
         </div>
 
         {/* Filters */}
@@ -141,6 +179,19 @@ const AdminProperties = () => {
                 <Button type="submit" className="w-full lg:w-auto">
                   Apply Filters
                 </Button>
+                {(search || typeFilter !== 'all' || statusFilter !== 'all' || bedroomsFilter !== 'all' || 
+                  locationFilter !== 'all' || completionFilter !== 'all' || featuredOnly || 
+                  priceRange[0] > 0 || priceRange[1] < 50000000) && (
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    onClick={clearFilters}
+                    className="w-full lg:w-auto"
+                  >
+                    <X className="mr-2 h-4 w-4" />
+                    Clear Filters
+                  </Button>
+                )}
               </div>
 
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -225,8 +276,8 @@ const AdminProperties = () => {
                   value={priceRange}
                   onValueChange={(value) => setPriceRange([value[0], value[1]] as [number, number])}
                   min={0}
-                  max={50000000}
-                  step={500000}
+                  max={500000000}
+                  step={1000000}
                 />
                 <div className="flex justify-between text-xs mt-1">
                   <span>{priceRange[0].toLocaleString()}</span>
@@ -254,7 +305,12 @@ const AdminProperties = () => {
         ) : properties.length === 0 ? (
           <Card>
             <CardContent className="py-12 text-center">
-              <p className="text-muted-foreground">No properties found</p>
+              <p className="text-muted-foreground mb-2">No properties found</p>
+              {import.meta.env.DEV && (
+                <p className="text-xs text-muted-foreground">
+                  Debug: Check console for fetched properties. Filters may be hiding results.
+                </p>
+              )}
             </CardContent>
           </Card>
         ) : (
@@ -286,11 +342,21 @@ const AdminProperties = () => {
                     </span>
                   </div>
                   <div className="flex gap-2">
-                    <Button variant="outline" size="sm" className="flex-1">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="flex-1"
+                      onClick={() => property.id && navigate(`/properties/${property.id}`)}
+                    >
                       <Eye className="mr-1 h-3 w-3" />
                       View
                     </Button>
-                    <Button variant="outline" size="sm" className="flex-1">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="flex-1"
+                      onClick={() => property.id && navigate(`/admin/edit-property/${property.id}`)}
+                    >
                       <Edit className="mr-1 h-3 w-3" />
                       Edit
                     </Button>

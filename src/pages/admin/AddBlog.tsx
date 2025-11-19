@@ -6,7 +6,9 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Upload, X } from "lucide-react";
 import { blogsService } from "@/services/firestore/blogs";
+import { firebaseStorage } from "@/services/firebaseStorage";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
@@ -14,6 +16,7 @@ import { ArrowLeft } from "lucide-react";
 const AdminAddBlog = () => {
   const navigate = useNavigate();
   const [submitting, setSubmitting] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [formData, setFormData] = useState({
     title: "",
     summary: "",
@@ -25,6 +28,34 @@ const AdminAddBlog = () => {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    const file = files[0];
+    if (!file.type.startsWith('image/')) {
+      toast.error("Please select an image file");
+      return;
+    }
+
+    setUploading(true);
+    try {
+      const url = await firebaseStorage.uploadFile(
+        file,
+        `blogs/${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`
+      );
+      setFormData({ ...formData, image: url });
+      toast.success("Image uploaded successfully");
+    } catch (error: any) {
+      const errorMessage = error?.message || "Failed to upload image";
+      toast.error(errorMessage);
+      console.error("Upload error:", error);
+    } finally {
+      setUploading(false);
+      e.target.value = '';
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -143,24 +174,61 @@ const AdminAddBlog = () => {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="image">Image URL</Label>
-                    <Input
-                      id="image"
-                      name="image"
-                      value={formData.image}
-                      onChange={handleChange}
-                      placeholder="https://example.com/image.jpg"
-                    />
-                    {formData.image && (
-                      <img
-                        src={formData.image}
-                        alt="Preview"
-                        className="mt-2 h-48 w-full rounded-lg object-cover"
-                        onError={(e) => {
-                          (e.target as HTMLImageElement).style.display = "none";
-                        }}
-                      />
-                    )}
+                    <Label htmlFor="image">Blog Image</Label>
+                    <div className="space-y-2">
+                      <div className="flex gap-2">
+                        <Input
+                          id="image"
+                          name="image"
+                          value={formData.image}
+                          onChange={handleChange}
+                          placeholder="Image URL or upload a file"
+                          className="flex-1"
+                        />
+                        <label>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            className="cursor-pointer"
+                            disabled={uploading}
+                            asChild
+                          >
+                            <span>
+                              <Upload className="mr-2 h-4 w-4" />
+                              {uploading ? "Uploading..." : "Upload"}
+                            </span>
+                          </Button>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={handleImageUpload}
+                            className="hidden"
+                            disabled={uploading}
+                          />
+                        </label>
+                      </div>
+                      {formData.image && (
+                        <div className="relative">
+                          <img
+                            src={formData.image}
+                            alt="Preview"
+                            className="h-48 w-full rounded-lg object-cover"
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).style.display = "none";
+                            }}
+                          />
+                          <Button
+                            type="button"
+                            variant="destructive"
+                            size="icon"
+                            className="absolute top-2 right-2"
+                            onClick={() => setFormData({ ...formData, image: "" })}
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </CardContent>
               </Card>

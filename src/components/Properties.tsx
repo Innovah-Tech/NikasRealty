@@ -35,7 +35,7 @@ const Properties = () => {
   const [status, setStatus] = useState("all");
   const [location, setLocation] = useState("all");
   const [completion, setCompletion] = useState("all");
-  const [priceRange, setPriceRange] = useState<[number, number]>([0, 50000000]);
+  const [priceRange, setPriceRange] = useState<[number, number]>([0, 500000000]); // 500M max
   const [sortBy, setSortBy] = useState("newest");
 
   useEffect(() => {
@@ -43,10 +43,13 @@ const Properties = () => {
     const fetchAll = async () => {
       try {
         const data = await propertiesService.getAll();
+        console.log('Properties fetched:', data.length, data);
         if (data.length === 0) {
           console.warn("No properties found in Firestore. Falling back to static data.");
           setAllProperties(fallback);
         } else {
+          console.log('Setting properties:', data);
+          console.log('Sample property data:', data[0]);
           setAllProperties(data);
         }
       } catch (error) {
@@ -74,7 +77,18 @@ const Properties = () => {
         : (p.projectStage?.toLowerCase() || "").includes(completion.toLowerCase());
     const priceNum = typeof p.price === "number" ? p.price : parsePrice(String(p.price));
     const matchesPrice = priceNum >= priceRange[0] && priceNum <= priceRange[1];
-    return (
+    
+    if (import.meta.env.DEV && !matchesPrice) {
+      console.log('Price filter failed:', {
+        property: p.title,
+        price: p.price,
+        priceNum,
+        priceRange,
+        inRange: priceNum >= priceRange[0] && priceNum <= priceRange[1]
+      });
+    }
+    
+    const matches = (
       matchesSearch &&
       matchesBedrooms &&
       matchesFeatured &&
@@ -84,7 +98,35 @@ const Properties = () => {
       matchesCompletion &&
       matchesPrice
     );
+    
+    if (import.meta.env.DEV && !matches && allProperties.length > 0) {
+      console.log('Property filtered out:', p.title, {
+        matchesSearch, 
+        matchesBedrooms, 
+        matchesFeatured, 
+        matchesType, 
+        matchesStatus, 
+        matchesLocation, 
+        matchesCompletion, 
+        matchesPrice,
+        price: p.price,
+        priceNum,
+        priceRange,
+        location: p.location,
+        locationFilter: location,
+        type: p.type,
+        typeFilter: propertyType,
+        status: p.status,
+        statusFilter: status
+      });
+    }
+    
+    return matches;
   });
+  
+  if (import.meta.env.DEV) {
+    console.log('Filtered properties:', filteredProperties.length, 'out of', allProperties.length);
+  }
 
   const sortedProperties = [...filteredProperties].sort((a, b) => {
     const priceA = typeof a.price === "number" ? a.price : parsePrice(String(a.price));
@@ -94,16 +136,24 @@ const Properties = () => {
     return 0;
   });
 
-  const featuredSlides = (allProperties.length ? allProperties : []).slice(0, 5).map((p) => ({
-    id: p.id || Math.random(),
-    title: p.title || "Property",
-    image: p.images?.[0] || p.image || "/images/property1.jpg",
-    price:
-      typeof p.price === "number"
-        ? `KES ${p.price.toLocaleString()}`
-        : p.price || "KES 0",
-    location: p.location || "Nairobi",
-  }));
+  const featuredSlides = (allProperties.length ? allProperties : []).slice(0, 5).map((p) => {
+    const slideImage = p.images?.[0] || p.image || "/images/property1.jpg";
+    
+    if (import.meta.env.DEV) {
+      console.log('Featured slide image for', p.title, ':', slideImage);
+    }
+    
+    return {
+      id: p.id || Math.random(),
+      title: p.title || "Property",
+      image: slideImage,
+      price:
+        typeof p.price === "number"
+          ? `KES ${p.price.toLocaleString()}`
+          : p.price || "KES 0",
+      location: p.location || "Nairobi",
+    };
+  });
 
   return (
     <section id="properties" className="py-20 lg:py-32 bg-muted/30">
@@ -202,7 +252,7 @@ const Properties = () => {
           </div>
           <div className="flex-1 min-w-[220px]">
             <div className="text-xs text-muted-foreground mb-1">Price Range (KES)</div>
-            <Slider value={priceRange} onValueChange={(v)=>setPriceRange([v[0], v[1]] as [number, number])} min={0} max={50000000} step={500000} />
+            <Slider value={priceRange} onValueChange={(v)=>setPriceRange([v[0], v[1]] as [number, number])} min={0} max={500000000} step={1000000} />
             <div className="flex justify-between text-xs mt-1">
               <span>{priceRange[0].toLocaleString()}</span>
               <span>{priceRange[1].toLocaleString()}</span>
@@ -253,7 +303,20 @@ const Properties = () => {
             </div>
           ) : (
             sortedProperties.map((property) => {
-              const mainImage = property.images?.[0] || property.image || "/images/property1.jpg";
+              // Use Cloudinary URL if available, otherwise fallback
+              const rawImage = property.images?.[0] || property.image || "/images/property1.jpg";
+              const mainImage = rawImage;
+              
+              if (import.meta.env.DEV && property.id) {
+                console.log(`Property "${property.title}" image:`, {
+                  hasImages: !!property.images,
+                  imagesLength: property.images?.length || 0,
+                  hasImage: !!property.image,
+                  finalImage: mainImage,
+                  isCloudinary: mainImage.includes('cloudinary.com')
+                });
+              }
+              
               const displayPrice =
                 typeof property.price === "number"
                   ? `KES ${property.price.toLocaleString()}`
@@ -266,12 +329,21 @@ const Properties = () => {
                   onClick={() => navigate(`/properties/${property.id}`)}
                 >
                   {/* Image */}
-                  <div className="relative h-64 overflow-hidden">
+                  <div className="relative h-64 overflow-hidden bg-muted">
                     <img
                       src={mainImage}
                       alt={property.title}
                       className="w-full h-full object-cover group-hover:scale-110 transition-smooth"
                       loading="lazy"
+                      onError={(e) => {
+                        console.error('Image failed to load:', mainImage, 'for property:', property.title);
+                        (e.target as HTMLImageElement).src = "/images/property1.jpg";
+                      }}
+                      onLoad={() => {
+                        if (import.meta.env.DEV) {
+                          console.log('Image loaded successfully:', mainImage);
+                        }
+                      }}
                     />
                     {property.featured && (
                       <Badge className="absolute top-4 right-4 gradient-gold text-secondary font-semibold">
@@ -358,6 +430,7 @@ const Properties = () => {
 };
 
 export default Properties;
+
 // --- Slides: Featured Properties (no external deps) ---
 const FeaturedPropertiesSlides = ({
   items,
@@ -374,9 +447,10 @@ const FeaturedPropertiesSlides = ({
   const prev = useCallback(() => setIndex((i) => (i <= 0 ? last : i - 1)), [last]);
 
   useEffect(() => {
+    if (items.length === 0) return;
     const id = window.setInterval(next, 4000);
     return () => window.clearInterval(id);
-  }, [next]);
+  }, [next, items.length]);
 
   return (
     <div className="mb-12">

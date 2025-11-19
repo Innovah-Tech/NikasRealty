@@ -5,7 +5,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/context/AuthContext";
-import { axiosClient } from "@/utils/axiosClient";
+import { auth } from "@/lib/firebase";
+import { updateProfile, updateEmail, updatePassword, reauthenticateWithCredential, EmailAuthProvider } from "firebase/auth";
 import { toast } from "sonner";
 
 const AdminSettings = () => {
@@ -35,10 +36,32 @@ const AdminSettings = () => {
     setLoading(true);
 
     try {
-      await axiosClient.patch("/auth/profile", profileData);
+      const currentUser = auth.currentUser;
+      if (!currentUser) {
+        toast.error("No user logged in");
+        return;
+      }
+
+      // Update display name
+      if (profileData.name !== currentUser.displayName) {
+        await updateProfile(currentUser, {
+          displayName: profileData.name,
+        });
+      }
+
+      // Update email if changed
+      if (profileData.email !== currentUser.email) {
+        await updateEmail(currentUser, profileData.email);
+      }
+
       toast.success("Profile updated successfully");
-    } catch (error) {
-      toast.error("Failed to update profile");
+    } catch (error: any) {
+      console.error("Profile update error:", error);
+      if (error.code === "auth/requires-recent-login") {
+        toast.error("Please log out and log back in to update your email");
+      } else {
+        toast.error(error.message || "Failed to update profile");
+      }
     } finally {
       setLoading(false);
     }
@@ -52,20 +75,44 @@ const AdminSettings = () => {
       return;
     }
 
+    if (passwordData.newPassword.length < 6) {
+      toast.error("Password must be at least 6 characters");
+      return;
+    }
+
     setLoading(true);
     try {
-      await axiosClient.post("/auth/change-password", {
-        currentPassword: passwordData.currentPassword,
-        newPassword: passwordData.newPassword,
-      });
+      const currentUser = auth.currentUser;
+      if (!currentUser || !currentUser.email) {
+        toast.error("No user logged in");
+        return;
+      }
+
+      // Re-authenticate user
+      const credential = EmailAuthProvider.credential(
+        currentUser.email,
+        passwordData.currentPassword
+      );
+      await reauthenticateWithCredential(currentUser, credential);
+
+      // Update password
+      await updatePassword(currentUser, passwordData.newPassword);
+
       toast.success("Password changed successfully");
       setPasswordData({
         currentPassword: "",
         newPassword: "",
         confirmPassword: "",
       });
-    } catch (error) {
-      toast.error("Failed to change password");
+    } catch (error: any) {
+      console.error("Password change error:", error);
+      if (error.code === "auth/wrong-password") {
+        toast.error("Current password is incorrect");
+      } else if (error.code === "auth/weak-password") {
+        toast.error("Password is too weak");
+      } else {
+        toast.error(error.message || "Failed to change password");
+      }
     } finally {
       setLoading(false);
     }

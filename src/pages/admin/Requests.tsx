@@ -5,25 +5,15 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Search } from "lucide-react";
-import { axiosClient } from "@/utils/axiosClient";
+import { requestsService, type Request } from "@/services/firestore/requests";
 import { toast } from "sonner";
-
-interface Request {
-  _id: string;
-  name: string;
-  phone: string;
-  email?: string;
-  message: string;
-  property?: string;
-  createdAt: string;
-  contacted: boolean;
-}
 
 const AdminRequests = () => {
   const [requests, setRequests] = useState<Request[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
+  const ITEMS_PER_PAGE = 10;
 
   useEffect(() => {
     fetchRequests();
@@ -31,11 +21,25 @@ const AdminRequests = () => {
 
   const fetchRequests = async () => {
     try {
-      const params: Record<string, string | number> = { page, limit: 10 };
-      if (search) params.search = search;
-
-      const response = await axiosClient.get("/requests", { params });
-      setRequests(response.data.requests || response.data || []);
+      setLoading(true);
+      const allRequests = await requestsService.getAll();
+      
+      // Apply search filter
+      let filtered = allRequests;
+      if (search) {
+        const searchLower = search.toLowerCase();
+        filtered = allRequests.filter(r => 
+          r.name?.toLowerCase().includes(searchLower) ||
+          r.phone?.toLowerCase().includes(searchLower) ||
+          r.email?.toLowerCase().includes(searchLower) ||
+          r.message?.toLowerCase().includes(searchLower)
+        );
+      }
+      
+      // Apply pagination
+      const startIndex = (page - 1) * ITEMS_PER_PAGE;
+      const paginated = filtered.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+      setRequests(paginated);
     } catch (error) {
       toast.error("Failed to fetch requests");
       console.error(error);
@@ -46,7 +50,7 @@ const AdminRequests = () => {
 
   const handleMarkContacted = async (id: string) => {
     try {
-      await axiosClient.patch(`/requests/${id}`, { contacted: true });
+      await requestsService.update(id, { contacted: true });
       toast.success("Request marked as contacted");
       fetchRequests();
     } catch (error) {
@@ -58,7 +62,7 @@ const AdminRequests = () => {
     if (!confirm("Are you sure you want to delete this request?")) return;
 
     try {
-      await axiosClient.delete(`/requests/${id}`);
+      await requestsService.delete(id);
       toast.success("Request deleted");
       fetchRequests();
     } catch (error) {
@@ -121,11 +125,11 @@ const AdminRequests = () => {
                 </TableHeader>
                 <TableBody>
                   {requests.map((request) => (
-                    <TableRow key={request._id}>
+                    <TableRow key={request.id}>
                       <TableCell className="font-medium">{request.name}</TableCell>
                       <TableCell>{request.phone}</TableCell>
                       <TableCell className="max-w-xs truncate">{request.message}</TableCell>
-                      <TableCell>{new Date(request.createdAt).toLocaleDateString()}</TableCell>
+                      <TableCell>{request.createdAt ? new Date(request.createdAt).toLocaleDateString() : 'N/A'}</TableCell>
                       <TableCell>
                         <span
                           className={`rounded-full px-2 py-1 text-xs font-medium ${
@@ -141,12 +145,12 @@ const AdminRequests = () => {
                             <Button
                               size="sm"
                               variant="outline"
-                              onClick={() => handleMarkContacted(request._id)}
+                              onClick={() => handleMarkContacted(request.id!)}
                             >
                               Mark Contacted
                             </Button>
                           )}
-                          <Button size="sm" variant="destructive" onClick={() => handleDelete(request._id)}>
+                          <Button size="sm" variant="destructive" onClick={() => handleDelete(request.id!)}>
                             Delete
                           </Button>
                         </div>
@@ -163,7 +167,7 @@ const AdminRequests = () => {
           <Button variant="outline" onClick={() => setPage(Math.max(1, page - 1))} disabled={page === 1}>
             Previous
           </Button>
-          <Button variant="outline" onClick={() => setPage(page + 1)} disabled={requests.length < 10}>
+          <Button variant="outline" onClick={() => setPage(page + 1)} disabled={requests.length < ITEMS_PER_PAGE}>
             Next
           </Button>
         </div>
