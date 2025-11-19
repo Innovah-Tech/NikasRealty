@@ -135,13 +135,13 @@ const PropertyDetailsPage = () => {
 
         {/* Full Page Main Image */}
         <div 
-          className="relative w-full h-[60vh] md:h-[70vh] lg:h-[80vh] overflow-hidden rounded-xl shadow-lg cursor-zoom-in mb-8"
+          className="relative w-full h-[60vh] md:h-[70vh] lg:h-[80vh] overflow-hidden rounded-xl shadow-lg cursor-zoom-in mb-8 bg-muted"
           onClick={() => openLightbox(0)}
         >
           <img 
             src={images[selectedImage]} 
             alt={property.title} 
-            className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
+            className="w-full h-full object-contain"
           />
           {/* Overlay with Title and Badges */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent flex flex-col justify-end p-6 md:p-8 lg:p-12">
