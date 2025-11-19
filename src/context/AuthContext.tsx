@@ -30,13 +30,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const login = async (email: string, password: string) => {
     try {
       if (import.meta.env.DEV) {
-        console.log('Attempting login for:', email);
+        // Don't log email for security - only log that login attempt occurred
+        console.log('Login attempt initiated');
       }
       
       const authUser = await firebaseAuth.login(email, password);
       
       if (import.meta.env.DEV) {
-        console.log('Login successful:', authUser.email);
+        // Don't log user email for security
+        console.log('Login successful');
       }
       
       setUser(authUser);
@@ -53,7 +55,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setLoading(false);
       
       if (import.meta.env.DEV) {
-        console.error('Login failed:', error);
+        // Only log error code, not full error details
+        const errorCode = error?.code || 'unknown';
+        console.error('Login failed:', errorCode);
       }
       
       // Re-throw the error so the Login component can handle it
@@ -66,8 +70,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       await firebaseAuth.logout();
       setUser(null);
       navigate('/', { replace: true });
-    } catch (error) {
-      console.error('Logout error:', error);
+    } catch (error: any) {
+      // Only log error in development, and sanitize error message
+      if (import.meta.env.DEV) {
+        const errorCode = error?.code || 'unknown';
+        console.error('Logout error:', errorCode);
+      }
       // Still clear user and navigate even if logout fails
       setUser(null);
       navigate('/', { replace: true });

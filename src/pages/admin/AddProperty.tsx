@@ -74,11 +74,11 @@ const AdminAddProperty = () => {
       );
       
       if (import.meta.env.DEV) {
-        console.log('Images uploaded to Cloudinary:', urls);
+        console.log('Images uploaded:', urls);
       }
       
       setImages((prev) => [...prev, ...urls]);
-      toast.success(`Successfully uploaded ${urls.length} image${urls.length > 1 ? 's' : ''} to Cloudinary`);
+      toast.success(`Successfully uploaded ${urls.length} image${urls.length > 1 ? 's' : ''}`);
     } catch (error: any) {
       const errorMessage = error?.message || "Failed to upload images";
       toast.error(errorMessage);
@@ -99,18 +99,11 @@ const AdminAddProperty = () => {
     setSubmitting(true);
 
     try {
-      // Ensure images array contains Cloudinary URLs
+      // Ensure images array contains image URLs
       const imageUrls = images.length > 0 ? images : [];
       
       if (import.meta.env.DEV) {
         console.log('Creating property with images:', imageUrls);
-        imageUrls.forEach((url, index) => {
-          if (url.includes('cloudinary.com')) {
-            console.log(`Image ${index + 1}: Cloudinary URL ✓`);
-          } else {
-            console.warn(`Image ${index + 1}: Not a Cloudinary URL:`, url);
-          }
-        });
       }
 
       const result = await propertiesService.create({

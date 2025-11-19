@@ -3,7 +3,9 @@ import { storage, auth } from '@/lib/firebase';
 import { imageHosting } from './imageHosting';
 
 // Use Cloudinary for image hosting (free tier, no backend needed)
-// Hardcoded Cloudinary configuration
+// SECURITY NOTE: These credentials are public by design for unsigned uploads.
+// Security is enforced via Cloudinary upload preset restrictions.
+// Ensure proper restrictions are configured in Cloudinary dashboard.
 const useCloudinary = (): boolean => {
   const cloudName = 'dc7jf9inl';
   const uploadPreset = 'nikasrealty';

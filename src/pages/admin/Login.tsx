@@ -38,10 +38,12 @@ const AdminLogin = () => {
       // (login function handles navigation, so this won't execute if there's an error)
       toast.success('Welcome back!');
     } catch (error: any) {
+      // Only log error code in development, not full error details
       if (import.meta.env.DEV) {
-        console.error('Login error:', error);
+        const errorCode = error?.code || 'unknown';
+        console.error('Login error:', errorCode);
       }
-      // Firebase Auth errors
+      // Authentication errors
       let errorMessage = 'Login failed. Please try again.';
       
       if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {

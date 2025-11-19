@@ -7,6 +7,14 @@ import { getAnalytics } from 'firebase/analytics';
 /**
  * Firebase configuration
  *
+ * SECURITY NOTE: Firebase API keys are public by design for client-side apps.
+ * Security is enforced via Firebase Security Rules, NOT the API key.
+ * 
+ * CRITICAL: Ensure Firebase Security Rules are properly configured:
+ * - Firestore: Only authenticated admins can write; public can read published content
+ * - Storage: Only authenticated users can upload; public can read
+ * - Set up Firebase App Check to prevent abuse
+ *
  * We still ship sane defaults so local environments just work out of the box,
  * but any `VITE_FIREBASE_*` env variable will override the defaults. This lets
  * production deployments point to the live Firebase project (with the existing

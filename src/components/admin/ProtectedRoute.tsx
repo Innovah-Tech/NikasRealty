@@ -5,7 +5,8 @@ export const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { isAuthenticated, loading, user } = useAuth();
 
   if (import.meta.env.DEV) {
-    console.log('ProtectedRoute check:', { loading, isAuthenticated, hasUser: !!user });
+    // Don't log user object - only log authentication state
+    console.log('ProtectedRoute check:', { loading, isAuthenticated });
   }
 
   if (loading) {

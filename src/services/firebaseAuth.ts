@@ -31,7 +31,11 @@ export const firebaseAuth = {
       if (!user) throw new Error('Failed to get user data');
       return user;
     } catch (error: any) {
-      console.error('Login error:', error);
+      // Only log error code in development, not full error details
+      if (import.meta.env.DEV) {
+        const errorCode = error?.code || 'unknown';
+        console.error('Login error:', errorCode);
+      }
       // Map Firebase errors to user-friendly messages
       if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
         throw new Error('Invalid email or password');
@@ -40,7 +44,8 @@ export const firebaseAuth = {
       } else if (error.code === 'auth/too-many-requests') {
         throw new Error('Too many failed attempts. Please try again later');
       } else {
-        throw new Error(error.message || 'Login failed');
+        // Don't expose internal error messages
+        throw new Error('Login failed. Please try again.');
       }
     }
   },
@@ -49,9 +54,14 @@ export const firebaseAuth = {
   async logout(): Promise<void> {
     try {
       await signOut(auth);
-    } catch (error) {
-      console.error('Logout error:', error);
-      throw error;
+    } catch (error: any) {
+      // Only log error code in development
+      if (import.meta.env.DEV) {
+        const errorCode = error?.code || 'unknown';
+        console.error('Logout error:', errorCode);
+      }
+      // Don't expose error details
+      throw new Error('Logout failed');
     }
   },
 

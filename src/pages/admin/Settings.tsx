@@ -105,13 +105,18 @@ const AdminSettings = () => {
         confirmPassword: "",
       });
     } catch (error: any) {
-      console.error("Password change error:", error);
+      // Only log error code in development, not full error details
+      if (import.meta.env.DEV) {
+        const errorCode = error?.code || 'unknown';
+        console.error("Password change error:", errorCode);
+      }
       if (error.code === "auth/wrong-password") {
         toast.error("Current password is incorrect");
       } else if (error.code === "auth/weak-password") {
         toast.error("Password is too weak");
       } else {
-        toast.error(error.message || "Failed to change password");
+        // Don't expose internal error messages
+        toast.error("Failed to change password. Please try again.");
       }
     } finally {
       setLoading(false);

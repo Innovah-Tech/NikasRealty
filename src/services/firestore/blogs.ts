@@ -111,8 +111,38 @@ export const blogsService = {
   },
 
   // Get published blogs (public)
+  // Always use client-side filtering to ensure reliability regardless of Firestore indexes
   async getPublished() {
-    return this.getAll({ status: 'published' });
+    try {
+      // Fetch all blogs and filter client-side to avoid index issues
+      const querySnapshot = await getDocs(collection(db, COLLECTION_NAME));
+      let blogs = querySnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+        publishedAt: doc.data().publishedAt?.toDate(),
+        createdAt: doc.data().createdAt?.toDate(),
+        updatedAt: doc.data().updatedAt?.toDate(),
+      })) as Blog[];
+
+      // Filter by published status (client-side)
+      blogs = blogs.filter(b => b.status === 'published');
+
+      // Sort by createdAt descending (client-side)
+      blogs.sort((a, b) => {
+        const aDate = a.createdAt ? (a.createdAt instanceof Date ? a.createdAt.getTime() : new Date(a.createdAt).getTime()) : 0;
+        const bDate = b.createdAt ? (b.createdAt instanceof Date ? b.createdAt.getTime() : new Date(b.createdAt).getTime()) : 0;
+        return bDate - aDate;
+      });
+
+      if (import.meta.env.DEV) {
+        console.log(`Fetched ${blogs.length} published blogs from Firestore`);
+      }
+
+      return blogs;
+    } catch (error) {
+      console.error('Error fetching published blogs:', error);
+      throw error;
+    }
   },
 
   // Get single blog

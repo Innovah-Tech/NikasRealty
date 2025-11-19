@@ -10,6 +10,13 @@ interface CloudinaryConfig {
 }
 
 // Get Cloudinary config - hardcoded values
+// SECURITY NOTE: These credentials are public by design for unsigned uploads.
+// Security is enforced via Cloudinary upload preset restrictions:
+// - File size limits
+// - File type restrictions (images only)
+// - Rate limiting
+// - Folder/tag restrictions
+// Ensure these restrictions are configured in Cloudinary dashboard.
 const getCloudinaryConfig = (): CloudinaryConfig => {
   const cloudName = 'dc7jf9inl';
   const uploadPreset = 'nikasrealty';
@@ -43,8 +50,7 @@ export const imageHosting = {
         
         // Provide helpful error messages for common issues
         if (errorMessage.includes('whitelisted') || errorMessage.includes('unsigned')) {
-          const uploadPreset = 'nikasrealty';
-          errorMessage = `Upload preset must be configured for unsigned uploads. Please check Cloudinary settings: Settings → Upload → Upload presets → Edit "${uploadPreset}" preset → Set Signing mode to "Unsigned"`;
+          errorMessage = `Upload configuration error. Please contact support if this issue persists.`;
         }
         
         throw new Error(errorMessage);
