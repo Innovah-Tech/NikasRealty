@@ -18,7 +18,17 @@ const Blog = () => {
         const data = await blogsService.getPublished();
         setPosts(data);
         if (import.meta.env.DEV) {
-          console.log('Fetched published blogs:', data.length);
+          console.log('Blog page: Fetched published blogs:', data.length);
+          if (data.length > 0) {
+            console.log('Sample blog:', {
+              id: data[0].id,
+              title: data[0].title,
+              status: data[0].status,
+              publishedAt: data[0].publishedAt,
+            });
+          } else {
+            console.warn('No published blogs found. Check if blogs are created with status="published"');
+          }
         }
       } catch (error) {
         console.error("Failed to fetch blogs:", error);

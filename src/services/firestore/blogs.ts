@@ -48,13 +48,20 @@ export const blogsService = {
       try {
         q = query(q, orderBy('createdAt', 'desc'));
         const querySnapshot = await getDocs(q);
-        let blogs = querySnapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data(),
-          publishedAt: doc.data().publishedAt?.toDate(),
-          createdAt: doc.data().createdAt?.toDate(),
-          updatedAt: doc.data().updatedAt?.toDate(),
-        })) as Blog[];
+        let blogs = querySnapshot.docs.map(doc => {
+          const data = doc.data();
+          // Normalize status field
+          const status = data.status ? String(data.status).toLowerCase() : 'draft';
+          const normalizedStatus = status === 'published' ? 'published' : 'draft';
+          return {
+            id: doc.id,
+            ...data,
+            status: normalizedStatus,
+            publishedAt: data.publishedAt?.toDate(),
+            createdAt: data.createdAt?.toDate(),
+            updatedAt: data.updatedAt?.toDate(),
+          };
+        }) as Blog[];
 
         // Apply search filter (client-side)
         if (filters?.search) {
@@ -71,17 +78,25 @@ export const blogsService = {
         if (indexError.code === 'failed-precondition' || indexError.message?.includes('index')) {
           console.warn('Firestore composite index missing, filtering client-side:', indexError.message);
           const querySnapshot = await getDocs(collection(db, COLLECTION_NAME));
-          let blogs = querySnapshot.docs.map(doc => ({
-            id: doc.id,
-            ...doc.data(),
-            publishedAt: doc.data().publishedAt?.toDate(),
-            createdAt: doc.data().createdAt?.toDate(),
-            updatedAt: doc.data().updatedAt?.toDate(),
-          })) as Blog[];
+          let blogs = querySnapshot.docs.map(doc => {
+            const data = doc.data();
+            // Normalize status field
+            const status = data.status ? String(data.status).toLowerCase() : 'draft';
+            const normalizedStatus = status === 'published' ? 'published' : 'draft';
+            return {
+              id: doc.id,
+              ...data,
+              status: normalizedStatus,
+              publishedAt: data.publishedAt?.toDate(),
+              createdAt: data.createdAt?.toDate(),
+              updatedAt: data.updatedAt?.toDate(),
+            };
+          }) as Blog[];
 
-          // Filter by status (client-side)
+          // Filter by status (client-side) - case insensitive
           if (filters?.status && filters.status !== 'all') {
-            blogs = blogs.filter(b => b.status === filters.status);
+            const filterStatus = String(filters.status).toLowerCase();
+            blogs = blogs.filter(b => String(b.status).toLowerCase() === filterStatus);
           }
 
           // Sort by createdAt descending (client-side)
@@ -116,16 +131,34 @@ export const blogsService = {
     try {
       // Fetch all blogs and filter client-side to avoid index issues
       const querySnapshot = await getDocs(collection(db, COLLECTION_NAME));
-      let blogs = querySnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data(),
-        publishedAt: doc.data().publishedAt?.toDate(),
-        createdAt: doc.data().createdAt?.toDate(),
-        updatedAt: doc.data().updatedAt?.toDate(),
-      })) as Blog[];
+      let allBlogs = querySnapshot.docs.map(doc => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          ...data,
+          status: data.status || 'draft', // Default to draft if status is missing
+          publishedAt: data.publishedAt?.toDate(),
+          createdAt: data.createdAt?.toDate(),
+          updatedAt: data.updatedAt?.toDate(),
+        };
+      }) as Blog[];
 
-      // Filter by published status (client-side)
-      blogs = blogs.filter(b => b.status === 'published');
+      if (import.meta.env.DEV) {
+        console.log(`Fetched ${allBlogs.length} total blogs from Firestore`);
+        allBlogs.forEach(blog => {
+          console.log(`Blog: ${blog.title}, Status: ${blog.status}, PublishedAt: ${blog.publishedAt}`);
+        });
+      }
+
+      // Filter by published status (client-side) - case insensitive
+      let blogs = allBlogs.filter(b => {
+        const status = String(b.status || '').toLowerCase();
+        return status === 'published';
+      });
+
+      if (import.meta.env.DEV) {
+        console.log(`Filtered to ${blogs.length} published blogs`);
+      }
 
       // Sort by createdAt descending (client-side)
       blogs.sort((a, b) => {
@@ -135,7 +168,7 @@ export const blogsService = {
       });
 
       if (import.meta.env.DEV) {
-        console.log(`Fetched ${blogs.length} published blogs from Firestore`);
+        console.log(`Returning ${blogs.length} published blogs`);
       }
 
       return blogs;
@@ -152,12 +185,18 @@ export const blogsService = {
       const docSnap = await getDoc(docRef);
       
       if (docSnap.exists()) {
+        const data = docSnap.data();
+        // Normalize status field
+        const status = data.status ? String(data.status).toLowerCase() : 'draft';
+        const normalizedStatus = status === 'published' ? 'published' : 'draft';
+        
         return {
           id: docSnap.id,
-          ...docSnap.data(),
-          publishedAt: docSnap.data().publishedAt?.toDate(),
-          createdAt: docSnap.data().createdAt?.toDate(),
-          updatedAt: docSnap.data().updatedAt?.toDate(),
+          ...data,
+          status: normalizedStatus,
+          publishedAt: data.publishedAt?.toDate(),
+          createdAt: data.createdAt?.toDate(),
+          updatedAt: data.updatedAt?.toDate(),
         } as Blog;
       }
       return null;
@@ -170,13 +209,31 @@ export const blogsService = {
   // Create blog
   async create(blog: Omit<Blog, 'id' | 'createdAt' | 'updatedAt' | 'publishedAt'>) {
     try {
+      // Ensure status is lowercase and valid
+      const status = (blog.status || 'draft').toLowerCase() === 'published' ? 'published' : 'draft';
+      
       const blogData = {
         ...blog,
+        status, // Normalize status to lowercase
         createdAt: Timestamp.now(),
         updatedAt: Timestamp.now(),
-        publishedAt: blog.status === 'published' ? Timestamp.now() : null,
+        publishedAt: status === 'published' ? Timestamp.now() : null,
       };
+      
+      if (import.meta.env.DEV) {
+        console.log('Creating blog with data:', {
+          title: blogData.title,
+          status: blogData.status,
+          publishedAt: blogData.publishedAt,
+        });
+      }
+      
       const docRef = await addDoc(collection(db, COLLECTION_NAME), blogData);
+      
+      if (import.meta.env.DEV) {
+        console.log('Blog created successfully with ID:', docRef.id);
+      }
+      
       return { id: docRef.id, ...blogData };
     } catch (error) {
       console.error('Error creating blog:', error);
