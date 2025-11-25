@@ -19,6 +19,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     // Listen to auth state changes
+    // Note: Token refresh errors (400) from securetoken.googleapis.com are expected
+    // when users are not logged in. These are non-critical and don't affect functionality.
     const unsubscribe = firebaseAuth.onAuthStateChanged((authUser) => {
       setUser(authUser);
       setLoading(false);

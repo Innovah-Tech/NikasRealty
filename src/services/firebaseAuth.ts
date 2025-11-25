@@ -77,6 +77,8 @@ export const firebaseAuth = {
   },
 
   // Listen to auth state changes
+  // Note: Token refresh errors (400) from securetoken.googleapis.com are expected
+  // when users are not logged in. These are non-critical and don't affect functionality.
   onAuthStateChanged(callback: (user: AuthUser | null) => void) {
     return onAuthStateChanged(auth, (firebaseUser) => {
       callback(mapFirebaseUser(firebaseUser));
