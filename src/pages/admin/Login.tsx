@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Building2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { APP_CONFIG } from '@/config/constants';
 
 const AdminLogin = () => {
   const [email, setEmail] = useState('');
