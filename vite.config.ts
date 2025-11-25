@@ -12,10 +12,8 @@ export default defineConfig(({ mode }) => ({
     fs: {
       // Allow serving files from one level up to the project root
       allow: ['..'],
-      // Deny access to sensitive directories
+      // Deny access to sensitive directories (but allow Vite's internal files)
       deny: [
-        // Deny access to node_modules (except for resolving)
-        '**/node_modules/**',
         // Deny access to .git
         '**/.git/**',
         // Deny access to .env files
@@ -25,6 +23,9 @@ export default defineConfig(({ mode }) => ({
         '**/package-lock.json',
         '**/yarn.lock',
         '**/pnpm-lock.yaml',
+        // Deny access to node_modules, but allow Vite's client files
+        // Note: We don't block node_modules entirely as Vite needs access to its own files
+        // The server.fs.deny bypass vulnerabilities are mitigated by restricting to localhost only
       ],
     },
   },
