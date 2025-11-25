@@ -382,14 +382,60 @@ export const propertiesService = {
   async update(id: string, updates: Partial<Property>) {
     try {
       const docRef = doc(db, COLLECTION_NAME, id);
-      await updateDoc(docRef, {
+      
+      // Prepare update data - remove Date objects and id field, convert to Firestore-compatible format
+      const updateData: any = {
         ...updates,
         updatedAt: Timestamp.now(),
+      };
+      
+      // Remove fields that shouldn't be updated
+      delete updateData.id;
+      delete updateData.createdAt; // Don't update createdAt
+      
+      // Ensure images is always an array
+      if (updateData.images && !Array.isArray(updateData.images)) {
+        updateData.images = [updateData.images];
+      }
+      
+      // Convert any Date objects to Timestamps (if any exist)
+      Object.keys(updateData).forEach(key => {
+        if (updateData[key] instanceof Date) {
+          updateData[key] = Timestamp.fromDate(updateData[key]);
+        }
       });
+      
+      await updateDoc(docRef, updateData);
+      
+      console.log('✅ Property updated successfully:', id);
+      
       return await this.getById(id);
-    } catch (error) {
-      console.error('Error updating property:', error);
-      throw error;
+    } catch (error: any) {
+      // Always log errors for debugging in production
+      console.error('❌ Error updating property:', {
+        id,
+        errorCode: error?.code,
+        errorMessage: error?.message,
+        errorDetails: error,
+        updateData: Object.keys(updateData),
+      });
+      
+      // Provide more specific error messages
+      if (error.code === 'permission-denied') {
+        throw new Error('Permission denied. Please check Firestore security rules. You may need to log in again.');
+      } else if (error.code === 'not-found') {
+        throw new Error('Property not found. It may have been deleted.');
+      } else if (error.code === 'unavailable') {
+        throw new Error('Firestore is temporarily unavailable. Please try again.');
+      } else if (error.code === 'unauthenticated') {
+        throw new Error('You must be logged in to update properties. Please log in again.');
+      } else if (error.code === 'failed-precondition') {
+        throw new Error('Update failed. The property may have been modified by another user.');
+      }
+      
+      // For unknown errors, include the error code if available
+      const errorMessage = error?.message || 'Failed to update property';
+      throw new Error(`${errorMessage}${error?.code ? ` (${error.code})` : ''}`);
     }
   },
 

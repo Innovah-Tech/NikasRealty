@@ -9,6 +9,7 @@ All colors MUST be HSL.
 @layer base {
   :root {
     /* Luxury Real Estate Color Palette - Gold, White, Charcoal */
+    /* Theme Color: #DA9100 (HSL: 40 100% 43%) */
     --background: 0 0% 100%;
     --foreground: 0 0% 11%;
 
@@ -18,7 +19,7 @@ All colors MUST be HSL.
     --popover: 0 0% 100%;
     --popover-foreground: 0 0% 11%;
 
-    --primary: 40 100% 43%; /* #DA9100 Gold */
+    --primary: 40 100% 43%; /* #DA9100 Gold - DO NOT CHANGE */
     --primary-foreground: 0 0% 100%;
 
     --secondary: 0 0% 11%; /* Deep Charcoal */

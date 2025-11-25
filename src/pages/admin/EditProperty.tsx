@@ -157,6 +157,18 @@ const AdminEditProperty = () => {
         console.log('Updating property with images:', imageUrls);
       }
 
+      // Log update attempt for debugging (works in both dev and production)
+      console.log('🔄 Attempting to update property:', {
+        id,
+        title: formData.title,
+        price: Number(formData.price),
+        images: imageUrls.length,
+        bedrooms: formData.bedrooms ? Number(formData.bedrooms) : undefined,
+        bathrooms: formData.bathrooms ? Number(formData.bathrooms) : undefined,
+        status: formData.status,
+        featured: formData.featured,
+      });
+
       await propertiesService.update(id, {
         title: formData.title,
         description: formData.description,
@@ -178,7 +190,24 @@ const AdminEditProperty = () => {
       navigate("/admin/properties");
     } catch (error: any) {
       console.error('Error updating property:', error);
-      const errorMessage = error?.message || "Failed to update property";
+      
+      // Provide user-friendly error messages
+      let errorMessage = "Failed to update property";
+      
+      if (error?.message) {
+        errorMessage = error.message;
+      } else if (error?.code) {
+        if (error.code === 'permission-denied') {
+          errorMessage = "Permission denied. Please check your authentication.";
+        } else if (error.code === 'not-found') {
+          errorMessage = "Property not found. It may have been deleted.";
+        } else if (error.code === 'unavailable') {
+          errorMessage = "Service temporarily unavailable. Please try again.";
+        } else if (error.code === 'unauthenticated') {
+          errorMessage = "You must be logged in to update properties.";
+        }
+      }
+      
       toast.error(errorMessage);
     } finally {
       setSubmitting(false);
