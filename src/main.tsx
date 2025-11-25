@@ -3,11 +3,27 @@ import App from "./App.tsx";
 import { ThemeProvider } from "next-themes";
 import "./index.css";
 
-// Production debugging - verify theme color is loaded
+// Force set theme color via JavaScript as fallback (ensures it works even if CSS is cached)
 if (typeof window !== 'undefined') {
-  // Wait for CSS to load, then verify theme color
+  const root = document.documentElement;
+  
+  // Set theme color directly via JavaScript - this overrides any cached CSS
+  root.style.setProperty('--primary', '40 100% 43%', 'important');
+  root.style.setProperty('--accent', '40 100% 43%', 'important');
+  root.style.setProperty('--ring', '40 100% 43%', 'important');
+  root.style.setProperty('--gradient-gold', 'linear-gradient(135deg, hsl(40 100% 35%), hsl(40 100% 50%))', 'important');
+  root.style.setProperty('--shadow-luxury', '0 10px 40px -10px hsl(40 100% 43% / 0.3)', 'important');
+  
+  // Also set for dark mode
+  const darkModeRoot = root.classList.contains('dark') ? root : root;
+  if (darkModeRoot) {
+    darkModeRoot.style.setProperty('--primary', '40 100% 43%', 'important');
+    darkModeRoot.style.setProperty('--accent', '40 100% 43%', 'important');
+    darkModeRoot.style.setProperty('--ring', '40 100% 43%', 'important');
+  }
+  
+  // Verify theme color is loaded
   setTimeout(() => {
-    const root = document.documentElement;
     const primaryColor = getComputedStyle(root).getPropertyValue('--primary');
     console.log('🎨 Theme Color Check:', {
       primaryColor,
@@ -15,6 +31,7 @@ if (typeof window !== 'undefined') {
       matches: primaryColor.trim() === '40 100% 43%',
       isProduction: !import.meta.env.DEV,
       buildTime: new Date().toISOString(),
+      cssLoaded: !!document.querySelector('style[data-vite-dev-id], link[rel="stylesheet"]'),
     });
     
     // Also log the actual computed color
@@ -23,7 +40,13 @@ if (typeof window !== 'undefined') {
     document.body.appendChild(testElement);
     const computedColor = getComputedStyle(testElement).color;
     console.log('🎨 Computed Primary Color:', computedColor);
+    console.log('🎨 Expected Color (RGB):', 'rgb(218, 145, 0)'); // #DA9100 in RGB
     document.body.removeChild(testElement);
+    
+    // If color doesn't match, log warning
+    if (primaryColor.trim() !== '40 100% 43%') {
+      console.warn('⚠️ Theme color mismatch! CSS may be cached. JavaScript fallback applied.');
+    }
   }, 1000);
 }
 
@@ -63,6 +86,15 @@ console.log('Build Info:', {
   isProd: import.meta.env.PROD,
   timestamp: new Date().toISOString(),
 });
+
+// Check which CSS files are loaded
+if (typeof window !== 'undefined') {
+  const stylesheets = Array.from(document.querySelectorAll('link[rel="stylesheet"]'));
+  console.log('📄 Loaded Stylesheets:', stylesheets.map(link => ({
+    href: link.getAttribute('href'),
+    integrity: link.getAttribute('integrity'),
+  })));
+}
 
 createRoot(document.getElementById("root")!).render(
   <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
