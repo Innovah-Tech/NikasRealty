@@ -1,7 +1,26 @@
 import { Building2, Award, Users, TrendingUp } from "lucide-react";
+import { useEffect, useState } from "react";
 import aboutImage from "@/assets/images/about.jpg";
+import { teamService, type TeamMember } from "@/services/firestore/team";
 
 const About = () => {
+  const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchTeamMembers();
+  }, []);
+
+  const fetchTeamMembers = async () => {
+    try {
+      const members = await teamService.getAll();
+      setTeamMembers(members);
+    } catch (error) {
+      console.error("Error fetching team members:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
   const stats = [
     { icon: Users, value: "100+", label: "Happy Clients" },
     { icon: Award, value: "6+", label: "Years Experience" },
@@ -89,22 +108,28 @@ const About = () => {
         {/* Team Section */}
         <div className="mt-20">
           <h3 className="text-3xl font-bold text-center text-foreground mb-8">Meet Our Team</h3>
-          <div className="flex flex-wrap gap-8 justify-center items-stretch">
-            <TeamMember
-              name="Monicah Githinji"
-              title="Lead Estate Agent"
-              image="/images/1000292924.jpg"
-              bio="Monicah is passionate about matching clients to the perfect property and is known for her expertise and client-first approach throughout all stages of the buying and selling experience."
-              objectPosition="object-top"
-            />
-            <TeamMember
-              name="Brian Wachira"
-              title="Estate Agent"
-              image="/images/1000295242.jpg"
-              bio="Brian is committed to delivering seamless real estate services, leveraging local knowledge and strong client relationships to achieve successful outcomes."
-              objectPosition="object-center"
-            />
-          </div>
+          {loading ? (
+            <div className="flex justify-center items-center py-12">
+              <p className="text-muted-foreground">Loading team members...</p>
+            </div>
+          ) : teamMembers.length === 0 ? (
+            <div className="flex justify-center items-center py-12">
+              <p className="text-muted-foreground">No team members to display</p>
+            </div>
+          ) : (
+            <div className="flex flex-wrap gap-8 justify-center items-stretch">
+              {teamMembers.map((member) => (
+                <TeamMember
+                  key={member.id}
+                  name={member.name}
+                  title={member.role}
+                  image={member.photo || "/placeholder.svg"}
+                  bio={member.bio || ""}
+                  objectPosition="object-center"
+                />
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </section>

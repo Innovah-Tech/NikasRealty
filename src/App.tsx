@@ -22,6 +22,8 @@ import AdminEditBlog from "./pages/admin/EditBlog";
 import AdminEditProperty from "./pages/admin/EditProperty";
 import AdminRequests from "./pages/admin/Requests";
 import AdminTeam from "./pages/admin/Team";
+import AdminAddTeamMember from "./pages/admin/AddTeamMember";
+import AdminEditTeamMember from "./pages/admin/EditTeamMember";
 import AdminSettings from "./pages/admin/Settings";
 
 const queryClient = new QueryClient();
@@ -113,6 +115,22 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <AdminTeam />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/add-team-member"
+              element={
+                <ProtectedRoute>
+                  <AdminAddTeamMember />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/edit-team-member/:id"
+              element={
+                <ProtectedRoute>
+                  <AdminEditTeamMember />
                 </ProtectedRoute>
               }
             />

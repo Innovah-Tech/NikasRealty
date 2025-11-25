@@ -1,14 +1,28 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { DashboardLayout } from "@/components/admin/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { PlusCircle } from "lucide-react";
+import { PlusCircle, Edit, Trash2 } from "lucide-react";
 import { teamService, type TeamMember } from "@/services/firestore/team";
 import { toast } from "sonner";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 const AdminTeam = () => {
   const [members, setMembers] = useState<TeamMember[]>([]);
   const [loading, setLoading] = useState(true);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchTeam();
@@ -26,6 +40,20 @@ const AdminTeam = () => {
     }
   };
 
+  const handleDelete = async (id: string) => {
+    setDeletingId(id);
+    try {
+      await teamService.delete(id);
+      toast.success("Team member deleted successfully");
+      fetchTeam(); // Refresh the list
+    } catch (error) {
+      toast.error("Failed to delete team member");
+      console.error(error);
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
   return (
     <DashboardLayout>
       <div className="space-y-6">
@@ -34,7 +62,7 @@ const AdminTeam = () => {
             <h1 className="text-3xl font-bold text-foreground">Team</h1>
             <p className="text-muted-foreground">Manage your team members</p>
           </div>
-          <Button>
+          <Button onClick={() => navigate("/admin/add-team-member")}>
             <PlusCircle className="mr-2 h-4 w-4" />
             Add Member
           </Button>
@@ -59,17 +87,65 @@ const AdminTeam = () => {
             </CardContent>
           </Card>
         ) : (
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {members.map((member) => (
               <Card key={member.id}>
-                <CardContent className="p-6 text-center">
-                  <div className="mx-auto mb-4 h-24 w-24 overflow-hidden rounded-full bg-muted">
-                    {member.photo && (
-                      <img src={member.photo} alt={member.name} className="h-full w-full object-cover" />
+                <CardContent className="p-6">
+                  <div className="text-center mb-4">
+                    <div className="mx-auto mb-4 h-24 w-24 overflow-hidden rounded-full bg-muted border-4 border-primary">
+                      {member.photo ? (
+                        <img src={member.photo} alt={member.name} className="h-full w-full object-cover" />
+                      ) : (
+                        <div className="h-full w-full flex items-center justify-center text-muted-foreground">
+                          <PlusCircle className="h-8 w-8" />
+                        </div>
+                      )}
+                    </div>
+                    <h3 className="text-lg font-semibold text-foreground">{member.name}</h3>
+                    <p className="text-sm text-primary font-medium">{member.role}</p>
+                    {member.bio && (
+                      <p className="text-xs text-muted-foreground mt-2 line-clamp-2">{member.bio}</p>
                     )}
                   </div>
-                  <h3 className="text-lg font-semibold text-foreground">{member.name}</h3>
-                  <p className="text-sm text-muted-foreground">{member.role}</p>
+                  <div className="flex gap-2 justify-center">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => navigate(`/admin/edit-team-member/${member.id}`)}
+                    >
+                      <Edit className="h-4 w-4 mr-2" />
+                      Edit
+                    </Button>
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          disabled={deletingId === member.id}
+                        >
+                          <Trash2 className="h-4 w-4 mr-2" />
+                          Delete
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            This will permanently delete {member.name} from the team. This action cannot be undone.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction
+                            onClick={() => member.id && handleDelete(member.id)}
+                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                          >
+                            Delete
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  </div>
                 </CardContent>
               </Card>
             ))}
