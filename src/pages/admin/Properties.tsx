@@ -6,6 +6,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Slider } from '@/components/ui/slider';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Badge } from '@/components/ui/badge';
 import { Edit, Eye, Trash2, Search, RefreshCw, X } from 'lucide-react';
 import { propertiesService, type Property } from '@/services/firestore/properties';
 import { toast } from 'sonner';
@@ -351,13 +352,16 @@ const AdminProperties = () => {
                         ? `KSh ${property.price.toLocaleString()}`
                         : property.price}
                     </span>
-                    <span className={`rounded-full px-3 py-1 text-xs font-medium ${
-                      property.status === "for-sale" || property.status === "For Sale" 
-                        ? "!text-white bg-primary" 
-                        : property.status === "for-rent" || property.status === "For Rent"
-                        ? "!text-white bg-secondary"
-                        : "!text-white bg-muted"
-                    }`}>
+                    <Badge 
+                      variant={property.status === "for-sale" || property.status === "For Sale" ? "default" : property.status === "for-rent" || property.status === "For Rent" ? "secondary" : "outline"}
+                      className={`font-semibold ${
+                        property.status === "for-sale" || property.status === "For Sale" 
+                          ? "!text-white bg-primary" 
+                          : property.status === "for-rent" || property.status === "For Rent"
+                          ? "!text-white bg-secondary"
+                          : "!text-white bg-muted"
+                      }`}
+                    >
                       {property.status === "for-sale" || property.status === "For Sale" 
                         ? "For Sale" 
                         : property.status === "for-rent" || property.status === "For Rent"
@@ -365,7 +369,7 @@ const AdminProperties = () => {
                         : property.status === "sold" || property.status === "Sold"
                         ? "Sold"
                         : property.status}
-                    </span>
+                    </Badge>
                   </div>
                   <div className="flex gap-2">
                     <Button 
