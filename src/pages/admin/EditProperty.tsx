@@ -153,10 +153,6 @@ const AdminEditProperty = () => {
     try {
       const imageUrls = images.length > 0 ? images : [];
       
-      if (import.meta.env.DEV) {
-        console.log('Updating property with images:', imageUrls);
-      }
-
       // Log update attempt for debugging (works in both dev and production)
       console.log('🔄 Attempting to update property:', {
         id,

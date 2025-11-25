@@ -40,12 +40,17 @@ export const db = getFirestore(app);
 export const storage = getStorage(app);
 export const firebaseAnalytics = analytics;
 
-// Test Firestore connection in development
-if (import.meta.env.DEV && typeof window !== 'undefined') {
+// Test Firestore connection (works in both dev and production for debugging)
+if (typeof window !== 'undefined') {
   import('firebase/firestore').then(({ collection, getDocs }) => {
     getDocs(collection(db, 'properties'))
       .then((snapshot) => {
         console.log(`✅ Firestore connected. Found ${snapshot.size} properties in database.`);
+        console.log('🔧 Firebase Config:', {
+          projectId: firebaseConfig.projectId,
+          authDomain: firebaseConfig.authDomain,
+          isProduction: !import.meta.env.DEV,
+        });
       })
       .catch((error) => {
         console.error('❌ Firestore connection error:', error);
