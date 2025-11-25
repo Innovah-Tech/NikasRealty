@@ -40,22 +40,27 @@ const Properties = () => {
   const [sortBy, setSortBy] = useState("newest");
 
   useEffect(() => {
-    const fallback = getFallbackProperties();
+    const defaultProperties = getFallbackProperties();
     const fetchAll = async () => {
       try {
         const data = await propertiesService.getAll();
         console.log('Properties fetched:', data.length, data);
-        if (data.length === 0) {
-          console.warn("No properties found in Firestore. Falling back to static data.");
-          setAllProperties(fallback);
-        } else {
-          console.log('Setting properties:', data);
-          console.log('Sample property data:', data[0]);
-          setAllProperties(data);
-        }
+        
+        // Filter out any properties that might have the same ID as defaults (shouldn't happen, but safety check)
+        const firestoreProperties = (data || []).filter(
+          (p) => p.id && !p.id.startsWith('fallback-')
+        );
+        
+        // Always combine default properties with Firestore properties
+        // Default properties appear first, then Firestore properties
+        const combined = [...defaultProperties, ...firestoreProperties];
+        
+        console.log('Combined properties:', combined.length, `(${defaultProperties.length} default + ${firestoreProperties.length} from Firestore)`);
+        setAllProperties(combined);
       } catch (error) {
         console.error("Failed to fetch properties:", error);
-        setAllProperties(fallback);
+        // On error, still show default properties
+        setAllProperties(defaultProperties);
       } finally {
         setLoading(false);
       }
