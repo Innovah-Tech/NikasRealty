@@ -5,16 +5,31 @@ export default {
   content: ["./pages/**/*.{ts,tsx}", "./components/**/*.{ts,tsx}", "./app/**/*.{ts,tsx}", "./src/**/*.{ts,tsx}"],
   // Safelist to ensure CSS variables and color classes aren't purged in production
   safelist: [
-    'gradient-gold',
-    'bg-primary',
-    'text-primary',
-    'border-primary',
-    'ring-primary',
-    'bg-accent',
-    'text-accent',
+    // Color utilities
+    'bg-primary', 'text-primary', 'border-primary', 'ring-primary',
+    'bg-accent', 'text-accent', 'border-accent', 'ring-accent',
+    'bg-secondary', 'text-secondary', 'border-secondary', 'ring-secondary',
+    'bg-foreground', 'text-foreground', 'bg-background',
+    
+    // Gradients and shadows
+    'gradient-gold', 'gradient-dark', 'gradient-hero',
+    'shadow-luxury',
+    
+    // All color variants for primary and accent
     {
-      pattern: /^(bg|text|border|ring)-(primary|accent|secondary)/,
+      pattern: /^(bg|text|border|ring|from|to|via|fill|stroke)-(primary|accent|secondary|foreground|background)/,
+      variants: ['hover', 'focus', 'active', 'dark', 'dark:hover', 'dark:focus'],
     },
+    
+    // CSS variables
+    'bg-[hsl(var(--primary))]',
+    'text-[hsl(var(--primary))]',
+    'border-[hsl(var(--primary))]',
+    'ring-[hsl(var(--primary))]',
+    'bg-[hsl(var(--accent))]',
+    'text-[hsl(var(--accent))]',
+    'border-[hsl(var(--accent))]',
+    'ring-[hsl(var(--accent))]',
   ],
   prefix: "",
   theme: {

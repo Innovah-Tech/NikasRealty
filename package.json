@@ -5,10 +5,12 @@
   "type": "module",
   "scripts": {
     "dev": "CHOKIDAR_USEPOLLING=1 CHOKIDAR_INTERVAL=200 vite",
-    "build": "vite build",
+    "build": "vite build && node scripts/copy-verification.js",
+    "build:prod": "vite build --mode production && node scripts/copy-verification.js",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "postbuild": "node scripts/verify-theme.js"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",

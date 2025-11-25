@@ -3,24 +3,44 @@ import App from "./App.tsx";
 import { ThemeProvider } from "next-themes";
 import "./index.css";
 
-// Force set theme color via JavaScript as fallback (ensures it works even if CSS is cached)
-if (typeof window !== 'undefined') {
+// Set theme colors immediately when the script loads
+const applyThemeColors = () => {
   const root = document.documentElement;
   
-  // Set theme color directly via JavaScript - this overrides any cached CSS
-  root.style.setProperty('--primary', '40 100% 43%', 'important');
-  root.style.setProperty('--accent', '40 100% 43%', 'important');
-  root.style.setProperty('--ring', '40 100% 43%', 'important');
-  root.style.setProperty('--gradient-gold', 'linear-gradient(135deg, hsl(40 100% 35%), hsl(40 100% 50%))', 'important');
-  root.style.setProperty('--shadow-luxury', '0 10px 40px -10px hsl(40 100% 43% / 0.3)', 'important');
-  
-  // Also set for dark mode
-  const darkModeRoot = root.classList.contains('dark') ? root : root;
-  if (darkModeRoot) {
-    darkModeRoot.style.setProperty('--primary', '40 100% 43%', 'important');
-    darkModeRoot.style.setProperty('--accent', '40 100% 43%', 'important');
-    darkModeRoot.style.setProperty('--ring', '40 100% 43%', 'important');
+  // Set theme color variables
+  const themeColors = {
+    '--primary': '40 100% 43%',
+    '--accent': '40 100% 43%',
+    '--ring': '40 100% 43%',
+    '--gradient-gold': 'linear-gradient(135deg, hsl(40 100% 35%), hsl(40 100% 50%))',
+    '--shadow-luxury': '0 10px 40px -10px hsl(40 100% 43% / 0.3)'
+  };
+
+  // Apply all theme colors at once
+  Object.entries(themeColors).forEach(([key, value]) => {
+    root.style.setProperty(key, value, 'important');
+  });
+
+  // Log theme status for debugging
+  if (process.env.NODE_ENV === 'production') {
+    console.log('🎨 Theme colors applied in production');
   }
+};
+
+// Run immediately and also after DOM is fully loaded
+if (typeof window !== 'undefined') {
+  // Apply immediately
+  applyThemeColors();
+  
+  // Apply again after DOM is loaded
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', applyThemeColors);
+  } else {
+    applyThemeColors();
+  }
+  
+  // Also apply on page show (for back/forward cache)
+  window.addEventListener('pageshow', applyThemeColors);
   
   // Verify theme color is loaded
   setTimeout(() => {
