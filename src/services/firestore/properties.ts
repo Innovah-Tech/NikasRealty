@@ -381,6 +381,18 @@ export const propertiesService = {
   // Update property
   async update(id: string, updates: Partial<Property>) {
     try {
+      // Verify authentication before attempting update
+      const { auth } = await import('@/lib/firebase');
+      if (!auth.currentUser) {
+        console.error('❌ No authenticated user found');
+        throw new Error('You must be logged in to update properties. Please log in again.');
+      }
+      
+      console.log('✅ User authenticated:', {
+        uid: auth.currentUser.uid,
+        email: auth.currentUser.email,
+      });
+      
       const docRef = doc(db, COLLECTION_NAME, id);
       
       // Prepare update data - remove Date objects and id field, convert to Firestore-compatible format
@@ -403,6 +415,12 @@ export const propertiesService = {
         if (updateData[key] instanceof Date) {
           updateData[key] = Timestamp.fromDate(updateData[key]);
         }
+      });
+      
+      console.log('🔄 Attempting Firestore update:', {
+        id,
+        hasAuth: !!auth.currentUser,
+        updateFields: Object.keys(updateData),
       });
       
       await updateDoc(docRef, updateData);

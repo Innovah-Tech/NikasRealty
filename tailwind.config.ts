@@ -3,6 +3,19 @@ import type { Config } from "tailwindcss";
 export default {
   darkMode: ["class"],
   content: ["./pages/**/*.{ts,tsx}", "./components/**/*.{ts,tsx}", "./app/**/*.{ts,tsx}", "./src/**/*.{ts,tsx}"],
+  // Safelist to ensure CSS variables and color classes aren't purged in production
+  safelist: [
+    'gradient-gold',
+    'bg-primary',
+    'text-primary',
+    'border-primary',
+    'ring-primary',
+    'bg-accent',
+    'text-accent',
+    {
+      pattern: /^(bg|text|border|ring)-(primary|accent|secondary)/,
+    },
+  ],
   prefix: "",
   theme: {
     container: {

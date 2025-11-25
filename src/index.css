@@ -4,6 +4,9 @@
 
 /* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
 All colors MUST be HSL.
+
+BUILD ID: 2024-12-19-theme-color-fix
+THEME COLOR: #DA9100 (HSL: 40 100% 43%)
 */
 
 @layer base {
