@@ -279,15 +279,7 @@ const Properties = () => {
               const rawImage = property.images?.[0] || property.image || "/images/property1.jpg";
               const mainImage = rawImage;
               
-              if (import.meta.env.DEV && property.id) {
-                console.log(`Property "${property.title}" image:`, {
-                  hasImages: !!property.images,
-                  imagesLength: property.images?.length || 0,
-                  hasImage: !!property.image,
-                  finalImage: mainImage,
-                  isCloudinary: mainImage.includes('cloudinary.com')
-                });
-              }
+              // Property image processing (silent)
               
               const displayPrice =
                 typeof property.price === "number"
