@@ -11,7 +11,8 @@ const mappedFallbackProperties: FirestoreProperty[] = staticProperties.map((prop
   bedrooms: property.bedrooms,
   bathrooms: property.bathrooms,
   size: property.size,
-  status: property.status,
+  // Normalize status to match Firestore format (for-sale, for-rent, sold)
+  status: property.status.toLowerCase().replace(/\s+/g, '-') as 'for-sale' | 'for-rent' | 'sold',
   image: property.image,
   images: property.gallery && property.gallery.length > 0 ? property.gallery : [property.image],
   gallery: property.gallery,

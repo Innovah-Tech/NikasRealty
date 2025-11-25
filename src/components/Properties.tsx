@@ -41,10 +41,12 @@ const Properties = () => {
 
   useEffect(() => {
     const defaultProperties = getFallbackProperties();
+    console.log('Default properties loaded:', defaultProperties.length, defaultProperties.map(p => ({ id: p.id, title: p.title, status: p.status })));
+    
     const fetchAll = async () => {
       try {
         const data = await propertiesService.getAll();
-        console.log('Properties fetched:', data.length, data);
+        console.log('Properties fetched from Firestore:', data.length, data);
         
         // Filter out any properties that might have the same ID as defaults (shouldn't happen, but safety check)
         const firestoreProperties = (data || []).filter(
@@ -56,10 +58,19 @@ const Properties = () => {
         const combined = [...defaultProperties, ...firestoreProperties];
         
         console.log('Combined properties:', combined.length, `(${defaultProperties.length} default + ${firestoreProperties.length} from Firestore)`);
+        console.log('Default property details:', defaultProperties.map(p => ({
+          id: p.id,
+          title: p.title,
+          status: p.status,
+          price: p.price,
+          location: p.location,
+          type: p.type
+        })));
         setAllProperties(combined);
       } catch (error) {
         console.error("Failed to fetch properties:", error);
         // On error, still show default properties
+        console.log('Using default properties only due to error');
         setAllProperties(defaultProperties);
       } finally {
         setLoading(false);
@@ -75,8 +86,14 @@ const Properties = () => {
     const matchesBedrooms = bedrooms === "all" ? true : String(p.bedrooms) === bedrooms;
     const matchesFeatured = featuredOnly ? p.featured : true;
     const matchesType = propertyType === "all" ? true : p.type === propertyType;
-    const matchesStatus = status === "all" ? true : p.status === status;
-    const matchesLocation = location === "all" ? true : p.location?.toLowerCase().includes(location.toLowerCase());
+    // Normalize status for comparison (handle both "For Sale" and "for-sale" formats)
+    const normalizeStatus = (s: string | undefined) => s?.toLowerCase().replace(/\s+/g, '-') || '';
+    const matchesStatus = status === "all" ? true : normalizeStatus(p.status) === normalizeStatus(status);
+    // Location filter: check if property location contains the filter location (handles "Langata, Nairobi" vs "Langata")
+    const matchesLocation = location === "all" 
+      ? true 
+      : p.location?.toLowerCase().includes(location.toLowerCase()) || 
+        location.toLowerCase().includes(p.location?.toLowerCase() || '');
     const matchesCompletion =
       completion === "all"
         ? true
