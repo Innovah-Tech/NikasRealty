@@ -8,6 +8,25 @@ export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
     port: 8080,
+    // Security: Restrict file system access in development
+    fs: {
+      // Allow serving files from one level up to the project root
+      allow: ['..'],
+      // Deny access to sensitive directories
+      deny: [
+        // Deny access to node_modules (except for resolving)
+        '**/node_modules/**',
+        // Deny access to .git
+        '**/.git/**',
+        // Deny access to .env files
+        '**/.env*',
+        // Deny access to package.json and lock files
+        '**/package*.json',
+        '**/package-lock.json',
+        '**/yarn.lock',
+        '**/pnpm-lock.yaml',
+      ],
+    },
   },
   plugins: [react(), mode === "development" && componentTagger()].filter(Boolean),
   resolve: {
@@ -47,7 +66,6 @@ export default defineConfig(({ mode }) => ({
       modules: {
         localsConvention: 'camelCaseOnly',
       },
-    },
     },
   },
 }));
