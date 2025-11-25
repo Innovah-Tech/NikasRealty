@@ -2,7 +2,7 @@ import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
 import { ThemeProvider } from "next-themes";
 import "./index.css";
-import { THEME_CONFIG } from "@/config/constants";
+import { APP_CONFIG, THEME_CONFIG } from "@/config/constants";
 
 // Set theme colors immediately when the script loads
 const applyThemeColors = () => {
@@ -98,8 +98,6 @@ if (typeof window !== 'undefined') {
     originalWarn.apply(console, args);
   };
 }
-
-import { APP_CONFIG, THEME_CONFIG } from "@/config/constants";
 
 // Startup banner for production debugging
 console.log(`%c🚀 ${APP_CONFIG.name} App Starting...`, `color: ${THEME_CONFIG.primaryColor}; font-size: 16px; font-weight: bold;`);

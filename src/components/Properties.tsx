@@ -23,6 +23,7 @@ import { useNavigate } from "react-router-dom";
 import { propertiesService, type Property } from "@/services/firestore/properties";
 import { parsePrice } from "@/data/properties";
 import { getFallbackProperties } from "@/utils/fallbackProperties";
+import { PROPERTY_CONFIG } from "@/config/constants";
 
 const Properties = () => {
   const navigate = useNavigate();
@@ -454,20 +455,28 @@ const FeaturedPropertiesSlides = ({
 }: {
   items: Array<{ id: string | number; title: string; image: string; price: string; location: string }>;
 }) => {
-  if (items.length === 0) {
-    return null;
-  }
+  // Hooks must be called before any conditional returns
   const [index, setIndex] = useState(0);
   const last = items.length - 1;
 
-  const next = useCallback(() => setIndex((i) => (i >= last ? 0 : i + 1)), [last]);
-  const prev = useCallback(() => setIndex((i) => (i <= 0 ? last : i - 1)), [last]);
+  const next = useCallback(() => {
+    setIndex((i) => (i >= last ? 0 : i + 1));
+  }, [last]);
+  
+  const prev = useCallback(() => {
+    setIndex((i) => (i <= 0 ? last : i - 1));
+  }, [last]);
 
   useEffect(() => {
     if (items.length === 0) return;
     const id = window.setInterval(next, 4000);
     return () => window.clearInterval(id);
   }, [next, items.length]);
+
+  // Early return after hooks
+  if (items.length === 0) {
+    return null;
+  }
 
   return (
     <div className="mb-12">
