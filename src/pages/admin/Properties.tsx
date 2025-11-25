@@ -10,6 +10,7 @@ import { Edit, Eye, Trash2, Search, RefreshCw, X } from 'lucide-react';
 import { propertiesService, type Property } from '@/services/firestore/properties';
 import { toast } from 'sonner';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { PROPERTY_CONFIG } from '@/config/constants';
 
 const AdminProperties = () => {
   const [properties, setProperties] = useState<Property[]>([]);
@@ -20,7 +21,7 @@ const AdminProperties = () => {
   const [bedroomsFilter, setBedroomsFilter] = useState('all');
   const [locationFilter, setLocationFilter] = useState('all');
   const [completionFilter, setCompletionFilter] = useState('all');
-  const [priceRange, setPriceRange] = useState<[number, number]>([0, 500000000]); // 500M max
+  const [priceRange, setPriceRange] = useState<[number, number]>(PROPERTY_CONFIG.defaultPriceRange);
   const [sortBy, setSortBy] = useState('newest');
   const [featuredOnly, setFeaturedOnly] = useState(false);
   const [page, setPage] = useState(1);
@@ -54,7 +55,7 @@ const AdminProperties = () => {
     setBedroomsFilter('all');
     setLocationFilter('all');
     setCompletionFilter('all');
-    setPriceRange([0, 500000000]); // 500M max
+    setPriceRange(PROPERTY_CONFIG.defaultPriceRange);
     setFeaturedOnly(false);
     setPage(1);
   };
@@ -63,7 +64,7 @@ const AdminProperties = () => {
     setLoading(true);
     try {
       // Don't apply price filter if range is at max (shows all properties)
-      const maxPriceFilter = priceRange[1] >= 500000000 ? undefined : priceRange[1];
+      const maxPriceFilter = priceRange[1] >= PROPERTY_CONFIG.maxPrice ? undefined : priceRange[1];
       const minPriceFilter = priceRange[0] <= 0 ? undefined : priceRange[0];
       
       const response = await propertiesService.getAll({
@@ -289,7 +290,7 @@ const AdminProperties = () => {
                   value={priceRange}
                   onValueChange={(value) => setPriceRange([value[0], value[1]] as [number, number])}
                   min={0}
-                  max={500000000}
+                  max={PROPERTY_CONFIG.maxPrice}
                   step={1000000}
                 />
                 <div className="flex justify-between text-xs mt-1">

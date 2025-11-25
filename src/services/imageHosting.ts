@@ -9,7 +9,9 @@ interface CloudinaryConfig {
   uploadPreset: string;
 }
 
-// Get Cloudinary config - hardcoded values
+import { CLOUDINARY_CONFIG } from '@/config/constants';
+
+// Get Cloudinary config
 // SECURITY NOTE: These credentials are public by design for unsigned uploads.
 // Security is enforced via Cloudinary upload preset restrictions:
 // - File size limits
@@ -18,10 +20,10 @@ interface CloudinaryConfig {
 // - Folder/tag restrictions
 // Ensure these restrictions are configured in Cloudinary dashboard.
 const getCloudinaryConfig = (): CloudinaryConfig => {
-  const cloudName = 'dc7jf9inl';
-  const uploadPreset = 'nikasrealty';
-  
-  return { cloudName, uploadPreset };
+  return {
+    cloudName: CLOUDINARY_CONFIG.cloudName,
+    uploadPreset: CLOUDINARY_CONFIG.uploadPreset,
+  };
 };
 
 export const imageHosting = {

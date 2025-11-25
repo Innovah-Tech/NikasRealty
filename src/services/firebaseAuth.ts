@@ -5,6 +5,7 @@ import {
   User as FirebaseUser
 } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
+import { APP_CONFIG } from '@/config/constants';
 
 export interface AuthUser {
   uid: string;
@@ -27,7 +28,7 @@ export const firebaseAuth = {
   async login(email: string, password: string): Promise<AuthUser> {
     // Block specific email from admin login
     const normalizedEmail = email.trim().toLowerCase();
-    if (normalizedEmail === 'admin@nikasrealty.co.ke') {
+    if (normalizedEmail === APP_CONFIG.blockedAdminEmail) {
       throw new Error('This email is not authorized for admin access');
     }
     

@@ -3,6 +3,7 @@ import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
 import { getAnalytics } from 'firebase/analytics';
+import { FIREBASE_CONFIG } from '@/config/constants';
 
 /**
  * Firebase configuration
@@ -21,13 +22,13 @@ import { getAnalytics } from 'firebase/analytics';
  * blog data) instead of being locked to the fallback credentials.
  */
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || 'AIzaSyAgnkCrU_CuNP1EtNA9HG7P42uYOx-LeZk',
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || 'nikas-db432.firebaseapp.com',
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || 'nikas-db432',
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || 'nikas-db432.firebasestorage.app',
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || '31056432402',
-  appId: import.meta.env.VITE_FIREBASE_APP_ID || '1:31056432402:web:9c06fabbf234a13509f7cb',
-  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID || 'G-PERDJVZ0SX',
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || FIREBASE_CONFIG.apiKey,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || FIREBASE_CONFIG.authDomain,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || FIREBASE_CONFIG.projectId,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || FIREBASE_CONFIG.storageBucket,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || FIREBASE_CONFIG.messagingSenderId,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID || FIREBASE_CONFIG.appId,
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID || FIREBASE_CONFIG.measurementId,
 };
 
 // Initialize Firebase

@@ -18,30 +18,10 @@ import { propertiesService } from "@/services/firestore/properties";
 import { firebaseStorage } from "@/services/firebaseStorage";
 import { toast } from "sonner";
 import { useNavigate, useParams } from "react-router-dom";
+import { PROPERTY_CONFIG } from "@/config/constants";
 
-const propertyTypeOptions = [
-  "Apartment",
-  "Mansion",
-  "Maisonette",
-  "Townhouse",
-  "Bungalow",
-  "Duplex",
-  "Triplex",
-];
-
-const locationOptions = [
-  "Langata",
-  "Ruiru",
-  "Kikuyu",
-  "Kilimani",
-  "Kileleshwa",
-  "Syokimau",
-  "Kabete",
-  "Muthaiga",
-  "Riverside",
-  "Kiambu Road",
-  "Ngong",
-];
+const propertyTypeOptions = PROPERTY_CONFIG.propertyTypes;
+const locationOptions = PROPERTY_CONFIG.locations;
 
 const AdminEditProperty = () => {
   const navigate = useNavigate();
@@ -97,7 +77,7 @@ const AdminEditProperty = () => {
       });
       setImages(property.images || []);
       // Check if location is in the predefined list
-      setUseCustomLocation(!locationOptions.includes(property.location || ""));
+      setUseCustomLocation(!PROPERTY_CONFIG.locations.includes(property.location || ""));
     } catch (error) {
       toast.error("Failed to fetch property");
       console.error(error);

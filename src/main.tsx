@@ -2,18 +2,19 @@ import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
 import { ThemeProvider } from "next-themes";
 import "./index.css";
+import { THEME_CONFIG } from "@/config/constants";
 
 // Set theme colors immediately when the script loads
 const applyThemeColors = () => {
   const root = document.documentElement;
   
-  // Set theme color variables
+  // Set theme color variables from config
   const themeColors = {
-    '--primary': '40 100% 43%',
-    '--accent': '40 100% 43%',
-    '--ring': '40 100% 43%',
-    '--gradient-gold': 'linear-gradient(135deg, hsl(40 100% 35%), hsl(40 100% 50%))',
-    '--shadow-luxury': '0 10px 40px -10px hsl(40 100% 43% / 0.3)'
+    '--primary': THEME_CONFIG.primaryColorHSL,
+    '--accent': THEME_CONFIG.primaryColorHSL,
+    '--ring': THEME_CONFIG.primaryColorHSL,
+    '--gradient-gold': THEME_CONFIG.gradientGold,
+    '--shadow-luxury': THEME_CONFIG.shadowLuxury,
   };
 
   // Apply all theme colors at once
@@ -22,7 +23,7 @@ const applyThemeColors = () => {
   });
 
   // Log theme status for debugging
-  if (process.env.NODE_ENV === 'production') {
+  if (import.meta.env.PROD) {
     console.log('🎨 Theme colors applied in production');
   }
 };
@@ -47,8 +48,8 @@ if (typeof window !== 'undefined') {
     const primaryColor = getComputedStyle(root).getPropertyValue('--primary');
     console.log('🎨 Theme Color Check:', {
       primaryColor,
-      expected: '40 100% 43%',
-      matches: primaryColor.trim() === '40 100% 43%',
+      expected: THEME_CONFIG.primaryColorHSL,
+      matches: primaryColor.trim() === THEME_CONFIG.primaryColorHSL,
       isProduction: !import.meta.env.DEV,
       buildTime: new Date().toISOString(),
       cssLoaded: !!document.querySelector('style[data-vite-dev-id], link[rel="stylesheet"]'),
@@ -60,11 +61,11 @@ if (typeof window !== 'undefined') {
     document.body.appendChild(testElement);
     const computedColor = getComputedStyle(testElement).color;
     console.log('🎨 Computed Primary Color:', computedColor);
-    console.log('🎨 Expected Color (RGB):', 'rgb(218, 145, 0)'); // #DA9100 in RGB
+    console.log('🎨 Expected Color:', THEME_CONFIG.primaryColor);
     document.body.removeChild(testElement);
     
     // If color doesn't match, log warning
-    if (primaryColor.trim() !== '40 100% 43%') {
+    if (primaryColor.trim() !== THEME_CONFIG.primaryColorHSL) {
       console.warn('⚠️ Theme color mismatch! CSS may be cached. JavaScript fallback applied.');
     }
   }, 1000);
@@ -98,8 +99,10 @@ if (typeof window !== 'undefined') {
   };
 }
 
+import { APP_CONFIG, THEME_CONFIG } from "@/config/constants";
+
 // Startup banner for production debugging
-console.log('%c🚀 Nikas Realty App Starting...', 'color: #DA9100; font-size: 16px; font-weight: bold;');
+console.log(`%c🚀 ${APP_CONFIG.name} App Starting...`, `color: ${THEME_CONFIG.primaryColor}; font-size: 16px; font-weight: bold;`);
 console.log('Build Info:', {
   mode: import.meta.env.MODE,
   isDev: import.meta.env.DEV,

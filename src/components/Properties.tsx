@@ -35,7 +35,7 @@ const Properties = () => {
   const [status, setStatus] = useState("all");
   const [location, setLocation] = useState("all");
   const [completion, setCompletion] = useState("all");
-  const [priceRange, setPriceRange] = useState<[number, number]>([0, 500000000]); // 500M max
+  const [priceRange, setPriceRange] = useState<[number, number]>(PROPERTY_CONFIG.defaultPriceRange);
   const [sortBy, setSortBy] = useState("newest");
 
   useEffect(() => {
@@ -223,17 +223,9 @@ const Properties = () => {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All</SelectItem>
-                <SelectItem value="Langata">Langata</SelectItem>
-                <SelectItem value="Ruiru">Ruiru</SelectItem>
-                <SelectItem value="Kikuyu">Kikuyu</SelectItem>
-                <SelectItem value="Kilimani">Kilimani</SelectItem>
-                <SelectItem value="Kileleshwa">Kileleshwa</SelectItem>
-                <SelectItem value="Syokimau">Syokimau</SelectItem>
-                <SelectItem value="Kabete">Kabete</SelectItem>
-                <SelectItem value="Muthaiga">Muthaiga</SelectItem>
-                <SelectItem value="Riverside">Riverside</SelectItem>
-                <SelectItem value="Kiambu Road">Kiambu Road</SelectItem>
-                <SelectItem value="Ngong">Ngong</SelectItem>
+                {PROPERTY_CONFIG.locations.map((loc) => (
+                  <SelectItem key={loc} value={loc}>{loc}</SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
@@ -252,7 +244,7 @@ const Properties = () => {
           </div>
           <div className="flex-1 min-w-[220px]">
             <div className="text-xs text-muted-foreground mb-1">Price Range (KES)</div>
-            <Slider value={priceRange} onValueChange={(v)=>setPriceRange([v[0], v[1]] as [number, number])} min={0} max={500000000} step={1000000} />
+            <Slider value={priceRange} onValueChange={(v)=>setPriceRange([v[0], v[1]] as [number, number])} min={0} max={PROPERTY_CONFIG.maxPrice} step={1000000} />
             <div className="flex justify-between text-xs mt-1">
               <span>{priceRange[0].toLocaleString()}</span>
               <span>{priceRange[1].toLocaleString()}</span>

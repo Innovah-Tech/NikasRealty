@@ -18,30 +18,10 @@ import { propertiesService } from "@/services/firestore/properties";
 import { firebaseStorage } from "@/services/firebaseStorage";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
+import { PROPERTY_CONFIG } from "@/config/constants";
 
-const propertyTypeOptions = [
-  "Apartment",
-  "Mansion",
-  "Maisonette",
-  "Townhouse",
-  "Bungalow",
-  "Duplex",
-  "Triplex",
-];
-
-const locationOptions = [
-  "Langata",
-  "Ruiru",
-  "Kikuyu",
-  "Kilimani",
-  "Kileleshwa",
-  "Syokimau",
-  "Kabete",
-  "Muthaiga",
-  "Riverside",
-  "Kiambu Road",
-  "Ngong",
-];
+const propertyTypeOptions = PROPERTY_CONFIG.propertyTypes;
+const locationOptions = PROPERTY_CONFIG.locations;
 
 const AdminAddProperty = () => {
   const [formData, setFormData] = useState({

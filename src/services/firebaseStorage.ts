@@ -1,15 +1,14 @@
 import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
 import { storage, auth } from '@/lib/firebase';
 import { imageHosting } from './imageHosting';
+import { CLOUDINARY_CONFIG } from '@/config/constants';
 
 // Use Cloudinary for image hosting (free tier, no backend needed)
 // SECURITY NOTE: These credentials are public by design for unsigned uploads.
 // Security is enforced via Cloudinary upload preset restrictions.
 // Ensure proper restrictions are configured in Cloudinary dashboard.
 const useCloudinary = (): boolean => {
-  const cloudName = 'dc7jf9inl';
-  const uploadPreset = 'nikasrealty';
-  return !!(cloudName && uploadPreset);
+  return !!(CLOUDINARY_CONFIG.cloudName && CLOUDINARY_CONFIG.uploadPreset);
 };
 
 export const firebaseStorage = {
