@@ -74,7 +74,7 @@ const Hero = () => {
               onClick={() => window.open("https://wa.me/254710132320", "_blank")}
               size="lg"
               variant="outline"
-              className="text-white border-white hover:bg-white hover:text-secondary font-semibold text-lg px-8 py-6 backdrop-blur-sm transition-smooth"
+              className="!text-white border-white hover:bg-white hover:!text-secondary font-semibold text-lg px-8 py-6 backdrop-blur-sm transition-smooth bg-transparent"
             >
               <MessageCircle className="mr-2" size={20} />
               WhatsApp Us
