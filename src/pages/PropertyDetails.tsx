@@ -146,13 +146,26 @@ const PropertyDetailsPage = () => {
           {/* Overlay with Title and Badges */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent flex flex-col justify-end p-6 md:p-8 lg:p-12">
             <div className="flex flex-wrap gap-2 mb-4">
-              <Badge variant="secondary" className="capitalize bg-white/90 text-foreground">{property.type}</Badge>
-              <Badge variant="outline" className="capitalize bg-white/90 text-foreground border-white/50">{property.status}</Badge>
-              {property.projectStage && (
-                <Badge variant="outline" className="capitalize bg-white/90 text-foreground border-white/50">{property.projectStage}</Badge>
+              {property.status && (
+                <Badge 
+                  variant={property.status === "for-sale" || property.status === "For Sale" ? "default" : property.status === "for-rent" || property.status === "For Rent" ? "secondary" : "outline"}
+                  className="font-semibold bg-white/90 text-foreground border-white/50"
+                >
+                  {property.status === "for-sale" || property.status === "For Sale" 
+                    ? "For Sale" 
+                    : property.status === "for-rent" || property.status === "For Rent"
+                    ? "For Rent"
+                    : property.status === "sold" || property.status === "Sold"
+                    ? "Sold"
+                    : property.status}
+                </Badge>
               )}
               {property.featured && (
                 <Badge className="gradient-gold text-secondary font-semibold">Featured</Badge>
+              )}
+              <Badge variant="secondary" className="capitalize bg-white/90 text-foreground">{property.type}</Badge>
+              {property.projectStage && (
+                <Badge variant="outline" className="capitalize bg-white/90 text-foreground border-white/50">{property.projectStage}</Badge>
               )}
             </div>
             <h1 className="text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-white mb-3">{property.title}</h1>

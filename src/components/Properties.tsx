@@ -345,33 +345,58 @@ const Properties = () => {
                         }
                       }}
                     />
-                    {property.featured && (
-                      <Badge className="absolute top-4 right-4 gradient-gold text-secondary font-semibold">
-                        Featured
-                      </Badge>
-                    )}
+                    <div className="absolute top-4 right-4 flex flex-col gap-2">
+                      {property.status && (
+                        <Badge 
+                          variant={property.status === "for-sale" || property.status === "For Sale" ? "default" : property.status === "for-rent" || property.status === "For Rent" ? "secondary" : "outline"}
+                          className="font-semibold shadow-lg"
+                        >
+                          {property.status === "for-sale" || property.status === "For Sale" 
+                            ? "For Sale" 
+                            : property.status === "for-rent" || property.status === "For Rent"
+                            ? "For Rent"
+                            : property.status === "sold" || property.status === "Sold"
+                            ? "Sold"
+                            : property.status}
+                        </Badge>
+                      )}
+                      {property.featured && (
+                        <Badge className="gradient-gold text-secondary font-semibold shadow-lg">
+                          Featured
+                        </Badge>
+                      )}
+                    </div>
                   </div>
 
                   {/* Content */}
                   <CardHeader>
                     <div className="flex flex-wrap gap-2 mb-2">
+                      {property.status && (
+                        <Badge 
+                          variant={property.status === "for-sale" || property.status === "For Sale" ? "default" : property.status === "for-rent" || property.status === "For Rent" ? "secondary" : "outline"}
+                          className="font-semibold"
+                        >
+                          {property.status === "for-sale" || property.status === "For Sale" 
+                            ? "For Sale" 
+                            : property.status === "for-rent" || property.status === "For Rent"
+                            ? "For Rent"
+                            : property.status === "sold" || property.status === "Sold"
+                            ? "Sold"
+                            : property.status}
+                        </Badge>
+                      )}
+                      {property.featured && (
+                        <Badge className="gradient-gold text-secondary font-semibold">Featured</Badge>
+                      )}
                       {property.type && (
                         <Badge variant="secondary" className="capitalize">
                           {property.type}
-                        </Badge>
-                      )}
-                      {property.status && (
-                        <Badge variant="outline" className="capitalize">
-                          {property.status}
                         </Badge>
                       )}
                       {property.projectStage && (
                         <Badge variant="outline" className="capitalize">
                           {property.projectStage}
                         </Badge>
-                      )}
-                      {property.featured && (
-                        <Badge className="gradient-gold text-secondary font-semibold">Featured</Badge>
                       )}
                     </div>
                     <CardTitle className="text-xl group-hover:text-primary transition-smooth">

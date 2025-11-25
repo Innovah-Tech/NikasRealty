@@ -13,6 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Upload, X } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 import { propertiesService } from "@/services/firestore/properties";
 import { firebaseStorage } from "@/services/firebaseStorage";
 import { toast } from "sonner";
@@ -51,6 +52,10 @@ const AdminAddProperty = () => {
     location: "",
     status: "",
     features: "",
+    bedrooms: "",
+    bathrooms: "",
+    size: "",
+    featured: false,
   });
   const [images, setImages] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
@@ -113,6 +118,10 @@ const AdminAddProperty = () => {
         price: Number(formData.price),
         location: formData.location,
         status: formData.status,
+        bedrooms: formData.bedrooms ? Number(formData.bedrooms) : undefined,
+        bathrooms: formData.bathrooms ? Number(formData.bathrooms) : undefined,
+        size: formData.size || undefined,
+        featured: formData.featured,
         features: formData.features
           ? formData.features.split(",").map((f) => f.trim()).filter(Boolean)
           : [],
@@ -256,6 +265,44 @@ const AdminAddProperty = () => {
                 </div>
 
                 <div className="space-y-2">
+                  <Label htmlFor="bedrooms">Bedrooms</Label>
+                  <Input
+                    id="bedrooms"
+                    name="bedrooms"
+                    type="number"
+                    min="0"
+                    value={formData.bedrooms}
+                    onChange={handleChange}
+                    placeholder="e.g., 3"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="bathrooms">Bathrooms</Label>
+                  <Input
+                    id="bathrooms"
+                    name="bathrooms"
+                    type="number"
+                    min="0"
+                    value={formData.bathrooms}
+                    onChange={handleChange}
+                    placeholder="e.g., 2"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="size">Size (sqm)</Label>
+                  <Input
+                    id="size"
+                    name="size"
+                    type="text"
+                    value={formData.size}
+                    onChange={handleChange}
+                    placeholder="e.g., 150 sqm or 2,650 - 3,750 sqft"
+                  />
+                </div>
+
+                <div className="space-y-2">
                   <Label htmlFor="features">Features (comma-separated)</Label>
                   <Input
                     id="features"
@@ -264,6 +311,17 @@ const AdminAddProperty = () => {
                     value={formData.features}
                     onChange={handleChange}
                   />
+                </div>
+
+                <div className="flex items-center space-x-2 pt-6">
+                  <Checkbox
+                    id="featured"
+                    checked={formData.featured}
+                    onCheckedChange={(checked) => setFormData({ ...formData, featured: checked === true })}
+                  />
+                  <Label htmlFor="featured" className="cursor-pointer font-normal">
+                    Mark as Featured Property
+                  </Label>
                 </div>
               </div>
 
