@@ -47,7 +47,7 @@ const Contact = () => {
     
     setIsSubmitting(true);
 
-    try {
+        try {
       // Sanitize all inputs before sending
       const sanitizedData = {
         name: sanitizeText(formData.name),
@@ -56,10 +56,10 @@ const Contact = () => {
         message: sanitizeText(formData.message),
       };
       
-      const { requestsService } = await import('@/services/firestore/requests');
+          const { requestsService } = await import('@/services/firestore/requests');
       await requestsService.create(sanitizedData);
 
-      toast.success("Message sent successfully! We'll get back to you soon.");
+          toast.success("Message sent successfully! We'll get back to you soon.");
       
       // Reset form
       setFormData({ name: "", email: "", phone: "", message: "" });

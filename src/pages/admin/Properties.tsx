@@ -153,9 +153,9 @@ const AdminProperties = () => {
               <RefreshCw className="mr-2 h-4 w-4" />
               Refresh
             </Button>
-            <Button onClick={() => navigate('/admin/add-property')}>
-              Add Property
-            </Button>
+          <Button onClick={() => navigate('/admin/add-property')}>
+            Add Property
+          </Button>
           </div>
         </div>
 
@@ -351,8 +351,20 @@ const AdminProperties = () => {
                         ? `KSh ${property.price.toLocaleString()}`
                         : property.price}
                     </span>
-                    <span className="rounded-full bg-secondary px-3 py-1 text-xs font-medium">
-                      {property.status}
+                    <span className={`rounded-full px-3 py-1 text-xs font-medium ${
+                      property.status === "for-sale" || property.status === "For Sale" 
+                        ? "!text-white bg-primary" 
+                        : property.status === "for-rent" || property.status === "For Rent"
+                        ? "!text-white bg-secondary"
+                        : "!text-white bg-muted"
+                    }`}>
+                      {property.status === "for-sale" || property.status === "For Sale" 
+                        ? "For Sale" 
+                        : property.status === "for-rent" || property.status === "For Rent"
+                        ? "For Rent"
+                        : property.status === "sold" || property.status === "Sold"
+                        ? "Sold"
+                        : property.status}
                     </span>
                   </div>
                   <div className="flex gap-2">

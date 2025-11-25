@@ -57,41 +57,41 @@ export const propertiesService = {
     page?: number;
     limit?: number;
   }) {
-      try {
+    try {
         if (import.meta.env.DEV) {
           console.log('Fetching properties with filters:', filters);
         }
         
         // Try optimized query first (if indexes exist)
         try {
-          let q = query(collection(db, COLLECTION_NAME));
+      let q = query(collection(db, COLLECTION_NAME));
 
         // Apply simple filters that work well with indexes
-        if (filters?.type && filters.type !== 'all') {
-          q = query(q, where('type', '==', filters.type));
-        }
-        if (filters?.status && filters.status !== 'all') {
-          q = query(q, where('status', '==', filters.status));
-        }
-        if (filters?.featured !== undefined) {
-          q = query(q, where('featured', '==', filters.featured));
-        }
+      if (filters?.type && filters.type !== 'all') {
+        q = query(q, where('type', '==', filters.type));
+      }
+      if (filters?.status && filters.status !== 'all') {
+        q = query(q, where('status', '==', filters.status));
+      }
+      if (filters?.featured !== undefined) {
+        q = query(q, where('featured', '==', filters.featured));
+      }
 
         // Try to apply sorting if we have minimal filters
         if (filters?.sortBy && (!filters?.type || filters.type === 'all') && (!filters?.status || filters.status === 'all')) {
-          const sortOrder = filters.order === 'desc' ? 'desc' : 'asc';
-          q = query(q, orderBy(filters.sortBy, sortOrder));
+        const sortOrder = filters.order === 'desc' ? 'desc' : 'asc';
+        q = query(q, orderBy(filters.sortBy, sortOrder));
         } else if (filters?.sortBy) {
           // If we have filters, try orderBy on createdAt (most common index)
           q = query(q, orderBy('createdAt', 'desc'));
-        }
+      }
 
-        // Apply pagination
-        if (filters?.limit) {
+      // Apply pagination
+      if (filters?.limit) {
           q = query(q, limit(filters.limit * 2)); // Get more to account for client-side filtering
-        }
+      }
 
-          const querySnapshot = await getDocs(q);
+      const querySnapshot = await getDocs(q);
           let properties = querySnapshot.docs.map(doc => {
             const data = doc.data();
             return {
@@ -136,7 +136,7 @@ export const propertiesService = {
           let properties = querySnapshot.docs.map(doc => {
             const data = doc.data();
             return {
-              id: doc.id,
+        id: doc.id,
               ...data,
               // Ensure images array is properly set
               images: data.images || (data.image ? [data.image] : []),
@@ -234,34 +234,34 @@ export const propertiesService = {
     }
 
     // Apply search filter
-    if (filters?.search) {
-      const searchLower = filters.search.toLowerCase();
+      if (filters?.search) {
+        const searchLower = filters.search.toLowerCase();
       filtered = filtered.filter(p => 
-        p.title?.toLowerCase().includes(searchLower) ||
+          p.title?.toLowerCase().includes(searchLower) ||
         p.location?.toLowerCase().includes(searchLower) ||
         p.description?.toLowerCase().includes(searchLower)
-      );
-    }
+        );
+      }
 
     // Apply location filter
-    if (filters?.location && filters.location !== 'all') {
-      const locationLower = filters.location.toLowerCase();
+      if (filters?.location && filters.location !== 'all') {
+        const locationLower = filters.location.toLowerCase();
       filtered = filtered.filter(p => 
-        p.location?.toLowerCase().includes(locationLower)
-      );
-    }
+          p.location?.toLowerCase().includes(locationLower)
+        );
+      }
 
-    // Apply bedrooms filter
-    if (filters?.bedrooms && filters.bedrooms !== 'all') {
+      // Apply bedrooms filter
+      if (filters?.bedrooms && filters.bedrooms !== 'all') {
       filtered = filtered.filter(p => p.bedrooms === parseInt(filters.bedrooms!));
-    }
+      }
 
-    // Apply completion filter
-    if (filters?.completion && filters.completion !== 'all') {
+      // Apply completion filter
+      if (filters?.completion && filters.completion !== 'all') {
       filtered = filtered.filter(p => 
-        (p.projectStage || p.completion || '').toLowerCase() === filters.completion!.toLowerCase()
-      );
-    }
+          (p.projectStage || p.completion || '').toLowerCase() === filters.completion!.toLowerCase()
+        );
+      }
 
     // Apply sorting
     if (filters?.sortBy) {

@@ -46,7 +46,7 @@ export const firebaseStorage = {
       } else if (error.code === 'storage/unknown') {
         throw new Error('An unknown error occurred. This might be a CORS issue. Please check Firebase Storage CORS configuration.');
       } else if (error.message) {
-        throw error;
+      throw error;
       } else {
         throw new Error('Failed to upload file. Please check your internet connection and try again.');
       }

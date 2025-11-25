@@ -149,7 +149,13 @@ const PropertyDetailsPage = () => {
               {property.status && (
                 <Badge 
                   variant={property.status === "for-sale" || property.status === "For Sale" ? "default" : property.status === "for-rent" || property.status === "For Rent" ? "secondary" : "outline"}
-                  className="font-semibold bg-white/90 text-foreground border-white/50"
+                  className={`font-semibold ${
+                    property.status === "for-sale" || property.status === "For Sale" 
+                      ? "!text-white bg-primary" 
+                      : property.status === "for-rent" || property.status === "For Rent"
+                      ? "!text-white bg-secondary"
+                      : "!text-white bg-muted"
+                  }`}
                 >
                   {property.status === "for-sale" || property.status === "For Sale" 
                     ? "For Sale" 

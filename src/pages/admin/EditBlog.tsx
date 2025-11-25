@@ -244,11 +244,11 @@ const AdminEditBlog = () => {
                     <Label htmlFor="image">Blog Image</Label>
                     <div className="space-y-2">
                       <div className="flex gap-2">
-                        <Input
-                          id="image"
-                          name="image"
-                          value={formData.image}
-                          onChange={handleChange}
+                    <Input
+                      id="image"
+                      name="image"
+                      value={formData.image}
+                      onChange={handleChange}
                           placeholder="Image URL or upload a file"
                           className="flex-1"
                         />
@@ -274,16 +274,16 @@ const AdminEditBlog = () => {
                           />
                         </label>
                       </div>
-                      {formData.image && (
+                    {formData.image && (
                         <div className="relative">
-                          <img
-                            src={formData.image}
-                            alt="Preview"
+                      <img
+                        src={formData.image}
+                        alt="Preview"
                             className="h-48 w-full rounded-lg object-cover"
-                            onError={(e) => {
-                              (e.target as HTMLImageElement).style.display = "none";
-                            }}
-                          />
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).style.display = "none";
+                        }}
+                      />
                           <Button
                             type="button"
                             variant="destructive"
@@ -294,7 +294,7 @@ const AdminEditBlog = () => {
                             <X className="h-4 w-4" />
                           </Button>
                         </div>
-                      )}
+                    )}
                     </div>
                   </div>
                 </CardContent>

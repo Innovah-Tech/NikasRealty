@@ -136,9 +136,9 @@ const About = () => {
               <p className="text-muted-foreground">Loading team members...</p>
             </div>
           ) : (
-            <div className="flex flex-wrap gap-8 justify-center items-stretch">
+          <div className="flex flex-wrap gap-8 justify-center items-stretch">
               {allTeamMembers.map((member) => (
-                <TeamMember
+            <TeamMember
                   key={member.id}
                   name={member.name}
                   title={member.role}
@@ -147,7 +147,7 @@ const About = () => {
                   objectPosition={member.id?.includes('native-monica') ? "object-top" : "object-center"}
                 />
               ))}
-            </div>
+          </div>
           )}
         </div>
       </div>

@@ -311,7 +311,13 @@ const Properties = () => {
                       {property.status && (
                         <Badge 
                           variant={property.status === "for-sale" || property.status === "For Sale" ? "default" : property.status === "for-rent" || property.status === "For Rent" ? "secondary" : "outline"}
-                          className="font-semibold shadow-lg"
+                          className={`font-semibold shadow-lg ${
+                            property.status === "for-sale" || property.status === "For Sale" 
+                              ? "!text-white bg-primary" 
+                              : property.status === "for-rent" || property.status === "For Rent"
+                              ? "!text-white bg-secondary"
+                              : "!text-white bg-muted"
+                          }`}
                         >
                           {property.status === "for-sale" || property.status === "For Sale" 
                             ? "For Sale" 

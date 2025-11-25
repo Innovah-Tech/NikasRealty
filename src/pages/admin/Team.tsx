@@ -94,7 +94,7 @@ const AdminTeam = () => {
                   <div className="text-center mb-4">
                     <div className="mx-auto mb-4 h-24 w-24 overflow-hidden rounded-full bg-muted border-4 border-primary">
                       {member.photo ? (
-                        <img src={member.photo} alt={member.name} className="h-full w-full object-cover" />
+                      <img src={member.photo} alt={member.name} className="h-full w-full object-cover" />
                       ) : (
                         <div className="h-full w-full flex items-center justify-center text-muted-foreground">
                           <PlusCircle className="h-8 w-8" />
