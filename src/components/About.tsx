@@ -3,6 +3,24 @@ import { useEffect, useState } from "react";
 import aboutImage from "@/assets/images/about.jpg";
 import { teamService, type TeamMember } from "@/services/firestore/team";
 
+// Default/native team members that always appear
+const DEFAULT_TEAM_MEMBERS: TeamMember[] = [
+  {
+    id: 'native-monica',
+    name: 'Monicah Githinji',
+    role: 'Lead Estate Agent',
+    photo: '/images/1000292924.jpg',
+    bio: 'Monicah is passionate about matching clients to the perfect property and is known for her expertise and client-first approach throughout all stages of the buying and selling experience.',
+  },
+  {
+    id: 'native-brian',
+    name: 'Brian Wachira',
+    role: 'Estate Agent',
+    photo: '/images/1000295242.jpg',
+    bio: 'Brian is committed to delivering seamless real estate services, leveraging local knowledge and strong client relationships to achieve successful outcomes.',
+  },
+];
+
 const About = () => {
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
   const [loading, setLoading] = useState(true);
@@ -17,10 +35,15 @@ const About = () => {
       setTeamMembers(members);
     } catch (error) {
       console.error("Error fetching team members:", error);
+      // On error, still show default members
+      setTeamMembers([]);
     } finally {
       setLoading(false);
     }
   };
+
+  // Combine default members with Firestore members, ensuring defaults always appear first
+  const allTeamMembers = [...DEFAULT_TEAM_MEMBERS, ...teamMembers];
   const stats = [
     { icon: Users, value: "100+", label: "Happy Clients" },
     { icon: Award, value: "6+", label: "Years Experience" },
@@ -112,20 +135,16 @@ const About = () => {
             <div className="flex justify-center items-center py-12">
               <p className="text-muted-foreground">Loading team members...</p>
             </div>
-          ) : teamMembers.length === 0 ? (
-            <div className="flex justify-center items-center py-12">
-              <p className="text-muted-foreground">No team members to display</p>
-            </div>
           ) : (
             <div className="flex flex-wrap gap-8 justify-center items-stretch">
-              {teamMembers.map((member) => (
+              {allTeamMembers.map((member) => (
                 <TeamMember
                   key={member.id}
                   name={member.name}
                   title={member.role}
                   image={member.photo || "/placeholder.svg"}
                   bio={member.bio || ""}
-                  objectPosition="object-center"
+                  objectPosition={member.id?.includes('native-monica') ? "object-top" : "object-center"}
                 />
               ))}
             </div>
