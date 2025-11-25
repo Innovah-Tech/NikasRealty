@@ -10,6 +10,8 @@ import { teamService } from "@/services/firestore/team";
 import { firebaseStorage } from "@/services/firebaseStorage";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
+import { sanitizeText, sanitizeEmail, sanitizePhone } from "@/utils/sanitize";
+import { validateName, validateEmail, validatePhone } from "@/utils/validate";
 
 const AdminAddTeamMember = () => {
   const [formData, setFormData] = useState({
@@ -63,29 +65,53 @@ const AdminAddTeamMember = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.name.trim() || !formData.role.trim()) {
-      toast.error("Please fill in at least name and role");
+    // Validate inputs
+    const nameValidation = validateName(formData.name);
+    if (!nameValidation.valid) {
+      toast.error(nameValidation.error || 'Invalid name');
       return;
+    }
+    
+    const roleValidation = validateName(formData.role);
+    if (!roleValidation.valid) {
+      toast.error('Role is required');
+      return;
+    }
+    
+    if (formData.email) {
+      const emailValidation = validateEmail(formData.email, false);
+      if (!emailValidation.valid) {
+        toast.error(emailValidation.error || 'Invalid email');
+        return;
+      }
+    }
+    
+    if (formData.phone) {
+      const phoneValidation = validatePhone(formData.phone);
+      if (!phoneValidation.valid) {
+        toast.error(phoneValidation.error || 'Invalid phone');
+        return;
+      }
     }
 
     setSubmitting(true);
 
     try {
+      // Sanitize all inputs
       await teamService.create({
-        name: formData.name.trim(),
-        role: formData.role.trim(),
-        email: formData.email.trim() || undefined,
-        phone: formData.phone.trim() || undefined,
-        bio: formData.bio.trim() || undefined,
+        name: sanitizeText(formData.name),
+        role: sanitizeText(formData.role),
+        email: formData.email ? sanitizeEmail(formData.email) : undefined,
+        phone: formData.phone ? sanitizePhone(formData.phone) : undefined,
+        bio: formData.bio ? sanitizeText(formData.bio) : undefined,
         photo: photo || undefined,
       });
       
       toast.success("Team member added successfully");
       navigate("/admin/team");
     } catch (error: any) {
-      const errorMessage = error?.message || "Failed to add team member";
-      toast.error(errorMessage);
       console.error("Error adding team member:", error);
+      toast.error("Failed to add team member. Please try again.");
     } finally {
       setSubmitting(false);
     }

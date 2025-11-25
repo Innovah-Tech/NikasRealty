@@ -19,6 +19,8 @@ import { firebaseStorage } from "@/services/firebaseStorage";
 import { toast } from "sonner";
 import { useNavigate, useParams } from "react-router-dom";
 import { PROPERTY_CONFIG } from "@/config/constants";
+import { sanitizeText, sanitizeArray } from "@/utils/sanitize";
+import { validateTitle, validateDescription, validatePrice, validateFeatures } from "@/utils/validate";
 
 const propertyTypeOptions = PROPERTY_CONFIG.propertyTypes;
 const locationOptions = PROPERTY_CONFIG.locations;
@@ -128,41 +130,64 @@ const AdminEditProperty = () => {
       toast.error("Property ID is missing");
       return;
     }
+    
+    // Validate inputs
+    const titleValidation = validateTitle(formData.title);
+    if (!titleValidation.valid) {
+      toast.error(titleValidation.error || 'Invalid title');
+      return;
+    }
+    
+    const descriptionValidation = validateDescription(formData.description);
+    if (!descriptionValidation.valid) {
+      toast.error(descriptionValidation.error || 'Invalid description');
+      return;
+    }
+    
+    const priceValidation = validatePrice(formData.price);
+    if (!priceValidation.valid) {
+      toast.error(priceValidation.error || 'Invalid price');
+      return;
+    }
+    
+    if (!formData.type || !formData.location || !formData.status) {
+      toast.error('Please fill in all required fields');
+      return;
+    }
+    
     setSubmitting(true);
 
     try {
       const imageUrls = images.length > 0 ? images : [];
+      const featuresArray = formData.features
+        ? formData.features.split(",").map((f) => f.trim()).filter(Boolean)
+        : [];
       
-      // Log update attempt for debugging (works in both dev and production)
-      console.log('🔄 Attempting to update property:', {
-        id,
-        title: formData.title,
-        price: Number(formData.price),
-        images: imageUrls.length,
-        bedrooms: formData.bedrooms ? Number(formData.bedrooms) : undefined,
-        bathrooms: formData.bathrooms ? Number(formData.bathrooms) : undefined,
-        status: formData.status,
-        featured: formData.featured,
-      });
+      const featuresValidation = validateFeatures(featuresArray);
+      if (!featuresValidation.valid) {
+        toast.error(featuresValidation.error || 'Invalid features');
+        setSubmitting(false);
+        return;
+      }
+      
+      const sanitizedFeatures = sanitizeArray(featuresArray);
 
       await propertiesService.update(id, {
-        title: formData.title,
-        description: formData.description,
+        title: sanitizeText(formData.title),
+        description: sanitizeText(formData.description),
         type: formData.type,
         price: Number(formData.price),
-        location: formData.location,
+        location: sanitizeText(formData.location),
         status: formData.status,
         bedrooms: formData.bedrooms ? Number(formData.bedrooms) : undefined,
         bathrooms: formData.bathrooms ? Number(formData.bathrooms) : undefined,
-        size: formData.size || undefined,
+        size: formData.size ? sanitizeText(formData.size) : undefined,
         featured: formData.featured,
-        features: formData.features
-          ? formData.features.split(",").map((f) => f.trim()).filter(Boolean)
-          : [],
+        features: sanitizedFeatures,
         images: imageUrls,
       });
 
-      toast.success(`Property "${formData.title}" updated successfully!`);
+      toast.success(`Property updated successfully!`);
       navigate("/admin/properties");
     } catch (error: any) {
       console.error('Error updating property:', error);

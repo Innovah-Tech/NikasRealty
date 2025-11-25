@@ -6,12 +6,13 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Upload, X } from "lucide-react";
+import { Upload, X, ArrowLeft } from "lucide-react";
 import { blogsService } from "@/services/firestore/blogs";
 import { firebaseStorage } from "@/services/firebaseStorage";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft } from "lucide-react";
+import { sanitizeText, sanitizeRichText } from "@/utils/sanitize";
+import { validateTitle, validateMessage } from "@/utils/validate";
 
 const AdminAddBlog = () => {
   const navigate = useNavigate();
@@ -60,19 +61,48 @@ const AdminAddBlog = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate inputs
+    const titleValidation = validateTitle(formData.title);
+    if (!titleValidation.valid) {
+      toast.error(titleValidation.error || 'Invalid title');
+      return;
+    }
+    
+    const summaryValidation = validateMessage(formData.summary, 'Summary');
+    if (!summaryValidation.valid) {
+      toast.error(summaryValidation.error || 'Invalid summary');
+      return;
+    }
+    
+    const contentValidation = validateMessage(formData.content, 'Content');
+    if (!contentValidation.valid) {
+      toast.error(contentValidation.error || 'Invalid content');
+      return;
+    }
+    
     setSubmitting(true);
 
     try {
-      await blogsService.create(formData);
+      // Sanitize inputs
+      const sanitizedData = {
+        title: sanitizeText(formData.title),
+        summary: sanitizeText(formData.summary),
+        content: sanitizeRichText(formData.content), // Allow some HTML for blog content
+        image: formData.image,
+        author: sanitizeText(formData.author),
+        status: formData.status,
+      };
+      
+      await blogsService.create(sanitizedData);
       const statusMessage = formData.status === "published" 
         ? "Blog post created and published! It will appear on the public blog page immediately."
         : "Blog post created as draft. Set status to 'Published' to make it visible on the public blog page.";
       toast.success(statusMessage);
       navigate("/admin/blogs");
     } catch (error: any) {
-      const errorMessage = error.message || error.response?.data?.error || "Failed to create blog post";
-      toast.error(errorMessage);
       console.error("Error creating blog:", error);
+      toast.error("Failed to create blog post. Please try again.");
     } finally {
       setSubmitting(false);
     }

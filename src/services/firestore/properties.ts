@@ -384,14 +384,19 @@ export const propertiesService = {
       // Verify authentication before attempting update
       const { auth } = await import('@/lib/firebase');
       if (!auth.currentUser) {
-        console.error('❌ No authenticated user found');
+        if (import.meta.env.DEV) {
+          console.error('❌ No authenticated user found');
+        }
         throw new Error('You must be logged in to update properties. Please log in again.');
       }
       
-      console.log('✅ User authenticated:', {
-        uid: auth.currentUser.uid,
-        email: auth.currentUser.email,
-      });
+      // Don't log user email for security - only log in development
+      if (import.meta.env.DEV) {
+        console.log('✅ User authenticated:', {
+          uid: auth.currentUser.uid,
+          // Don't log email even in dev for security
+        });
+      }
       
       const docRef = doc(db, COLLECTION_NAME, id);
       
@@ -417,25 +422,26 @@ export const propertiesService = {
         }
       });
       
-      console.log('🔄 Attempting Firestore update:', {
-        id,
-        hasAuth: !!auth.currentUser,
-        updateFields: Object.keys(updateData),
-      });
+      if (import.meta.env.DEV) {
+        console.log('🔄 Attempting Firestore update:', {
+          id,
+          hasAuth: !!auth.currentUser,
+          updateFields: Object.keys(updateData),
+        });
+      }
       
       await updateDoc(docRef, updateData);
       
-      console.log('✅ Property updated successfully:', id);
+      // Silent success (only log errors)
       
       return await this.getById(id);
     } catch (error: any) {
-      // Always log errors for debugging in production
+      // Log errors (but don't expose sensitive details)
       console.error('❌ Error updating property:', {
         id,
         errorCode: error?.code,
         errorMessage: error?.message,
-        errorDetails: error,
-        updateData: Object.keys(updateData),
+        // Don't log full error or updateData for security
       });
       
       // Provide more specific error messages

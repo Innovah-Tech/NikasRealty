@@ -19,6 +19,8 @@ import { firebaseStorage } from "@/services/firebaseStorage";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { PROPERTY_CONFIG } from "@/config/constants";
+import { sanitizeText, sanitizeArray } from "@/utils/sanitize";
+import { validateTitle, validateDescription, validatePrice, validateFeatures } from "@/utils/validate";
 
 const propertyTypeOptions = PROPERTY_CONFIG.propertyTypes;
 const locationOptions = PROPERTY_CONFIG.locations;
@@ -81,40 +83,69 @@ const AdminAddProperty = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate inputs
+    const titleValidation = validateTitle(formData.title);
+    if (!titleValidation.valid) {
+      toast.error(titleValidation.error || 'Invalid title');
+      return;
+    }
+    
+    const descriptionValidation = validateDescription(formData.description);
+    if (!descriptionValidation.valid) {
+      toast.error(descriptionValidation.error || 'Invalid description');
+      return;
+    }
+    
+    const priceValidation = validatePrice(formData.price);
+    if (!priceValidation.valid) {
+      toast.error(priceValidation.error || 'Invalid price');
+      return;
+    }
+    
+    if (!formData.type || !formData.location || !formData.status) {
+      toast.error('Please fill in all required fields');
+      return;
+    }
+    
     setSubmitting(true);
 
     try {
-      // Ensure images array contains image URLs
+      // Sanitize and prepare data
       const imageUrls = images.length > 0 ? images : [];
+      const featuresArray = formData.features
+        ? formData.features.split(",").map((f) => f.trim()).filter(Boolean)
+        : [];
       
-      if (import.meta.env.DEV) {
-        console.log('Creating property with images:', imageUrls);
+      const featuresValidation = validateFeatures(featuresArray);
+      if (!featuresValidation.valid) {
+        toast.error(featuresValidation.error || 'Invalid features');
+        setSubmitting(false);
+        return;
       }
+      
+      const sanitizedFeatures = sanitizeArray(featuresArray);
 
       const result = await propertiesService.create({
-        title: formData.title,
-        description: formData.description,
+        title: sanitizeText(formData.title),
+        description: sanitizeText(formData.description),
         type: formData.type,
         price: Number(formData.price),
-        location: formData.location,
+        location: sanitizeText(formData.location),
         status: formData.status,
         bedrooms: formData.bedrooms ? Number(formData.bedrooms) : undefined,
         bathrooms: formData.bathrooms ? Number(formData.bathrooms) : undefined,
-        size: formData.size || undefined,
+        size: formData.size ? sanitizeText(formData.size) : undefined,
         featured: formData.featured,
-        features: formData.features
-          ? formData.features.split(",").map((f) => f.trim()).filter(Boolean)
-          : [],
+        features: sanitizedFeatures,
         images: imageUrls,
       });
 
-      console.log('Property created successfully:', result);
-      toast.success(`Property "${formData.title}" added successfully with ${imageUrls.length} image${imageUrls.length !== 1 ? 's' : ''}!`);
+      toast.success(`Property "${sanitizeText(formData.title)}" added successfully with ${imageUrls.length} image${imageUrls.length !== 1 ? 's' : ''}!`);
       navigate("/admin/properties");
     } catch (error: any) {
       console.error('Error creating property:', error);
-      const errorMessage = error?.message || "Failed to add property";
-      toast.error(errorMessage);
+      toast.error("Failed to add property. Please try again.");
     } finally {
       setSubmitting(false);
     }

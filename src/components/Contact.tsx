@@ -5,6 +5,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
 import { Phone, Mail, Instagram, Video, Send, MapPin } from "lucide-react";
 import { toast } from "sonner";
+import { sanitizeText, sanitizeEmail, sanitizePhone } from "@/utils/sanitize";
+import { validateName, validateEmail, validatePhone, validateMessage } from "@/utils/validate";
 
 const Contact = () => {
   const [formData, setFormData] = useState({
@@ -17,24 +19,53 @@ const Contact = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate inputs
+    const nameValidation = validateName(formData.name);
+    if (!nameValidation.valid) {
+      toast.error(nameValidation.error || 'Invalid name');
+      return;
+    }
+    
+    const phoneValidation = validatePhone(formData.phone);
+    if (!phoneValidation.valid) {
+      toast.error(phoneValidation.error || 'Invalid phone number');
+      return;
+    }
+    
+    const emailValidation = validateEmail(formData.email, false);
+    if (!emailValidation.valid) {
+      toast.error(emailValidation.error || 'Invalid email');
+      return;
+    }
+    
+    const messageValidation = validateMessage(formData.message);
+    if (!messageValidation.valid) {
+      toast.error(messageValidation.error || 'Invalid message');
+      return;
+    }
+    
     setIsSubmitting(true);
 
-        try {
-          const { requestsService } = await import('@/services/firestore/requests');
-          await requestsService.create({
-            name: formData.name,
-            email: formData.email || undefined,
-            phone: formData.phone,
-            message: formData.message,
-          });
+    try {
+      // Sanitize all inputs before sending
+      const sanitizedData = {
+        name: sanitizeText(formData.name),
+        email: formData.email ? sanitizeEmail(formData.email) : undefined,
+        phone: sanitizePhone(formData.phone),
+        message: sanitizeText(formData.message),
+      };
+      
+      const { requestsService } = await import('@/services/firestore/requests');
+      await requestsService.create(sanitizedData);
 
-          toast.success("Message sent successfully! We'll get back to you soon.");
+      toast.success("Message sent successfully! We'll get back to you soon.");
       
       // Reset form
       setFormData({ name: "", email: "", phone: "", message: "" });
     } catch (error) {
       console.error('Error submitting form:', error);
-      toast.error(error instanceof Error ? error.message : "Failed to send message. Please try again.");
+      toast.error("Failed to send message. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
