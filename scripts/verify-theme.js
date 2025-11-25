@@ -1,6 +1,5 @@
 // This script verifies that theme colors are correctly applied in the production build
-
-console.log('🔍 Verifying theme colors in production build...');
+// Silent verification - only logs to window object for debugging if needed
 
 // Check if theme colors are correctly defined
 const root = document.documentElement;
@@ -26,9 +25,7 @@ const themeCheck = {
   },
 };
 
-console.log('🎨 Theme Verification Results:', themeCheck);
-
-// Log to the window object for easier debugging
+// Log to the window object for debugging (accessible via window.__THEME_VERIFICATION)
 window.__THEME_VERIFICATION = {
   ...themeCheck,
   buildTime: new Date().toISOString(),

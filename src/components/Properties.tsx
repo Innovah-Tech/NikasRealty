@@ -41,12 +41,10 @@ const Properties = () => {
 
   useEffect(() => {
     const defaultProperties = getFallbackProperties();
-    console.log('Default properties loaded:', defaultProperties.length, defaultProperties.map(p => ({ id: p.id, title: p.title, status: p.status })));
     
     const fetchAll = async () => {
       try {
         const data = await propertiesService.getAll();
-        console.log('Properties fetched from Firestore:', data.length, data);
         
         // Filter out any properties that might have the same ID as defaults (shouldn't happen, but safety check)
         const firestoreProperties = (data || []).filter(
@@ -57,20 +55,13 @@ const Properties = () => {
         // Default properties appear first, then Firestore properties
         const combined = [...defaultProperties, ...firestoreProperties];
         
-        console.log('Combined properties:', combined.length, `(${defaultProperties.length} default + ${firestoreProperties.length} from Firestore)`);
-        console.log('Default property details:', defaultProperties.map(p => ({
-          id: p.id,
-          title: p.title,
-          status: p.status,
-          price: p.price,
-          location: p.location,
-          type: p.type
-        })));
+        if (import.meta.env.DEV) {
+          console.log('Properties loaded:', combined.length, `(${defaultProperties.length} default + ${firestoreProperties.length} from Firestore)`);
+        }
         setAllProperties(combined);
       } catch (error) {
         console.error("Failed to fetch properties:", error);
         // On error, still show default properties
-        console.log('Using default properties only due to error');
         setAllProperties(defaultProperties);
       } finally {
         setLoading(false);
@@ -101,15 +92,7 @@ const Properties = () => {
     const priceNum = typeof p.price === "number" ? p.price : parsePrice(String(p.price));
     const matchesPrice = priceNum >= priceRange[0] && priceNum <= priceRange[1];
     
-    if (import.meta.env.DEV && !matchesPrice) {
-      console.log('Price filter failed:', {
-        property: p.title,
-        price: p.price,
-        priceNum,
-        priceRange,
-        inRange: priceNum >= priceRange[0] && priceNum <= priceRange[1]
-      });
-    }
+    // Price filter check (silent)
     
     const matches = (
       matchesSearch &&
@@ -122,34 +105,12 @@ const Properties = () => {
       matchesPrice
     );
     
-    if (import.meta.env.DEV && !matches && allProperties.length > 0) {
-      console.log('Property filtered out:', p.title, {
-        matchesSearch, 
-        matchesBedrooms, 
-        matchesFeatured, 
-        matchesType, 
-        matchesStatus, 
-        matchesLocation, 
-        matchesCompletion, 
-        matchesPrice,
-        price: p.price,
-        priceNum,
-        priceRange,
-        location: p.location,
-        locationFilter: location,
-        type: p.type,
-        typeFilter: propertyType,
-        status: p.status,
-        statusFilter: status
-      });
-    }
+    // Property filter check (silent)
     
     return matches;
   });
   
-  if (import.meta.env.DEV) {
-    console.log('Filtered properties:', filteredProperties.length, 'out of', allProperties.length);
-  }
+  // Filtered properties count (only in development)
 
   const sortedProperties = [...filteredProperties].sort((a, b) => {
     const priceA = typeof a.price === "number" ? a.price : parsePrice(String(a.price));
@@ -161,10 +122,6 @@ const Properties = () => {
 
   const featuredSlides = (allProperties.length ? allProperties : []).slice(0, 5).map((p) => {
     const slideImage = p.images?.[0] || p.image || "/images/property1.jpg";
-    
-    if (import.meta.env.DEV) {
-      console.log('Featured slide image for', p.title, ':', slideImage);
-    }
     
     return {
       id: p.id || Math.random(),
@@ -355,9 +312,7 @@ const Properties = () => {
                         (e.target as HTMLImageElement).src = "/images/property1.jpg";
                       }}
                       onLoad={() => {
-                        if (import.meta.env.DEV) {
-                          console.log('Image loaded successfully:', mainImage);
-                        }
+                        // Image loaded successfully (silent)
                       }}
                     />
                     <div className="absolute top-4 right-4 flex flex-col gap-2">

@@ -22,10 +22,7 @@ const applyThemeColors = () => {
     root.style.setProperty(key, value, 'important');
   });
 
-  // Log theme status for debugging
-  if (import.meta.env.PROD) {
-    console.log('🎨 Theme colors applied in production');
-  }
+  // Theme colors applied silently
 };
 
 // Run immediately and also after DOM is fully loaded
@@ -43,32 +40,15 @@ if (typeof window !== 'undefined') {
   // Also apply on page show (for back/forward cache)
   window.addEventListener('pageshow', applyThemeColors);
   
-  // Verify theme color is loaded
-  setTimeout(() => {
-    const primaryColor = getComputedStyle(root).getPropertyValue('--primary');
-    console.log('🎨 Theme Color Check:', {
-      primaryColor,
-      expected: THEME_CONFIG.primaryColorHSL,
-      matches: primaryColor.trim() === THEME_CONFIG.primaryColorHSL,
-      isProduction: !import.meta.env.DEV,
-      buildTime: new Date().toISOString(),
-      cssLoaded: !!document.querySelector('style[data-vite-dev-id], link[rel="stylesheet"]'),
-    });
-    
-    // Also log the actual computed color
-    const testElement = document.createElement('div');
-    testElement.style.color = 'hsl(var(--primary))';
-    document.body.appendChild(testElement);
-    const computedColor = getComputedStyle(testElement).color;
-    console.log('🎨 Computed Primary Color:', computedColor);
-    console.log('🎨 Expected Color:', THEME_CONFIG.primaryColor);
-    document.body.removeChild(testElement);
-    
-    // If color doesn't match, log warning
-    if (primaryColor.trim() !== THEME_CONFIG.primaryColorHSL) {
-      console.warn('⚠️ Theme color mismatch! CSS may be cached. JavaScript fallback applied.');
-    }
-  }, 1000);
+  // Theme color verification (only in development)
+  if (import.meta.env.DEV) {
+    setTimeout(() => {
+      const primaryColor = getComputedStyle(root).getPropertyValue('--primary');
+      if (primaryColor.trim() !== THEME_CONFIG.primaryColorHSL) {
+        console.warn('⚠️ Theme color mismatch! CSS may be cached. JavaScript fallback applied.');
+      }
+    }, 1000);
+  }
 }
 
 // Suppress non-critical Firebase token refresh errors
@@ -99,22 +79,9 @@ if (typeof window !== 'undefined') {
   };
 }
 
-// Startup banner for production debugging
-console.log(`%c🚀 ${APP_CONFIG.name} App Starting...`, `color: ${THEME_CONFIG.primaryColor}; font-size: 16px; font-weight: bold;`);
-console.log('Build Info:', {
-  mode: import.meta.env.MODE,
-  isDev: import.meta.env.DEV,
-  isProd: import.meta.env.PROD,
-  timestamp: new Date().toISOString(),
-});
-
-// Check which CSS files are loaded
-if (typeof window !== 'undefined') {
-  const stylesheets = Array.from(document.querySelectorAll('link[rel="stylesheet"]'));
-  console.log('📄 Loaded Stylesheets:', stylesheets.map(link => ({
-    href: link.getAttribute('href'),
-    integrity: link.getAttribute('integrity'),
-  })));
+// Startup banner (only in development)
+if (import.meta.env.DEV) {
+  console.log(`%c🚀 ${APP_CONFIG.name} App Starting...`, `color: ${THEME_CONFIG.primaryColor}; font-size: 16px; font-weight: bold;`);
 }
 
 createRoot(document.getElementById("root")!).render(
