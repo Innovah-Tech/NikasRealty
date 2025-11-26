@@ -7,7 +7,7 @@
 export const THEME_CONFIG = {
   primaryColor: '#DA9100',
   primaryColorHSL: '40 100% 43%',
-  gradientGold: 'linear-gradient(135deg, hsl(40 100% 35%), hsl(40 100% 50%))',
+  gradientGold: 'linear-gradient(135deg, hsl(40 100% 41%), hsl(40 100% 45%))',
   shadowLuxury: '0 10px 40px -10px hsl(40 100% 43% / 0.3)',
 } as const;
 

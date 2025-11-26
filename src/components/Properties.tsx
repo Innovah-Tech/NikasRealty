@@ -297,7 +297,7 @@ const Properties = () => {
                     <img
                       src={mainImage}
                       alt={property.title}
-                      className="w-full h-full object-cover group-hover:scale-110 transition-smooth"
+                      className="w-full h-full object-contain group-hover:scale-110 transition-smooth"
                       loading="lazy"
                       onError={(e) => {
                         console.error('Image failed to load:', mainImage, 'for property:', property.title);
@@ -313,7 +313,7 @@ const Properties = () => {
                           variant={property.status === "for-sale" || property.status === "For Sale" ? "default" : property.status === "for-rent" || property.status === "For Rent" ? "secondary" : "outline"}
                           className={`font-semibold shadow-lg ${
                             property.status === "for-sale" || property.status === "For Sale" 
-                              ? "!text-white bg-primary" 
+                              ? "gradient-gold text-secondary" 
                               : property.status === "for-rent" || property.status === "For Rent"
                               ? "!text-white bg-secondary"
                               : "!text-white bg-muted"
@@ -342,7 +342,11 @@ const Properties = () => {
                       {property.status && (
                         <Badge 
                           variant={property.status === "for-sale" || property.status === "For Sale" ? "default" : property.status === "for-rent" || property.status === "For Rent" ? "secondary" : "outline"}
-                          className="font-semibold"
+                          className={`font-semibold ${
+                            property.status === "for-sale" || property.status === "For Sale" 
+                              ? "gradient-gold text-secondary" 
+                              : ""
+                          }`}
                         >
                           {property.status === "for-sale" || property.status === "For Sale" 
                             ? "For Sale" 

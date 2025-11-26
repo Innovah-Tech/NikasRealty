@@ -356,7 +356,7 @@ const AdminProperties = () => {
                       variant={property.status === "for-sale" || property.status === "For Sale" ? "default" : property.status === "for-rent" || property.status === "For Rent" ? "secondary" : "outline"}
                       className={`font-semibold ${
                         property.status === "for-sale" || property.status === "For Sale" 
-                          ? "!text-white bg-primary" 
+                          ? "gradient-gold text-secondary" 
                           : property.status === "for-rent" || property.status === "For Rent"
                           ? "!text-white bg-secondary"
                           : "!text-white bg-muted"
