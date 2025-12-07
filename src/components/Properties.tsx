@@ -307,7 +307,7 @@ const Properties = () => {
                         // Image loaded successfully (silent)
                       }}
                     />
-                    <div className="absolute top-4 right-4 flex flex-col gap-2">
+                    <div className="absolute top-4 right-4 flex flex-row flex-wrap gap-2">
                       {property.status && (
                         <Badge 
                           variant={property.status === "for-sale" || property.status === "For Sale" ? "default" : property.status === "for-rent" || property.status === "For Rent" ? "secondary" : "outline"}
