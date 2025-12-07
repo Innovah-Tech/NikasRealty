@@ -20,6 +20,7 @@ export type Property = {
   type: string;
   status: string;
   projectStage?: string;
+  offplan?: boolean;
   features?: string[];
   paymentOptions?: string[];
   completionDate?: string;
@@ -50,6 +51,7 @@ export const properties: Property[] = [
     type: "Townhouse",
     status: "For Sale",
     projectStage: "Offplan",
+    offplan: true,
     features: [
       "Prime location opposite Wilson Airport",
       "Spacious duplexes (2,650 sqft) and triplexes (3,750 sqft)",
@@ -88,6 +90,7 @@ export const properties: Property[] = [
     type: "Maisonette",
     status: "For Sale",
     projectStage: "Offplan",
+    offplan: true,
     features: [
       "4 spacious bedrooms (all ensuite)",
       "Detached Servant Quarter (DSQ)",

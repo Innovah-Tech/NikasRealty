@@ -17,6 +17,7 @@ const mappedFallbackProperties: FirestoreProperty[] = staticProperties.map((prop
   images: property.gallery && property.gallery.length > 0 ? property.gallery : [property.image],
   gallery: property.gallery,
   featured: property.featured,
+  offplan: property.offplan || false,
   projectStage: property.projectStage,
   paymentOptions: property.paymentOptions,
   completionDate: property.completionDate,
