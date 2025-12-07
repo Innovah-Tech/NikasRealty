@@ -169,7 +169,7 @@ const PropertyDetailsPage = () => {
               {property.featured && (
                 <Badge className="gradient-gold text-secondary font-semibold">Featured</Badge>
               )}
-              {property.offplan && (
+              {property.offplan === true && (
                 <Badge className="bg-blue-600 text-white font-semibold">Off-plan</Badge>
               )}
               <Badge variant="secondary" className="capitalize bg-white/90 text-foreground">{property.type}</Badge>

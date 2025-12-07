@@ -333,7 +333,7 @@ const Properties = () => {
                           Featured
                         </Badge>
                       )}
-                      {property.offplan && (
+                      {property.offplan === true && (
                         <Badge className="bg-blue-600 text-white font-semibold shadow-lg">
                           Off-plan
                         </Badge>
@@ -377,7 +377,7 @@ const Properties = () => {
                           </Badge>
                         )}
                       </div>
-                      {property.offplan && (
+                      {property.offplan === true && (
                         <Badge className="bg-blue-600 text-white font-semibold w-fit">Off-plan</Badge>
                       )}
                     </div>
