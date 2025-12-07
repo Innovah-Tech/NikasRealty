@@ -343,40 +343,42 @@ const Properties = () => {
 
                   {/* Content */}
                   <CardHeader>
-                    <div className="flex flex-wrap gap-2 mb-2">
-                      {property.status && (
-                        <Badge 
-                          variant={property.status === "for-sale" || property.status === "For Sale" ? "default" : property.status === "for-rent" || property.status === "For Rent" ? "secondary" : "outline"}
-                          className={`font-semibold ${
-                            property.status === "for-sale" || property.status === "For Sale" 
-                              ? "gradient-gold text-secondary" 
-                              : ""
-                          }`}
-                        >
-                          {property.status === "for-sale" || property.status === "For Sale" 
-                            ? "For Sale" 
-                            : property.status === "for-rent" || property.status === "For Rent"
-                            ? "For Rent"
-                            : property.status === "sold" || property.status === "Sold"
-                            ? "Sold"
-                            : property.status}
-                        </Badge>
-                      )}
-                      {property.featured && (
-                        <Badge className="gradient-gold text-secondary font-semibold">Featured</Badge>
-                      )}
+                    <div className="flex flex-col gap-2 mb-2">
+                      <div className="flex flex-wrap gap-2">
+                        {property.status && (
+                          <Badge 
+                            variant={property.status === "for-sale" || property.status === "For Sale" ? "default" : property.status === "for-rent" || property.status === "For Rent" ? "secondary" : "outline"}
+                            className={`font-semibold ${
+                              property.status === "for-sale" || property.status === "For Sale" 
+                                ? "gradient-gold text-secondary" 
+                                : ""
+                            }`}
+                          >
+                            {property.status === "for-sale" || property.status === "For Sale" 
+                              ? "For Sale" 
+                              : property.status === "for-rent" || property.status === "For Rent"
+                              ? "For Rent"
+                              : property.status === "sold" || property.status === "Sold"
+                              ? "Sold"
+                              : property.status}
+                          </Badge>
+                        )}
+                        {property.featured && (
+                          <Badge className="gradient-gold text-secondary font-semibold">Featured</Badge>
+                        )}
+                        {property.type && (
+                          <Badge variant="secondary" className="capitalize">
+                            {property.type}
+                          </Badge>
+                        )}
+                        {property.projectStage && (
+                          <Badge variant="outline" className="capitalize">
+                            {property.projectStage}
+                          </Badge>
+                        )}
+                      </div>
                       {property.offplan && (
-                        <Badge className="bg-blue-600 text-white font-semibold">Off-plan</Badge>
-                      )}
-                      {property.type && (
-                        <Badge variant="secondary" className="capitalize">
-                          {property.type}
-                        </Badge>
-                      )}
-                      {property.projectStage && (
-                        <Badge variant="outline" className="capitalize">
-                          {property.projectStage}
-                        </Badge>
+                        <Badge className="bg-blue-600 text-white font-semibold w-fit">Off-plan</Badge>
                       )}
                     </div>
                     <CardTitle className="text-xl group-hover:text-primary transition-smooth">
