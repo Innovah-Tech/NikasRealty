@@ -43,6 +43,7 @@ const AdminEditProperty = () => {
     bathrooms: "",
     size: "",
     featured: false,
+    offplan: false,
   });
   const [images, setImages] = useState<string[]>([]);
   const [useCustomLocation, setUseCustomLocation] = useState(false);
@@ -76,6 +77,7 @@ const AdminEditProperty = () => {
         bathrooms: property.bathrooms?.toString() || "",
         size: property.size || "",
         featured: property.featured || false,
+        offplan: property.offplan || false,
       });
       setImages(property.images || []);
       // Check if location is in the predefined list
@@ -183,6 +185,7 @@ const AdminEditProperty = () => {
         bathrooms: formData.bathrooms ? Number(formData.bathrooms) : undefined,
         size: formData.size ? sanitizeText(formData.size) : undefined,
         featured: formData.featured,
+        offplan: formData.offplan,
         features: sanitizedFeatures,
         images: imageUrls,
       });
@@ -412,6 +415,16 @@ const AdminEditProperty = () => {
                   />
                   <Label htmlFor="featured" className="cursor-pointer font-normal">
                     Mark as Featured Property
+                  </Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="offplan"
+                    checked={formData.offplan}
+                    onCheckedChange={(checked) => setFormData({ ...formData, offplan: checked === true })}
+                  />
+                  <Label htmlFor="offplan" className="cursor-pointer font-normal">
+                    Mark as Off-plan Property
                   </Label>
                 </div>
               </div>

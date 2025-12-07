@@ -38,6 +38,7 @@ const AdminAddProperty = () => {
     bathrooms: "",
     size: "",
     featured: false,
+    offplan: false,
   });
   const [images, setImages] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
@@ -137,6 +138,7 @@ const AdminAddProperty = () => {
         bathrooms: formData.bathrooms ? Number(formData.bathrooms) : undefined,
         size: formData.size ? sanitizeText(formData.size) : undefined,
         featured: formData.featured,
+        offplan: formData.offplan,
         features: sanitizedFeatures,
         images: imageUrls,
       });
@@ -332,6 +334,16 @@ const AdminAddProperty = () => {
                   />
                   <Label htmlFor="featured" className="cursor-pointer font-normal">
                     Mark as Featured Property
+                  </Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="offplan"
+                    checked={formData.offplan}
+                    onCheckedChange={(checked) => setFormData({ ...formData, offplan: checked === true })}
+                  />
+                  <Label htmlFor="offplan" className="cursor-pointer font-normal">
+                    Mark as Off-plan Property
                   </Label>
                 </div>
               </div>

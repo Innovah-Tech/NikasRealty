@@ -31,6 +31,7 @@ export interface Property {
   images?: string[];
   gallery?: string[];
   featured?: boolean;
+  offplan?: boolean;
   completion?: string;
   projectStage?: string;
   features?: string[];

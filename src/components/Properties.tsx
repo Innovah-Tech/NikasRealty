@@ -333,6 +333,11 @@ const Properties = () => {
                           Featured
                         </Badge>
                       )}
+                      {property.offplan && (
+                        <Badge className="bg-blue-600 text-white font-semibold shadow-lg">
+                          Off-plan
+                        </Badge>
+                      )}
                     </div>
                   </div>
 
@@ -359,6 +364,9 @@ const Properties = () => {
                       )}
                       {property.featured && (
                         <Badge className="gradient-gold text-secondary font-semibold">Featured</Badge>
+                      )}
+                      {property.offplan && (
+                        <Badge className="bg-blue-600 text-white font-semibold">Off-plan</Badge>
                       )}
                       {property.type && (
                         <Badge variant="secondary" className="capitalize">
