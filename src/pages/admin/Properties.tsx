@@ -346,30 +346,35 @@ const AdminProperties = () => {
                     <h3 className="text-lg font-semibold text-foreground">{property.title}</h3>
                     <p className="text-sm text-muted-foreground">{property.location}</p>
                   </div>
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between gap-2 flex-wrap">
                     <span className="text-sm font-medium text-primary">
                       {typeof property.price === 'number'
                         ? `KSh ${property.price.toLocaleString()}`
                         : property.price}
                     </span>
-                    <Badge 
-                      variant={property.status === "for-sale" || property.status === "For Sale" ? "default" : property.status === "for-rent" || property.status === "For Rent" ? "secondary" : "outline"}
-                      className={`font-semibold ${
-                        property.status === "for-sale" || property.status === "For Sale" 
-                          ? "gradient-gold text-secondary" 
+                    <div className="flex items-center gap-2">
+                      {property.offplan === true && (
+                        <Badge className="bg-blue-600 text-white font-semibold">Off-plan</Badge>
+                      )}
+                      <Badge 
+                        variant={property.status === "for-sale" || property.status === "For Sale" ? "default" : property.status === "for-rent" || property.status === "For Rent" ? "secondary" : "outline"}
+                        className={`font-semibold ${
+                          property.status === "for-sale" || property.status === "For Sale" 
+                            ? "gradient-gold text-secondary" 
+                            : property.status === "for-rent" || property.status === "For Rent"
+                            ? "!text-white bg-secondary"
+                            : "!text-white bg-muted"
+                        }`}
+                      >
+                        {property.status === "for-sale" || property.status === "For Sale" 
+                          ? "For Sale" 
                           : property.status === "for-rent" || property.status === "For Rent"
-                          ? "!text-white bg-secondary"
-                          : "!text-white bg-muted"
-                      }`}
-                    >
-                      {property.status === "for-sale" || property.status === "For Sale" 
-                        ? "For Sale" 
-                        : property.status === "for-rent" || property.status === "For Rent"
-                        ? "For Rent"
-                        : property.status === "sold" || property.status === "Sold"
-                        ? "Sold"
-                        : property.status}
-                    </Badge>
+                          ? "For Rent"
+                          : property.status === "sold" || property.status === "Sold"
+                          ? "Sold"
+                          : property.status}
+                      </Badge>
+                    </div>
                   </div>
                   <div className="flex gap-2">
                     <Button 

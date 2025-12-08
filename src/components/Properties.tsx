@@ -333,6 +333,11 @@ const Properties = () => {
                           Featured
                         </Badge>
                       )}
+                      {property.offplan === true && (
+                        <Badge className="bg-blue-600 text-white font-semibold shadow-lg">
+                          Off-plan
+                        </Badge>
+                      )}
                     </div>
                   </div>
 
