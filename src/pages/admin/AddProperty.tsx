@@ -33,6 +33,7 @@ const AdminAddProperty = () => {
     price: "",
     location: "",
     status: "",
+    projectStage: "",
     features: "",
     bedrooms: "",
     bathrooms: "",
@@ -134,6 +135,7 @@ const AdminAddProperty = () => {
         price: Number(formData.price),
         location: sanitizeText(formData.location),
         status: formData.status,
+        projectStage: formData.projectStage ? sanitizeText(formData.projectStage) : undefined,
         bedrooms: formData.bedrooms ? Number(formData.bedrooms) : undefined,
         bathrooms: formData.bathrooms ? Number(formData.bathrooms) : undefined,
         size: formData.size ? sanitizeText(formData.size) : undefined,
@@ -273,6 +275,23 @@ const AdminAddProperty = () => {
                       <SelectItem value="for-sale">For Sale</SelectItem>
                       <SelectItem value="for-rent">For Rent</SelectItem>
                       <SelectItem value="sold">Sold</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="projectStage">Project Stage</Label>
+                  <Select
+                    value={formData.projectStage}
+                    onValueChange={(value) => setFormData({ ...formData, projectStage: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select stage" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Ready">Ready</SelectItem>
+                      <SelectItem value="Under Construction">Under Construction</SelectItem>
+                      <SelectItem value="Offplan">Off-plan</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>

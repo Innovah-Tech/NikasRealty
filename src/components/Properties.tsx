@@ -333,11 +333,6 @@ const Properties = () => {
                           Featured
                         </Badge>
                       )}
-                      {property.offplan === true && (
-                        <Badge className="bg-blue-600 text-white font-semibold shadow-lg">
-                          Off-plan
-                        </Badge>
-                      )}
                     </div>
                   </div>
 
@@ -377,9 +372,6 @@ const Properties = () => {
                           </Badge>
                         )}
                       </div>
-                      {property.offplan === true && (
-                        <Badge className="bg-blue-600 text-white font-semibold w-fit">Off-plan</Badge>
-                      )}
                     </div>
                     <CardTitle className="text-xl group-hover:text-primary transition-smooth">
                       {property.title}
