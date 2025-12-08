@@ -76,8 +76,16 @@ const Navbar = () => {
       <div className="container mx-auto px-4 lg:px-8">
         <div className="flex items-center justify-between h-24">
           {/* Logo */}
-          <Link to="/" className="flex items-center space-x-3 bg-white/90 backdrop-blur-sm p-2 rounded-lg shadow-sm hover:shadow-md transition-shadow" onClick={() => setIsOpen(false)}>
-            <img src={logo} alt="Nikas Realty" className="h-16 w-auto" />
+          <Link
+            to="/"
+            className="flex items-center gap-3 py-2 pr-2"
+            onClick={() => setIsOpen(false)}
+            aria-label="Nikas Realty home"
+          >
+            <img src={logo} alt="Nikas Realty" className="h-10 w-auto hidden sm:block" />
+            <span className="text-xl sm:text-2xl font-bold tracking-tight text-foreground">
+              Nikas Realty
+            </span>
           </Link>
 
           {/* Desktop Navigation */}
