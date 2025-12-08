@@ -86,7 +86,7 @@ const Navbar = () => {
               src={logo} 
               alt="Nikas Realty" 
               className="h-16 sm:h-20 md:h-24 w-auto object-contain"
-              style={{ mixBlendMode: 'normal' }}
+              style={{ mixBlendMode: 'normal', filter: 'brightness(1.3)' }}
             />
           </Link>
 
