@@ -133,10 +133,20 @@ export const blogsService = {
       const querySnapshot = await getDocs(collection(db, COLLECTION_NAME));
       let allBlogs = querySnapshot.docs.map(doc => {
         const data = doc.data();
+        // Normalize status field - handle various formats
+        let status = data.status;
+        if (status) {
+          status = String(status).toLowerCase().trim();
+          // Normalize to 'published' or 'draft'
+          status = status === 'published' ? 'published' : 'draft';
+        } else {
+          status = 'draft'; // Default to draft if status is missing
+        }
+        
         return {
           id: doc.id,
           ...data,
-          status: data.status || 'draft', // Default to draft if status is missing
+          status: status,
           publishedAt: data.publishedAt?.toDate(),
           createdAt: data.createdAt?.toDate(),
           updatedAt: data.updatedAt?.toDate(),
@@ -145,19 +155,32 @@ export const blogsService = {
 
       if (import.meta.env.DEV) {
         console.log(`Fetched ${allBlogs.length} total blogs from Firestore`);
-        allBlogs.forEach(blog => {
-          console.log(`Blog: ${blog.title}, Status: ${blog.status}, PublishedAt: ${blog.publishedAt}`);
-        });
+        if (allBlogs.length > 0) {
+          allBlogs.forEach(blog => {
+            console.log(`Blog: "${blog.title}", Status: "${blog.status}", PublishedAt: ${blog.publishedAt || 'N/A'}`);
+          });
+        } else {
+          console.warn('No blogs found in Firestore collection "blogs"');
+        }
       }
 
       // Filter by published status (client-side) - case insensitive
       let blogs = allBlogs.filter(b => {
-        const status = String(b.status || '').toLowerCase();
-        return status === 'published';
+        const status = String(b.status || '').toLowerCase().trim();
+        const isPublished = status === 'published';
+        if (import.meta.env.DEV && !isPublished) {
+          console.log(`Filtering out blog "${b.title}" - status: "${b.status}"`);
+        }
+        return isPublished;
       });
 
       if (import.meta.env.DEV) {
         console.log(`Filtered to ${blogs.length} published blogs`);
+        if (blogs.length === 0 && allBlogs.length > 0) {
+          console.warn('No published blogs found. Available statuses:', 
+            [...new Set(allBlogs.map(b => b.status))]);
+          console.warn('Tip: Set blog status to "published" in admin panel for blogs to appear on public page');
+        }
       }
 
       // Sort by createdAt descending (client-side)
@@ -172,8 +195,21 @@ export const blogsService = {
       }
 
       return blogs;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching published blogs:', error);
+      console.error('Error details:', {
+        message: error?.message,
+        code: error?.code,
+        name: error?.name
+      });
+      
+      // Provide more helpful error messages
+      if (error?.code === 'permission-denied') {
+        throw new Error('Permission denied. Please check Firestore security rules allow read access to the "blogs" collection.');
+      } else if (error?.code === 'unavailable') {
+        throw new Error('Firestore is unavailable. Please check your internet connection and Firebase configuration.');
+      }
+      
       throw error;
     }
   },

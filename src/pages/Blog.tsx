@@ -10,16 +10,17 @@ const Blog = () => {
   const navigate = useNavigate();
   const [posts, setPosts] = useState<Blog[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchBlogs = async () => {
       try {
         // Use getPublished() which is specifically for public blog page
         const data = await blogsService.getPublished();
-        setPosts(data);
+        setPosts(data || []);
         if (import.meta.env.DEV) {
-          console.log('Blog page: Fetched published blogs:', data.length);
-          if (data.length > 0) {
+          console.log('Blog page: Fetched published blogs:', data?.length || 0);
+          if (data && data.length > 0) {
             console.log('Sample blog:', {
               id: data[0].id,
               title: data[0].title,
@@ -28,12 +29,19 @@ const Blog = () => {
             });
           } else {
             console.warn('No published blogs found. Check if blogs are created with status="published"');
+            console.warn('Tip: In admin panel, make sure to set blog status to "Published" for them to appear here');
           }
         }
-      } catch (error) {
+      } catch (error: any) {
         console.error("Failed to fetch blogs:", error);
+        console.error("Error details:", {
+          message: error?.message,
+          code: error?.code,
+          stack: error?.stack
+        });
         // Show error to user
         setPosts([]);
+        setError(error?.message || "Failed to load blog posts. Please try again later.");
       } finally {
         setLoading(false);
       }
@@ -55,9 +63,25 @@ const Blog = () => {
           </div>
           {loading ? (
             <div className="flex justify-center py-16 text-muted-foreground">Loading blogs...</div>
+          ) : error ? (
+            <div className="text-center py-16">
+              <div className="text-destructive mb-4 font-semibold">Error loading blogs</div>
+              <p className="text-muted-foreground mb-4">{error}</p>
+              <Button 
+                variant="outline" 
+                onClick={() => {
+                  setError(null);
+                  setLoading(true);
+                  window.location.reload();
+                }}
+              >
+                Retry
+              </Button>
+            </div>
           ) : posts.length === 0 ? (
             <div className="text-center text-muted-foreground py-16">
-              No blog posts available yet. Check back soon!
+              <p className="mb-2">No blog posts available yet.</p>
+              <p className="text-sm">Check back soon or contact the administrator.</p>
             </div>
           ) : (
             <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-3">
