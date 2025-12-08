@@ -22,7 +22,6 @@ import { Slider } from "@/components/ui/slider";
 import { useNavigate } from "react-router-dom";
 import { propertiesService, type Property } from "@/services/firestore/properties";
 import { parsePrice } from "@/data/properties";
-import { getFallbackProperties } from "@/utils/fallbackProperties";
 import { PROPERTY_CONFIG } from "@/config/constants";
 
 const Properties = () => {
@@ -40,29 +39,17 @@ const Properties = () => {
   const [sortBy, setSortBy] = useState("newest");
 
   useEffect(() => {
-    const defaultProperties = getFallbackProperties();
-    
     const fetchAll = async () => {
       try {
         const data = await propertiesService.getAll();
         
-        // Filter out any properties that might have the same ID as defaults (shouldn't happen, but safety check)
-        const firestoreProperties = (data || []).filter(
-          (p) => p.id && !p.id.startsWith('fallback-')
-        );
-        
-        // Always combine default properties with Firestore properties
-        // Default properties appear first, then Firestore properties
-        const combined = [...defaultProperties, ...firestoreProperties];
-        
         if (import.meta.env.DEV) {
-          console.log('Properties loaded:', combined.length, `(${defaultProperties.length} default + ${firestoreProperties.length} from Firestore)`);
+          console.log('Properties loaded:', (data || []).length, 'from Firestore');
         }
-        setAllProperties(combined);
+        setAllProperties(data || []);
       } catch (error) {
         console.error("Failed to fetch properties:", error);
-        // On error, still show default properties
-        setAllProperties(defaultProperties);
+        setAllProperties([]);
       } finally {
         setLoading(false);
       }

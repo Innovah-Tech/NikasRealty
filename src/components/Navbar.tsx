@@ -78,24 +78,16 @@ const Navbar = () => {
           {/* Logo */}
           <Link
             to="/"
-            className="flex items-center gap-3 py-2 pr-2 group"
+            className="flex items-center py-2 pr-2 group"
             onClick={() => setIsOpen(false)}
             aria-label="Nikas Realty home"
           >
             <img 
               src={logo} 
               alt="Nikas Realty" 
-              className="h-12 sm:h-14 md:h-16 w-auto object-contain"
+              className="h-16 sm:h-20 md:h-24 w-auto object-contain"
               style={{ mixBlendMode: 'normal' }}
             />
-            <div className="flex items-baseline gap-2">
-              <span className="text-xl sm:text-2xl md:text-3xl font-serif font-bold tracking-tight text-foreground leading-none">
-                Nikas
-              </span>
-              <span className="text-[9px] sm:text-[10px] font-sans uppercase tracking-[0.15em] text-foreground/70 font-light border-l border-foreground/20 pl-2 leading-none">
-                Realty
-              </span>
-            </div>
           </Link>
 
           {/* Desktop Navigation */}

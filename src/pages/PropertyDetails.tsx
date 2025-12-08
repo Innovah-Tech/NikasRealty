@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { MapPin, Bed, Bath, Square, Loader2, ArrowLeft, X } from "lucide-react";
 import { propertiesService, type Property } from "@/services/firestore/properties";
-import { findFallbackProperty } from "@/utils/fallbackProperties";
 
 const PropertyDetailsPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -26,18 +25,9 @@ const PropertyDetailsPage = () => {
         const data = await propertiesService.getById(id);
         if (data) {
           setProperty(data);
-          return;
-        }
-        const fallback = findFallbackProperty(id);
-        if (fallback) {
-          setProperty(fallback);
         }
       } catch (error) {
         console.error("Failed to load property:", error);
-        const fallback = findFallbackProperty(id);
-        if (fallback) {
-          setProperty(fallback);
-        }
       } finally {
         setLoading(false);
       }
