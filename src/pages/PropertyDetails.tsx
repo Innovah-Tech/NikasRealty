@@ -237,7 +237,15 @@ const PropertyDetailsPage = () => {
               </span>
               <span className="flex items-center gap-2">
                 <Square size={20} />
-                <span className="font-medium">{property.size ?? "N/A"}</span>
+                <span className="font-medium">
+                  {(() => {
+                    const size = property.size?.trim();
+                    if (!size) return "N/A";
+                    const lower = size.toLowerCase();
+                    const hasUnit = /sqm|sq\.?\s*m|sqft|sq\.?\s*ft|m²|ft²|acre/.test(lower);
+                    return hasUnit ? size : `${size} sqm`;
+                  })()}
+                </span>
               </span>
             </div>
 

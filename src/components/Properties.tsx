@@ -281,6 +281,14 @@ const Properties = () => {
               
               // Property image processing (silent)
               
+              const formatSize = (val?: string) => {
+                if (!val) return "N/A";
+                const size = val.trim();
+                const lower = size.toLowerCase();
+                const hasUnit = /sqm|sq\.?\s*m|sqft|sq\.?\s*ft|m²|ft²|acre/.test(lower);
+                return hasUnit ? size : `${size} sqm`;
+              };
+
               const displayPrice =
                 typeof property.price === "number"
                   ? `KES ${property.price.toLocaleString()}`
@@ -402,7 +410,7 @@ const Properties = () => {
                       </div>
                       <div className="flex items-center gap-1">
                         <Square size={16} />
-                        <span>{property.size ?? "N/A"}</span>
+                        <span>{formatSize(property.size)}</span>
                       </div>
                     </div>
 

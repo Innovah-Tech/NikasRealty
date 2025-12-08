@@ -128,6 +128,13 @@ const AdminAddProperty = () => {
       
       const sanitizedFeatures = sanitizeArray(featuresArray);
 
+      const withSizeUnit = (val: string) => {
+        const size = val.trim();
+        const lower = size.toLowerCase();
+        const hasUnit = /sqm|sq\.?\s*m|sqft|sq\.?\s*ft|m²|ft²|acre/.test(lower);
+        return hasUnit ? size : `${size} sqm`;
+      };
+
       const result = await propertiesService.create({
         title: sanitizeText(formData.title),
         description: sanitizeText(formData.description),
@@ -138,7 +145,7 @@ const AdminAddProperty = () => {
         projectStage: formData.projectStage ? sanitizeText(formData.projectStage) : undefined,
         bedrooms: formData.bedrooms ? Number(formData.bedrooms) : undefined,
         bathrooms: formData.bathrooms ? Number(formData.bathrooms) : undefined,
-        size: formData.size ? sanitizeText(formData.size) : undefined,
+        size: formData.size ? sanitizeText(withSizeUnit(formData.size)) : undefined,
         featured: formData.featured,
         offplan: formData.offplan,
         features: sanitizedFeatures,
