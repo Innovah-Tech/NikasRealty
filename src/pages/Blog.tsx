@@ -11,6 +11,8 @@ const Blog = () => {
   const [posts, setPosts] = useState<Blog[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [debugError, setDebugError] = useState<string | null>(null);
+  const isDev = import.meta.env.DEV;
 
   useEffect(() => {
     const fetchBlogs = async () => {
@@ -39,9 +41,12 @@ const Blog = () => {
           code: error?.code,
           stack: error?.stack
         });
-        // Show error to user
+        const friendlyMessage = error?.code === "permission-denied"
+          ? "Our latest stories are being refreshed. Please check back soon."
+          : "We're unable to load new stories right now. Please try again shortly.";
         setPosts([]);
-        setError(error?.message || "Failed to load blog posts. Please try again later.");
+        setDebugError(error?.message || error?.code || "Unknown error");
+        setError(friendlyMessage);
       } finally {
         setLoading(false);
       }
@@ -64,18 +69,24 @@ const Blog = () => {
           {loading ? (
             <div className="flex justify-center py-16 text-muted-foreground">Loading blogs...</div>
           ) : error ? (
-            <div className="text-center py-16">
-              <div className="text-destructive mb-4 font-semibold">Error loading blogs</div>
-              <p className="text-muted-foreground mb-4">{error}</p>
+            <div className="text-center py-16 space-y-4">
+              <p className="text-xl font-semibold text-foreground">Our stories are being refreshed</p>
+              <p className="text-muted-foreground">{error}</p>
+              {isDev && debugError && (
+                <p className="text-xs text-muted-foreground">
+                  Debug details: {debugError}
+                </p>
+              )}
               <Button 
                 variant="outline" 
                 onClick={() => {
                   setError(null);
+                  setDebugError(null);
                   setLoading(true);
                   window.location.reload();
                 }}
               >
-                Retry
+                Refresh
               </Button>
             </div>
           ) : posts.length === 0 ? (
