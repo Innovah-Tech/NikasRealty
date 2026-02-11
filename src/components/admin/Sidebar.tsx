@@ -1,14 +1,15 @@
 import { NavLink } from 'react-router-dom';
-import { 
-  LayoutDashboard, 
-  Building2, 
-  PlusCircle, 
-  Users, 
-  MessageSquare, 
+import {
+  LayoutDashboard,
+  Building2,
+  PlusCircle,
+  Users,
+  MessageSquare,
   Settings,
   FileText,
   Menu,
-  X
+  X,
+  BarChart3
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -21,6 +22,8 @@ const navigation = [
   { name: 'Blogs', href: '/admin/blogs', icon: FileText },
   { name: 'Requests', href: '/admin/requests', icon: MessageSquare },
   { name: 'Team', href: '/admin/team', icon: Users },
+  { name: 'Analytics', href: '/admin/analytics', icon: BarChart3 },
+  { name: 'Newsletter', href: '/admin/newsletter', icon: Mail },
   { name: 'Settings', href: '/admin/settings', icon: Settings },
 ];
 
@@ -31,7 +34,7 @@ export const Sidebar = () => {
     <>
       {/* Mobile overlay */}
       {!collapsed && (
-        <div 
+        <div
           className="fixed inset-0 z-40 bg-black/50 lg:hidden"
           onClick={() => setCollapsed(true)}
         />

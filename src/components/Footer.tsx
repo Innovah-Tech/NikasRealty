@@ -1,5 +1,6 @@
 import { Instagram, Video, Phone, Mail } from "lucide-react";
 import logo from "@/assets/images/logo.png";
+import NewsletterSubscribe from "@/components/NewsletterSubscribe";
 
 const Footer = () => {
   const scrollToSection = (href: string) => {
@@ -13,6 +14,7 @@ const Footer = () => {
     { name: "Home", href: "#home" },
     { name: "About Us", href: "#about" },
     { name: "Properties", href: "#properties" },
+    { name: "Rentals", href: "/rentals" },
     { name: "Services", href: "#services" },
     { name: "Contact", href: "#contact" },
   ];
@@ -43,9 +45,9 @@ const Footer = () => {
   return (
     <footer className="gradient-dark text-white">
       <div className="container mx-auto px-4 lg:px-8 py-16">
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
+        <div className="grid md:grid-cols-2 lg:grid-cols-5 gap-8 mb-12">
           {/* Brand */}
-          <div className="space-y-4">
+          <div className="space-y-4 lg:col-span-1">
             <img src={logo} alt="Nikas Realty" className="h-16 w-auto" />
             <p className="text-primary font-semibold text-lg">
               We Turn Dreams Into Reality
@@ -72,7 +74,7 @@ const Footer = () => {
             </ul>
           </div>
 
-          {/* Property Types (New Column) */}
+          {/* Property Types */}
           <div>
             <h3 className="text-xl font-bold mb-6 text-primary">Property Types</h3>
             <ul className="space-y-3">
@@ -117,28 +119,33 @@ const Footer = () => {
                 </a>
               </li>
             </ul>
+
+            {/* Social Media */}
+            <div className="mt-6">
+              <h4 className="font-bold mb-3 text-primary">Follow Us</h4>
+              <div className="flex gap-4">
+                {socialLinks.map((social) => {
+                  const Icon = social.icon;
+                  return (
+                    <a
+                      key={social.label}
+                      href={social.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-12 h-12 bg-white/10 rounded-full flex items-center justify-center hover:bg-primary hover:scale-110 transition-smooth"
+                      aria-label={social.label}
+                    >
+                      <Icon size={20} />
+                    </a>
+                  );
+                })}
+              </div>
+            </div>
           </div>
 
-          {/* Social Media */}
-          <div>
-            <h3 className="text-xl font-bold mb-6 text-primary">Follow Us</h3>
-            <div className="flex gap-4">
-              {socialLinks.map((social) => {
-                const Icon = social.icon;
-                return (
-                  <a
-                    key={social.label}
-                    href={social.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-12 h-12 bg-white/10 rounded-full flex items-center justify-center hover:bg-primary hover:scale-110 transition-smooth"
-                    aria-label={social.label}
-                  >
-                    <Icon size={20} />
-                  </a>
-                );
-              })}
-            </div>
+          {/* Newsletter Subscription */}
+          <div className="lg:col-span-1">
+            <NewsletterSubscribe variant="footer" />
           </div>
         </div>
 

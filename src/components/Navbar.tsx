@@ -36,6 +36,7 @@ const Navbar = () => {
     { name: "Home", href: "#home", type: "anchor" },
     { name: "About Us", href: "#about", type: "anchor" },
     { name: "Properties", href: "#properties", type: "anchor" },
+    { name: "Rentals", href: "/rentals", type: "route" },
     { name: "Services", href: "#services", type: "anchor" },
     { name: "Blog", href: "/blog", type: "route" },
     { name: "Contact", href: "#contact", type: "anchor" },
@@ -68,9 +69,8 @@ const Navbar = () => {
 
   return (
     <nav
-      className={`fixed top-0 left-0 right-0 z-50 transition-smooth ${
-        isScrolled ? "bg-background/95 backdrop-blur-md shadow-card" : "bg-transparent"
-      }`}
+      className={`fixed top-0 left-0 right-0 z-50 transition-smooth ${isScrolled ? "bg-background/95 backdrop-blur-md shadow-card" : "bg-transparent"
+        }`}
       style={{ minHeight: '6rem' }}
     >
       <div className="container mx-auto px-4 lg:px-8">
@@ -82,9 +82,9 @@ const Navbar = () => {
             onClick={() => setIsOpen(false)}
             aria-label="Nikas Realty home"
           >
-            <img 
-              src={logo} 
-              alt="Nikas Realty" 
+            <img
+              src={logo}
+              alt="Nikas Realty"
               className="h-16 sm:h-20 md:h-24 w-auto object-contain"
               style={{ mixBlendMode: 'normal', filter: 'brightness(1.3)' }}
             />

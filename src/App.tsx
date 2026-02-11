@@ -2,15 +2,18 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { AuthProvider } from "@/context/AuthContext";
 import { ProtectedRoute } from "@/components/admin/ProtectedRoute";
 import ScrollToTop from "@/components/ScrollToTop";
+import { useEffect } from "react";
+import { initGA, logPageView } from "@/lib/analytics";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import Blog from "./pages/Blog";
 import BlogDetailsPage from "./pages/BlogDetails";
 import PropertiesPage from "./pages/Properties";
+import RentalsPage from "./pages/Rentals";
 import PropertyDetailsPage from "./pages/PropertyDetails";
 import AdminLogin from "./pages/admin/Login";
 import AdminDashboard from "./pages/admin/Dashboard";
@@ -25,8 +28,27 @@ import AdminTeam from "./pages/admin/Team";
 import AdminAddTeamMember from "./pages/admin/AddTeamMember";
 import AdminEditTeamMember from "./pages/admin/EditTeamMember";
 import AdminSettings from "./pages/admin/Settings";
+import AdminAnalytics from "./pages/admin/Analytics";
+import AdminNewsletter from "./pages/admin/Newsletter";
 
 const queryClient = new QueryClient();
+
+// Analytics tracker component
+const AnalyticsTracker = () => {
+  const location = useLocation();
+
+  useEffect(() => {
+    // Initialize GA on mount
+    initGA();
+  }, []);
+
+  useEffect(() => {
+    // Track page views
+    logPageView(location.pathname + location.search);
+  }, [location]);
+
+  return null;
+};
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -35,6 +57,7 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <AuthProvider>
+          <AnalyticsTracker />
           <ScrollToTop />
           <Routes>
             {/* Public Routes */}
@@ -42,8 +65,9 @@ const App = () => (
             <Route path="/blog" element={<Blog />} />
             <Route path="/blog/:id" element={<BlogDetailsPage />} />
             <Route path="/properties" element={<PropertiesPage />} />
+            <Route path="/rentals" element={<RentalsPage />} />
             <Route path="/properties/:id" element={<PropertyDetailsPage />} />
-            
+
             {/* Admin Routes */}
             <Route path="/admin/login" element={<AdminLogin />} />
             <Route
@@ -142,7 +166,24 @@ const App = () => (
                 </ProtectedRoute>
               }
             />
-            
+            <Route
+              path="/admin/analytics"
+              element={
+                <ProtectedRoute>
+                  <AdminAnalytics />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/admin/newsletter"
+              element={
+                <ProtectedRoute>
+                  <AdminNewsletter />
+                </ProtectedRoute>
+              }
+            />
+
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
