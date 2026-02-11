@@ -1,6 +1,6 @@
 import ReactGA from 'react-ga4';
 
-const TRACKING_ID = import.meta.env.VITE_GA_TRACKING_ID || '';
+const TRACKING_ID = 'G-PERDJVZ0SX';
 
 export const initGA = () => {
     if (TRACKING_ID) {
