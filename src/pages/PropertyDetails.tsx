@@ -43,11 +43,11 @@ const PropertyDetailsPage = () => {
     property?.images?.length
       ? property.images
       : property?.gallery?.length
-      ? property.gallery
-      : property?.image
-      ? [property.image]
-      : ["/images/property1.jpg"];
-  
+        ? property.gallery
+        : property?.image
+          ? [property.image]
+          : ["/images/property1.jpg"];
+
   if (import.meta.env.DEV && property) {
     console.log('Property details images:', {
       propertyId: property.id,
@@ -110,9 +110,9 @@ const PropertyDetailsPage = () => {
       <Navbar />
       <main className="container mx-auto px-4 lg:px-8 py-10">
         <div className="mb-6">
-          <Button 
+          <Button
             type="button"
-            variant="outline" 
+            variant="outline"
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
@@ -124,36 +124,35 @@ const PropertyDetailsPage = () => {
         </div>
 
         {/* Full Page Main Image */}
-        <div 
+        <div
           className="relative w-full h-[60vh] md:h-[70vh] lg:h-[80vh] overflow-hidden rounded-xl shadow-lg cursor-zoom-in mb-8 bg-muted"
           onClick={() => openLightbox(0)}
         >
-          <img 
-            src={images[selectedImage]} 
-            alt={property.title} 
+          <img
+            src={images[selectedImage]}
+            alt={property.title}
             className="w-full h-full object-contain"
           />
           {/* Overlay with Title and Badges */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent flex flex-col justify-end p-6 md:p-8 lg:p-12">
             <div className="flex flex-wrap gap-2 mb-4">
               {property.status && (
-                <Badge 
+                <Badge
                   variant={property.status === "for-sale" || property.status === "For Sale" ? "default" : property.status === "for-rent" || property.status === "For Rent" ? "secondary" : "outline"}
-                  className={`font-semibold ${
-                    property.status === "for-sale" || property.status === "For Sale" 
-                      ? "gradient-gold text-secondary" 
+                  className={`font-semibold ${property.status === "for-sale" || property.status === "For Sale"
+                      ? "gradient-gold text-secondary"
                       : property.status === "for-rent" || property.status === "For Rent"
-                      ? "!text-white bg-secondary"
-                      : "!text-white bg-muted"
-                  }`}
+                        ? "!text-white bg-secondary"
+                        : "!text-white bg-muted"
+                    }`}
                 >
-                  {property.status === "for-sale" || property.status === "For Sale" 
-                    ? "For Sale" 
+                  {property.status === "for-sale" || property.status === "For Sale"
+                    ? "For Sale"
                     : property.status === "for-rent" || property.status === "For Rent"
-                    ? "For Rent"
-                    : property.status === "sold" || property.status === "Sold"
-                    ? "Sold"
-                    : property.status}
+                      ? "For Rent"
+                      : property.status === "sold" || property.status === "Sold"
+                        ? "Sold"
+                        : property.status}
                 </Badge>
               )}
               {property.featured && (
@@ -183,19 +182,18 @@ const PropertyDetailsPage = () => {
               <h2 className="text-2xl font-semibold text-foreground">Gallery</h2>
               <div className="grid grid-cols-4 gap-2">
                 {images.map((img, index) => (
-                  <button 
+                  <button
                     key={index}
                     onClick={(e) => {
                       e.stopPropagation();
                       openLightbox(index);
                     }}
-                    className={`relative aspect-square overflow-hidden rounded-lg transition-all duration-200 ${
-                      selectedImage === index ? 'ring-2 ring-primary' : 'opacity-70 hover:opacity-100'
-                    }`}
+                    className={`relative aspect-square overflow-hidden rounded-lg transition-all duration-200 ${selectedImage === index ? 'ring-2 ring-primary' : 'opacity-70 hover:opacity-100'
+                      }`}
                   >
-                    <img 
-                      src={img} 
-                      alt={`${property.title} - ${index + 1}`} 
+                    <img
+                      src={img}
+                      alt={`${property.title} - ${index + 1}`}
                       className="w-full h-full object-cover"
                     />
                   </button>
@@ -208,11 +206,25 @@ const PropertyDetailsPage = () => {
           <div className="space-y-6">
             {/* Price */}
             <div className="pt-4 border-t border-border">
-                <div className="text-4xl font-bold text-primary">
-                  {typeof property.price === "number"
+              <div className="text-4xl font-bold text-primary">
+                {(() => {
+                  if ((property.status === 'for-rent' || property.status === 'For Rent') && (property.priceDaily || property.priceMonthly)) {
+                    return (
+                      <div className="flex flex-col gap-1">
+                        {property.priceMonthly && (
+                          <span>KES {property.priceMonthly.toLocaleString()} <span className="text-2xl text-muted-foreground font-normal">/ Month</span></span>
+                        )}
+                        {property.priceDaily && (
+                          <span className="text-2xl text-muted-foreground">KES {property.priceDaily.toLocaleString()} / Day</span>
+                        )}
+                      </div>
+                    );
+                  }
+                  return typeof property.price === "number"
                     ? `KES ${property.price.toLocaleString()}`
-                    : property.price}
-                </div>
+                    : property.price;
+                })()}
+              </div>
             </div>
 
             {/* Property Details */}
@@ -301,11 +313,11 @@ const PropertyDetailsPage = () => {
 
         {/* Lightbox Modal */}
         {lightboxOpen && images.length > 0 && (
-          <div 
+          <div
             className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4"
             onClick={closeLightbox}
           >
-            <button 
+            <button
               className="absolute top-4 right-4 text-white hover:text-gray-300 z-10"
               onClick={(e) => {
                 e.stopPropagation();
@@ -314,8 +326,8 @@ const PropertyDetailsPage = () => {
             >
               <X className="w-8 h-8" />
             </button>
-            
-            <button 
+
+            <button
               className="absolute left-4 text-white hover:text-gray-300 z-10 p-2"
               onClick={(e) => {
                 e.stopPropagation();
@@ -324,17 +336,17 @@ const PropertyDetailsPage = () => {
             >
               <ArrowLeft className="w-8 h-8" />
             </button>
-            
+
             <div className="relative max-w-4xl w-full max-h-[90vh] flex items-center justify-center">
-              <img 
-                src={images[selectedImage]} 
+              <img
+                src={images[selectedImage]}
                 alt={`${property.title} - ${selectedImage + 1}`}
                 className="max-h-[90vh] max-w-full object-contain"
                 onClick={(e) => e.stopPropagation()}
               />
             </div>
-            
-            <button 
+
+            <button
               className="absolute right-4 text-white hover:text-gray-300 z-10 p-2"
               onClick={(e) => {
                 e.stopPropagation();
@@ -343,7 +355,7 @@ const PropertyDetailsPage = () => {
             >
               <ArrowLeft className="w-8 h-8 transform rotate-180" />
             </button>
-            
+
             <div className="absolute bottom-4 text-white text-center w-full">
               {selectedImage + 1} / {images.length}
             </div>

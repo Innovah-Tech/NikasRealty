@@ -35,6 +35,8 @@ const AdminAddProperty = () => {
     description: "",
     type: "",
     price: "",
+    priceDaily: "",
+    priceMonthly: "",
     location: "",
     status: isRentalMode ? "for-rent" : "",
     projectStage: "",
@@ -104,8 +106,13 @@ const AdminAddProperty = () => {
     }
 
     const priceValidation = validatePrice(formData.price);
-    if (!priceValidation.valid) {
+    if (formData.status !== 'for-rent' && !priceValidation.valid) {
       toast.error(priceValidation.error || 'Invalid price');
+      return;
+    }
+
+    if (formData.status === 'for-rent' && !formData.priceDaily && !formData.priceMonthly) {
+      toast.error('Please enter at least a Daily or Monthly price');
       return;
     }
 
@@ -139,11 +146,23 @@ const AdminAddProperty = () => {
         return hasUnit ? size : `${size} sqm`;
       };
 
+      const priceDaily = formData.priceDaily ? Number(formData.priceDaily) : undefined;
+      const priceMonthly = formData.priceMonthly ? Number(formData.priceMonthly) : undefined;
+
+      // Determine main price for sorting/display
+      let mainPrice = Number(formData.price);
+      if (formData.status === 'for-rent') {
+        if (priceMonthly) mainPrice = priceMonthly;
+        else if (priceDaily) mainPrice = priceDaily * 30; // Approximation for sorting
+      }
+
       const result = await propertiesService.create({
         title: sanitizeText(formData.title),
         description: sanitizeText(formData.description),
         type: formData.type,
-        price: Number(formData.price),
+        price: mainPrice,
+        priceDaily,
+        priceMonthly,
         location: sanitizeText(formData.location),
         status: formData.status,
         projectStage: formData.projectStage ? sanitizeText(formData.projectStage) : undefined,
@@ -216,19 +235,44 @@ const AdminAddProperty = () => {
                   </Select>
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="price">
-                    {formData.status === 'for-rent' ? "Monthly Rent (KSh)" : "Price (KSh)"}
-                  </Label>
-                  <Input
-                    id="price"
-                    name="price"
-                    type="number"
-                    value={formData.price}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
+                {formData.status === 'for-rent' ? (
+                  <div className="grid gap-6 md:grid-cols-2">
+                    <div className="space-y-2">
+                      <Label htmlFor="priceDaily">Daily Price (KSh)</Label>
+                      <Input
+                        id="priceDaily"
+                        name="priceDaily"
+                        type="number"
+                        value={formData.priceDaily}
+                        onChange={handleChange}
+                        placeholder="e.g. 5000"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="priceMonthly">Monthly Price (KSh)</Label>
+                      <Input
+                        id="priceMonthly"
+                        name="priceMonthly"
+                        type="number"
+                        value={formData.priceMonthly}
+                        onChange={handleChange}
+                        placeholder="e.g. 150000"
+                      />
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    <Label htmlFor="price">Price (KSh)</Label>
+                    <Input
+                      id="price"
+                      name="price"
+                      type="number"
+                      value={formData.price}
+                      onChange={handleChange}
+                      required={formData.status !== 'for-rent'}
+                    />
+                  </div>
+                )}
 
                 <div className="space-y-2">
                   <Label htmlFor="location">Location</Label>

@@ -1,16 +1,16 @@
-import { 
-  collection, 
-  doc, 
-  getDocs, 
-  getDoc, 
-  addDoc, 
-  updateDoc, 
-  deleteDoc, 
-  query, 
-  where, 
-  orderBy, 
+import {
+  collection,
+  doc,
+  getDocs,
+  getDoc,
+  addDoc,
+  updateDoc,
+  deleteDoc,
+  query,
+  where,
+  orderBy,
   limit,
-  Timestamp 
+  Timestamp
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 
@@ -22,6 +22,8 @@ export interface Property {
   description: string;
   type: string;
   price: number | string;
+  priceDaily?: number;
+  priceMonthly?: number;
   location: string;
   bedrooms?: number;
   bathrooms?: number;
@@ -59,68 +61,68 @@ export const propertiesService = {
     limit?: number;
   }) {
     try {
-        if (import.meta.env.DEV) {
-          console.log('Fetching properties with filters:', filters);
-        }
-        
-        // Try optimized query first (if indexes exist)
-        try {
-      let q = query(collection(db, COLLECTION_NAME));
+      if (import.meta.env.DEV) {
+        console.log('Fetching properties with filters:', filters);
+      }
+
+      // Try optimized query first (if indexes exist)
+      try {
+        let q = query(collection(db, COLLECTION_NAME));
 
         // Apply simple filters that work well with indexes
-      if (filters?.type && filters.type !== 'all') {
-        q = query(q, where('type', '==', filters.type));
-      }
-      if (filters?.status && filters.status !== 'all') {
-        q = query(q, where('status', '==', filters.status));
-      }
-      if (filters?.featured !== undefined) {
-        q = query(q, where('featured', '==', filters.featured));
-      }
+        if (filters?.type && filters.type !== 'all') {
+          q = query(q, where('type', '==', filters.type));
+        }
+        if (filters?.status && filters.status !== 'all') {
+          q = query(q, where('status', '==', filters.status));
+        }
+        if (filters?.featured !== undefined) {
+          q = query(q, where('featured', '==', filters.featured));
+        }
 
         // Try to apply sorting if we have minimal filters
         if (filters?.sortBy && (!filters?.type || filters.type === 'all') && (!filters?.status || filters.status === 'all')) {
-        const sortOrder = filters.order === 'desc' ? 'desc' : 'asc';
-        q = query(q, orderBy(filters.sortBy, sortOrder));
+          const sortOrder = filters.order === 'desc' ? 'desc' : 'asc';
+          q = query(q, orderBy(filters.sortBy, sortOrder));
         } else if (filters?.sortBy) {
           // If we have filters, try orderBy on createdAt (most common index)
           q = query(q, orderBy('createdAt', 'desc'));
-      }
+        }
 
-      // Apply pagination
-      if (filters?.limit) {
+        // Apply pagination
+        if (filters?.limit) {
           q = query(q, limit(filters.limit * 2)); // Get more to account for client-side filtering
-      }
+        }
 
-      const querySnapshot = await getDocs(q);
-          let properties = querySnapshot.docs.map(doc => {
-            const data = doc.data();
-            return {
-              id: doc.id,
-              ...data,
-              // Ensure images array is properly set
-              images: data.images || (data.image ? [data.image] : []),
-              createdAt: data.createdAt?.toDate(),
-              updatedAt: data.updatedAt?.toDate(),
-            };
-          }) as Property[];
+        const querySnapshot = await getDocs(q);
+        let properties = querySnapshot.docs.map(doc => {
+          const data = doc.data();
+          return {
+            id: doc.id,
+            ...data,
+            // Ensure images array is properly set
+            images: data.images || (data.image ? [data.image] : []),
+            createdAt: data.createdAt?.toDate(),
+            updatedAt: data.updatedAt?.toDate(),
+          };
+        }) as Property[];
 
-          if (import.meta.env.DEV) {
-            console.log(`Fetched ${properties.length} properties from Firestore`);
-            if (properties.length > 0) {
-              const sample = properties[0];
-              console.log('Sample property structure:', {
-                id: sample.id,
-                title: sample.title,
-                images: sample.images,
-                image: sample.image,
-                hasImages: !!sample.images && sample.images.length > 0
-              });
-            }
+        if (import.meta.env.DEV) {
+          console.log(`Fetched ${properties.length} properties from Firestore`);
+          if (properties.length > 0) {
+            const sample = properties[0];
+            console.log('Sample property structure:', {
+              id: sample.id,
+              title: sample.title,
+              images: sample.images,
+              image: sample.image,
+              hasImages: !!sample.images && sample.images.length > 0
+            });
           }
+        }
 
-          // Apply remaining filters client-side
-          properties = this.applyClientSideFilters(properties, filters);
+        // Apply remaining filters client-side
+        properties = this.applyClientSideFilters(properties, filters);
 
         // Apply pagination after filtering
         if (filters?.page && filters?.limit) {
@@ -137,7 +139,7 @@ export const propertiesService = {
           let properties = querySnapshot.docs.map(doc => {
             const data = doc.data();
             return {
-        id: doc.id,
+              id: doc.id,
               ...data,
               // Ensure images array is properly set
               images: data.images || (data.image ? [data.image] : []),
@@ -175,7 +177,7 @@ export const propertiesService = {
       }
     } catch (error: any) {
       console.error('Error fetching properties:', error);
-      
+
       // Provide helpful error messages
       if (error.code === 'permission-denied') {
         throw new Error('Permission denied. Please check Firestore security rules allow read access to the "properties" collection.');
@@ -184,7 +186,7 @@ export const propertiesService = {
       } else if (error.code === 'unauthenticated') {
         throw new Error('Authentication required. Please check Firebase Auth configuration.');
       }
-      
+
       throw error;
     }
   },
@@ -235,34 +237,34 @@ export const propertiesService = {
     }
 
     // Apply search filter
-      if (filters?.search) {
-        const searchLower = filters.search.toLowerCase();
-      filtered = filtered.filter(p => 
-          p.title?.toLowerCase().includes(searchLower) ||
+    if (filters?.search) {
+      const searchLower = filters.search.toLowerCase();
+      filtered = filtered.filter(p =>
+        p.title?.toLowerCase().includes(searchLower) ||
         p.location?.toLowerCase().includes(searchLower) ||
         p.description?.toLowerCase().includes(searchLower)
-        );
-      }
+      );
+    }
 
     // Apply location filter
-      if (filters?.location && filters.location !== 'all') {
-        const locationLower = filters.location.toLowerCase();
-      filtered = filtered.filter(p => 
-          p.location?.toLowerCase().includes(locationLower)
-        );
-      }
+    if (filters?.location && filters.location !== 'all') {
+      const locationLower = filters.location.toLowerCase();
+      filtered = filtered.filter(p =>
+        p.location?.toLowerCase().includes(locationLower)
+      );
+    }
 
-      // Apply bedrooms filter
-      if (filters?.bedrooms && filters.bedrooms !== 'all') {
+    // Apply bedrooms filter
+    if (filters?.bedrooms && filters.bedrooms !== 'all') {
       filtered = filtered.filter(p => p.bedrooms === parseInt(filters.bedrooms!));
-      }
+    }
 
-      // Apply completion filter
-      if (filters?.completion && filters.completion !== 'all') {
-      filtered = filtered.filter(p => 
-          (p.projectStage || p.completion || '').toLowerCase() === filters.completion!.toLowerCase()
-        );
-      }
+    // Apply completion filter
+    if (filters?.completion && filters.completion !== 'all') {
+      filtered = filtered.filter(p =>
+        (p.projectStage || p.completion || '').toLowerCase() === filters.completion!.toLowerCase()
+      );
+    }
 
     // Apply sorting
     if (filters?.sortBy) {
@@ -303,7 +305,7 @@ export const propertiesService = {
     try {
       const docRef = doc(db, COLLECTION_NAME, id);
       const docSnap = await getDoc(docRef);
-      
+
       if (docSnap.exists()) {
         const data = docSnap.data();
         const property = {
@@ -314,7 +316,7 @@ export const propertiesService = {
           createdAt: data.createdAt?.toDate(),
           updatedAt: data.updatedAt?.toDate(),
         } as Property;
-        
+
         if (import.meta.env.DEV) {
           console.log('Property fetched by ID:', {
             id: property.id,
@@ -324,7 +326,7 @@ export const propertiesService = {
             hasImages: !!property.images && property.images.length > 0
           });
         }
-        
+
         return property;
       }
       return null;
@@ -338,12 +340,12 @@ export const propertiesService = {
   async create(property: Omit<Property, 'id' | 'createdAt' | 'updatedAt'>) {
     try {
       // Ensure images array is properly set
-      const imagesArray = property.images && property.images.length > 0 
-        ? property.images 
-        : property.image 
-        ? [property.image] 
-        : [];
-      
+      const imagesArray = property.images && property.images.length > 0
+        ? property.images
+        : property.image
+          ? [property.image]
+          : [];
+
       const propertyData = {
         ...property,
         images: imagesArray, // Store images array
@@ -351,22 +353,22 @@ export const propertiesService = {
         createdAt: Timestamp.now(),
         updatedAt: Timestamp.now(),
       };
-      
+
       if (import.meta.env.DEV) {
         console.log('Creating property with data:', propertyData);
         if (imagesArray.length > 0) {
           console.log('Property images (Cloudinary URLs):', imagesArray);
         }
       }
-      
+
       const docRef = await addDoc(collection(db, COLLECTION_NAME), propertyData);
       const createdProperty = { id: docRef.id, ...propertyData };
-      
+
       if (import.meta.env.DEV) {
         console.log('Property created successfully with ID:', docRef.id);
         console.log('Images stored:', createdProperty.images);
       }
-      
+
       return createdProperty;
     } catch (error: any) {
       console.error('Error creating property:', error);
@@ -390,7 +392,7 @@ export const propertiesService = {
         }
         throw new Error('You must be logged in to update properties. Please log in again.');
       }
-      
+
       // Don't log user email for security - only log in development
       if (import.meta.env.DEV) {
         console.log('✅ User authenticated:', {
@@ -398,31 +400,31 @@ export const propertiesService = {
           // Don't log email even in dev for security
         });
       }
-      
+
       const docRef = doc(db, COLLECTION_NAME, id);
-      
+
       // Prepare update data - remove Date objects and id field, convert to Firestore-compatible format
       const updateData: any = {
         ...updates,
         updatedAt: Timestamp.now(),
       };
-      
+
       // Remove fields that shouldn't be updated
       delete updateData.id;
       delete updateData.createdAt; // Don't update createdAt
-      
+
       // Ensure images is always an array
       if (updateData.images && !Array.isArray(updateData.images)) {
         updateData.images = [updateData.images];
       }
-      
+
       // Convert any Date objects to Timestamps (if any exist)
       Object.keys(updateData).forEach(key => {
         if (updateData[key] instanceof Date) {
           updateData[key] = Timestamp.fromDate(updateData[key]);
         }
       });
-      
+
       if (import.meta.env.DEV) {
         console.log('🔄 Attempting Firestore update:', {
           id,
@@ -430,11 +432,11 @@ export const propertiesService = {
           updateFields: Object.keys(updateData),
         });
       }
-      
+
       await updateDoc(docRef, updateData);
-      
+
       // Silent success (only log errors)
-      
+
       return await this.getById(id);
     } catch (error: any) {
       // Log errors (but don't expose sensitive details)
@@ -444,7 +446,7 @@ export const propertiesService = {
         errorMessage: error?.message,
         // Don't log full error or updateData for security
       });
-      
+
       // Provide more specific error messages
       if (error.code === 'permission-denied') {
         throw new Error('Permission denied. Please check Firestore security rules. You may need to log in again.');
@@ -457,7 +459,7 @@ export const propertiesService = {
       } else if (error.code === 'failed-precondition') {
         throw new Error('Update failed. The property may have been modified by another user.');
       }
-      
+
       // For unknown errors, include the error code if available
       const errorMessage = error?.message || 'Failed to update property';
       throw new Error(`${errorMessage}${error?.code ? ` (${error.code})` : ''}`);
@@ -481,7 +483,7 @@ export const propertiesService = {
       const allProperties = await this.getAll();
       const sales = allProperties.filter(p => p.status === 'For Sale' || p.status === 'for-sale').length;
       const rentals = allProperties.filter(p => p.status === 'For Rent' || p.status === 'for-rent').length;
-      
+
       return {
         total: allProperties.length,
         sales,
