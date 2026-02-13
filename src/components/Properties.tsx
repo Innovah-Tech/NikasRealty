@@ -415,7 +415,22 @@ const Properties = () => {
 
                     {/* Price */}
                     <div className="pt-4 border-t border-border">
-                      <p className="text-2xl font-bold text-primary">{displayPrice}</p>
+                      {(property.status === 'for-rent' || property.status === 'For Rent') && (property.priceDaily || property.priceMonthly) ? (
+                        <div className="space-y-1">
+                          {property.priceMonthly && (
+                            <p className="text-2xl font-bold text-primary">
+                              KES {property.priceMonthly.toLocaleString()} <span className="text-base font-normal text-muted-foreground">/ Month</span>
+                            </p>
+                          )}
+                          {property.priceDaily && (
+                            <p className={`${property.priceMonthly ? 'text-lg' : 'text-2xl'} font-bold text-primary`}>
+                              KES {property.priceDaily.toLocaleString()} <span className="text-sm font-normal text-muted-foreground">/ Day</span>
+                            </p>
+                          )}
+                        </div>
+                      ) : (
+                        <p className="text-2xl font-bold text-primary">{displayPrice}</p>
+                      )}
                     </div>
                   </CardContent>
 
