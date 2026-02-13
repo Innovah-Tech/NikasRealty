@@ -87,7 +87,7 @@ const AdminEditProperty = () => {
       });
       setImages(property.images || []);
       // Check if location is in the predefined list
-      setUseCustomLocation(!PROPERTY_CONFIG.locations.includes(property.location || ""));
+      setUseCustomLocation(!PROPERTY_CONFIG.locations.includes(property.location as any || ""));
     } catch (error) {
       toast.error("Failed to fetch property");
       console.error(error);
