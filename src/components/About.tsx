@@ -2,6 +2,7 @@ import { Building2, Award, Users, TrendingUp } from "lucide-react";
 import { useEffect, useState } from "react";
 import aboutImage from "@/assets/images/about.jpg";
 import { teamService, type TeamMember } from "@/services/firestore/team";
+import NewsletterSubscribe from "@/components/NewsletterSubscribe";
 
 // Default/native team members that always appear
 const DEFAULT_TEAM_MEMBERS: TeamMember[] = [
@@ -66,7 +67,7 @@ const About = () => {
               />
               <div className="absolute inset-0 bg-gradient-to-t from-secondary/80 to-transparent" />
             </div>
-            
+
             {/* Decorative Element */}
             <div className="absolute -bottom-6 -right-6 w-72 h-72 gradient-gold opacity-20 rounded-full blur-3xl -z-10" />
           </div>
@@ -136,9 +137,9 @@ const About = () => {
               <p className="text-muted-foreground">Loading team members...</p>
             </div>
           ) : (
-          <div className="flex flex-wrap gap-8 justify-center items-stretch">
+            <div className="flex flex-wrap gap-8 justify-center items-stretch">
               {allTeamMembers.map((member) => (
-            <TeamMember
+                <TeamMember
                   key={member.id}
                   name={member.name}
                   title={member.role}
@@ -147,8 +148,13 @@ const About = () => {
                   objectPosition={member.id?.includes('native-monica') ? "object-top" : "object-center"}
                 />
               ))}
-          </div>
+            </div>
           )}
+        </div>
+
+        {/* Newsletter Section */}
+        <div className="mt-20 max-w-2xl mx-auto">
+          <NewsletterSubscribe variant="default" />
         </div>
       </div>
     </section>

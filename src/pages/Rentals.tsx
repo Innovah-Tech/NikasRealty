@@ -25,7 +25,7 @@ import { useNavigate } from "react-router-dom";
 import { propertiesService, type Property } from "@/services/firestore/properties";
 import { parsePrice } from "@/data/properties";
 import { PROPERTY_CONFIG } from "@/config/constants";
-import NewsletterSubscribe from "@/components/NewsletterSubscribe";
+
 
 const RentalsPage = () => {
     const navigate = useNavigate();
@@ -116,10 +116,7 @@ const RentalsPage = () => {
                         </p>
                     </div>
 
-                    {/* Newsletter Subscription */}
-                    <div className="max-w-2xl mx-auto mb-12">
-                        <NewsletterSubscribe variant="default" />
-                    </div>
+
 
                     {/* Search and Filter */}
                     <div className="flex flex-wrap gap-4 mb-10 items-end">
