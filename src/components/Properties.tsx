@@ -115,8 +115,8 @@ const Properties = () => {
       : p.price || "KES 0";
 
     if ((p.status === 'for-rent' || p.status === 'For Rent') && (p.priceMonthly || p.priceDaily)) {
-      if (p.priceMonthly) priceDisplay = `KES ${p.priceMonthly.toLocaleString()} / Month`;
-      else if (p.priceDaily) priceDisplay = `KES ${p.priceDaily.toLocaleString()} / Day`;
+      if (p.priceMonthly) priceDisplay = `KES ${p.priceMonthly?.toLocaleString() ?? '0'} / Month`;
+      else if (p.priceDaily) priceDisplay = `KES ${p.priceDaily?.toLocaleString() ?? '0'} / Day`;
     }
 
     return {
@@ -289,9 +289,9 @@ const Properties = () => {
 
               if ((property.status === 'for-rent' || property.status === 'For Rent') && (property.priceDaily || property.priceMonthly)) {
                 if (property.priceMonthly) {
-                  displayPrice = `KES ${property.priceMonthly.toLocaleString()} / Month`;
+                  displayPrice = `KES ${property.priceMonthly?.toLocaleString() ?? '0'} / Month`;
                 } else if (property.priceDaily) {
-                  displayPrice = `KES ${property.priceDaily.toLocaleString()} / Day`;
+                  displayPrice = `KES ${property.priceDaily?.toLocaleString() ?? '0'} / Day`;
                 }
               }
 
@@ -419,12 +419,12 @@ const Properties = () => {
                         <div className="space-y-1">
                           {property.priceMonthly && (
                             <p className="text-2xl font-bold text-primary">
-                              KES {property.priceMonthly.toLocaleString()} <span className="text-base font-normal text-muted-foreground">/ Month</span>
+                              KES {property.priceMonthly?.toLocaleString() ?? '0'} <span className="text-base font-normal text-muted-foreground">/ Month</span>
                             </p>
                           )}
                           {property.priceDaily && (
                             <p className={`${property.priceMonthly ? 'text-lg' : 'text-2xl'} font-bold text-primary`}>
-                              KES {property.priceDaily.toLocaleString()} <span className="text-sm font-normal text-muted-foreground">/ Day</span>
+                              KES {property.priceDaily?.toLocaleString() ?? '0'} <span className="text-sm font-normal text-muted-foreground">/ Day</span>
                             </p>
                           )}
                         </div>

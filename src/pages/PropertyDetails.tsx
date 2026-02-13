@@ -140,10 +140,10 @@ const PropertyDetailsPage = () => {
                 <Badge
                   variant={property.status === "for-sale" || property.status === "For Sale" ? "default" : property.status === "for-rent" || property.status === "For Rent" ? "secondary" : "outline"}
                   className={`font-semibold ${property.status === "for-sale" || property.status === "For Sale"
-                      ? "gradient-gold text-secondary"
-                      : property.status === "for-rent" || property.status === "For Rent"
-                        ? "!text-white bg-secondary"
-                        : "!text-white bg-muted"
+                    ? "gradient-gold text-secondary"
+                    : property.status === "for-rent" || property.status === "For Rent"
+                      ? "!text-white bg-secondary"
+                      : "!text-white bg-muted"
                     }`}
                 >
                   {property.status === "for-sale" || property.status === "For Sale"
@@ -212,10 +212,10 @@ const PropertyDetailsPage = () => {
                     return (
                       <div className="flex flex-col gap-1">
                         {property.priceMonthly && (
-                          <span>KES {property.priceMonthly.toLocaleString()} <span className="text-2xl text-muted-foreground font-normal">/ Month</span></span>
+                          <span>KES {property.priceMonthly?.toLocaleString() ?? '0'} <span className="text-2xl text-muted-foreground font-normal">/ Month</span></span>
                         )}
                         {property.priceDaily && (
-                          <span className="text-2xl text-muted-foreground">KES {property.priceDaily.toLocaleString()} / Day</span>
+                          <span className="text-2xl text-muted-foreground">KES {property.priceDaily?.toLocaleString() ?? '0'} / Day</span>
                         )}
                       </div>
                     );

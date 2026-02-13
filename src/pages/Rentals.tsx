@@ -290,12 +290,12 @@ const RentalsPage = () => {
                                                     <div className="space-y-1">
                                                         {property.priceMonthly && (
                                                             <p className="text-2xl font-bold text-primary">
-                                                                KES {property.priceMonthly.toLocaleString()} <span className="text-base font-normal text-muted-foreground">/ Month</span>
+                                                                KES {property.priceMonthly?.toLocaleString() ?? '0'} <span className="text-base font-normal text-muted-foreground">/ Month</span>
                                                             </p>
                                                         )}
                                                         {property.priceDaily && (
                                                             <p className={`${property.priceMonthly ? 'text-lg' : 'text-2xl'} font-bold text-primary`}>
-                                                                KES {property.priceDaily.toLocaleString()} <span className="text-sm font-normal text-muted-foreground">/ Day</span>
+                                                                KES {property.priceDaily?.toLocaleString() ?? '0'} <span className="text-sm font-normal text-muted-foreground">/ Day</span>
                                                             </p>
                                                         )}
                                                     </div>
