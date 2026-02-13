@@ -10,7 +10,8 @@ import {
   Menu,
   X,
   BarChart3,
-  Mail
+  Mail,
+  Home
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -20,6 +21,7 @@ const navigation = [
   { name: 'Dashboard', href: '/admin/dashboard', icon: LayoutDashboard },
   { name: 'Properties', href: '/admin/properties', icon: Building2 },
   { name: 'Add Property', href: '/admin/add-property', icon: PlusCircle },
+  { name: 'Add Rental', href: '/admin/add-property?mode=rent', icon: Home },
   { name: 'Blogs', href: '/admin/blogs', icon: FileText },
   { name: 'Requests', href: '/admin/requests', icon: MessageSquare },
   { name: 'Team', href: '/admin/team', icon: Users },

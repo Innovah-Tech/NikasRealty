@@ -17,7 +17,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { propertiesService } from "@/services/firestore/properties";
 import { firebaseStorage } from "@/services/firebaseStorage";
 import { toast } from "sonner";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { PROPERTY_CONFIG } from "@/config/constants";
 import { sanitizeText, sanitizeArray } from "@/utils/sanitize";
 import { validateTitle, validateDescription, validatePrice, validateFeatures } from "@/utils/validate";
@@ -26,13 +26,17 @@ const propertyTypeOptions = PROPERTY_CONFIG.propertyTypes;
 const locationOptions = PROPERTY_CONFIG.locations;
 
 const AdminAddProperty = () => {
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const isRentalMode = searchParams.get('mode') === 'rent';
+
   const [formData, setFormData] = useState({
     title: "",
     description: "",
     type: "",
     price: "",
     location: "",
-    status: "",
+    status: isRentalMode ? "for-rent" : "",
     projectStage: "",
     features: "",
     bedrooms: "",
@@ -41,11 +45,11 @@ const AdminAddProperty = () => {
     featured: false,
     offplan: false,
   });
+
   const [images, setImages] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [useCustomLocation, setUseCustomLocation] = useState(false);
-  const navigate = useNavigate();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -61,11 +65,11 @@ const AdminAddProperty = () => {
         Array.from(files),
         `properties/${Date.now()}`
       );
-      
+
       if (import.meta.env.DEV) {
         console.log('Images uploaded:', urls);
       }
-      
+
       setImages((prev) => [...prev, ...urls]);
       toast.success(`Successfully uploaded ${urls.length} image${urls.length > 1 ? 's' : ''}`);
     } catch (error: any) {
@@ -85,31 +89,31 @@ const AdminAddProperty = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Validate inputs
     const titleValidation = validateTitle(formData.title);
     if (!titleValidation.valid) {
       toast.error(titleValidation.error || 'Invalid title');
       return;
     }
-    
+
     const descriptionValidation = validateDescription(formData.description);
     if (!descriptionValidation.valid) {
       toast.error(descriptionValidation.error || 'Invalid description');
       return;
     }
-    
+
     const priceValidation = validatePrice(formData.price);
     if (!priceValidation.valid) {
       toast.error(priceValidation.error || 'Invalid price');
       return;
     }
-    
+
     if (!formData.type || !formData.location || !formData.status) {
       toast.error('Please fill in all required fields');
       return;
     }
-    
+
     setSubmitting(true);
 
     try {
@@ -118,14 +122,14 @@ const AdminAddProperty = () => {
       const featuresArray = formData.features
         ? formData.features.split(",").map((f) => f.trim()).filter(Boolean)
         : [];
-      
+
       const featuresValidation = validateFeatures(featuresArray);
       if (!featuresValidation.valid) {
         toast.error(featuresValidation.error || 'Invalid features');
         setSubmitting(false);
         return;
       }
-      
+
       const sanitizedFeatures = sanitizeArray(featuresArray);
 
       const withSizeUnit = (val: string) => {
@@ -166,8 +170,12 @@ const AdminAddProperty = () => {
     <DashboardLayout>
       <div className="mx-auto max-w-3xl space-y-6">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Add New Property</h1>
-          <p className="text-muted-foreground">Fill in the details to list a new property</p>
+          <h1 className="text-3xl font-bold text-foreground">
+            {isRentalMode ? "Add Rental Property" : "Add New Property"}
+          </h1>
+          <p className="text-muted-foreground">
+            {isRentalMode ? "List a new property for rent" : "Fill in the details to list a new property"}
+          </p>
         </div>
 
         <form onSubmit={handleSubmit}>
@@ -209,7 +217,9 @@ const AdminAddProperty = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="price">Price (KSh)</Label>
+                  <Label htmlFor="price">
+                    {formData.status === 'for-rent' ? "Monthly Rent (KSh)" : "Price (KSh)"}
+                  </Label>
                   <Input
                     id="price"
                     name="price"
