@@ -217,10 +217,6 @@ const RentalsPage = () => {
                         ) : (
                             sortedRentals.map((property) => {
                                 const mainImage = property.images?.[0] || property.image || "/images/property1.jpg";
-                                const displayPrice =
-                                    typeof property.price === "number"
-                                        ? `KES ${property.price.toLocaleString()}/month`
-                                        : `${property.price}/month`;
 
                                 return (
                                     <Card
@@ -290,7 +286,26 @@ const RentalsPage = () => {
 
                                             {/* Price */}
                                             <div className="pt-4 border-t border-border">
-                                                <p className="text-2xl font-bold text-primary">{displayPrice}</p>
+                                                {(property.priceDaily || property.priceMonthly) ? (
+                                                    <div className="space-y-1">
+                                                        {property.priceMonthly && (
+                                                            <p className="text-2xl font-bold text-primary">
+                                                                KES {property.priceMonthly.toLocaleString()} <span className="text-base font-normal text-muted-foreground">/ Month</span>
+                                                            </p>
+                                                        )}
+                                                        {property.priceDaily && (
+                                                            <p className={`${property.priceMonthly ? 'text-lg' : 'text-2xl'} font-bold text-primary`}>
+                                                                KES {property.priceDaily.toLocaleString()} <span className="text-sm font-normal text-muted-foreground">/ Day</span>
+                                                            </p>
+                                                        )}
+                                                    </div>
+                                                ) : (
+                                                    <p className="text-2xl font-bold text-primary">
+                                                        {typeof property.price === "number"
+                                                            ? `KES ${property.price.toLocaleString()}/month`
+                                                            : `${property.price}/month`}
+                                                    </p>
+                                                )}
                                             </div>
                                         </CardContent>
 
