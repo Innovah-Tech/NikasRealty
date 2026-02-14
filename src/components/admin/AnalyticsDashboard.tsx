@@ -187,9 +187,8 @@ const AnalyticsDashboard = () => {
                     </CardHeader>
                     <CardContent>
                         <div className="text-2xl font-bold">{analytics.uniqueVisitors.toLocaleString()}</div>
-                        <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
-                            <TrendingUp className="h-3 w-3 text-green-500" />
-                            <span className="text-green-500">+8.3%</span> from last period
+                        <p className="text-xs text-muted-foreground mt-1">
+                            Total unique sessions
                         </p>
                     </CardContent>
                 </Card>
@@ -201,9 +200,8 @@ const AnalyticsDashboard = () => {
                     </CardHeader>
                     <CardContent>
                         <div className="text-2xl font-bold">{formatDuration(analytics.avgSessionDuration)}</div>
-                        <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
-                            <TrendingUp className="h-3 w-3 text-green-500" />
-                            <span className="text-green-500">+5.2%</span> from last period
+                        <p className="text-xs text-muted-foreground mt-1">
+                            Coming soon from Firestore
                         </p>
                     </CardContent>
                 </Card>
@@ -215,8 +213,8 @@ const AnalyticsDashboard = () => {
                     </CardHeader>
                     <CardContent>
                         <div className="text-2xl font-bold">{analytics.bounceRate}%</div>
-                        <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
-                            <span className="text-red-500">-2.1%</span> from last period
+                        <p className="text-xs text-muted-foreground mt-1">
+                            Coming soon from Firestore
                         </p>
                     </CardContent>
                 </Card>
@@ -336,22 +334,25 @@ const AnalyticsDashboard = () => {
             </Card>
 
             {/* Info Note */}
-            <Card className="border-primary/50">
+            <Card className="border-primary/50 bg-primary/5">
                 <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
+                    <CardTitle className="flex items-center gap-2 text-primary font-bold">
                         <Activity className="h-5 w-5" />
-                        Google Analytics Integration
+                        Real-time Analytics System
                     </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-2 text-sm text-muted-foreground">
+                <CardContent className="space-y-2 text-sm text-foreground/80">
                     <p>
-                        This dashboard displays real-time analytics from Google Analytics 4. To view live data:
+                        This dashboard provides live visibility into your website traffic, powered directly by your custom Firestore tracking system:
                     </p>
-                    <ol className="list-decimal list-inside space-y-1 ml-2">
-                        <li>Ensure Google Analytics is properly configured with your tracking ID</li>
-                        <li>Data refreshes automatically every 5 minutes</li>
-                        <li>Historical data is available for up to 30 days</li>
-                    </ol>
+                    <ul className="list-disc list-inside space-y-1 ml-2">
+                        <li><strong>Live Refresh</strong>: Dashboard data updates automatically every 30 seconds.</li>
+                        <li><strong>Session Tracking</strong>: Active user counts reflect real people browsing right now.</li>
+                        <li><strong>Direct Logging</strong>: Every page visit is recorded and aggregated into these charts instantly.</li>
+                    </ul>
+                    <p className="text-xs text-muted-foreground mt-4 italic">
+                        Note: This data is separate from Google Analytics and represents immediate, raw traffic to Nikas Realty.
+                    </p>
                 </CardContent>
             </Card>
         </div>
