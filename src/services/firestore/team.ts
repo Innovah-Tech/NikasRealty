@@ -68,20 +68,32 @@ export const teamService = {
   // Create team member
   async create(member: Omit<TeamMember, 'id' | 'createdAt' | 'updatedAt'>) {
     try {
+      console.log('Creating team member with data:', member);
+
       // Filter out undefined fields which Firebase doesn't support
-      const cleanedData = Object.fromEntries(
-        Object.entries(member).filter(([_, v]) => v !== undefined)
-      );
+      // Using a robust fallback instead of Object.fromEntries if possible
+      const cleanedData: Record<string, any> = {};
+      Object.entries(member).forEach(([key, value]) => {
+        if (value !== undefined) {
+          cleanedData[key] = value;
+        }
+      });
 
       const memberData = {
         ...cleanedData,
         createdAt: Timestamp.now(),
         updatedAt: Timestamp.now(),
       };
+
       const docRef = await addDoc(collection(db, COLLECTION_NAME), memberData);
       return { id: docRef.id, ...memberData };
-    } catch (error) {
-      console.error('Error creating team member:', error);
+    } catch (error: any) {
+      console.error('Firestore Error details:', {
+        code: error.code,
+        message: error.message,
+        name: error.name,
+        stack: error.stack
+      });
       throw error;
     }
   },
@@ -90,9 +102,12 @@ export const teamService = {
   async update(id: string, updates: Partial<TeamMember>) {
     try {
       // Filter out undefined fields
-      const cleanedUpdates = Object.fromEntries(
-        Object.entries(updates).filter(([_, v]) => v !== undefined)
-      );
+      const cleanedUpdates: Record<string, any> = {};
+      Object.entries(updates).forEach(([key, value]) => {
+        if (value !== undefined) {
+          cleanedUpdates[key] = value;
+        }
+      });
 
       const docRef = doc(db, COLLECTION_NAME, id);
       await updateDoc(docRef, {

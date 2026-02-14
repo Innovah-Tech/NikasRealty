@@ -112,8 +112,13 @@ const AdminAddTeamMember = () => {
 
       toast.success("Team member added successfully");
       navigate("/admin/team");
-    } catch (error: unknown) {
-      console.error("Error adding team member:", error);
+    } catch (error: any) {
+      console.error("Error adding team member full object:", error);
+      console.error("Error adding team member details:", {
+        message: error.message,
+        code: error.code,
+        name: error.name
+      });
       toast.error("Failed to add team member. Please try again.");
     } finally {
       setSubmitting(false);
