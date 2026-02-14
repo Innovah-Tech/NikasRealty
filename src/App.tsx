@@ -33,6 +33,9 @@ import AdminNewsletter from "./pages/admin/Newsletter";
 
 const queryClient = new QueryClient();
 
+import { analyticsService } from "@/services/firestore/analytics";
+import { v4 as uuidv4 } from 'uuid';
+
 // Analytics tracker component
 const AnalyticsTracker = () => {
   const location = useLocation();
@@ -40,11 +43,23 @@ const AnalyticsTracker = () => {
   useEffect(() => {
     // Initialize GA on mount
     initGA();
+
+    // Initialize or get sessionId
+    let sessionId = localStorage.getItem('nikas_session_id');
+    if (!sessionId) {
+      sessionId = uuidv4();
+      localStorage.setItem('nikas_session_id', sessionId);
+    }
   }, []);
 
   useEffect(() => {
-    // Track page views
-    logPageView(location.pathname + location.search);
+    const path = location.pathname + location.search;
+    // Track page views in GA4
+    logPageView(path);
+
+    // Track in real-time Firestore analytics
+    const sessionId = localStorage.getItem('nikas_session_id') || 'anonymous';
+    analyticsService.logVisit(location.pathname, sessionId);
   }, [location]);
 
   return null;

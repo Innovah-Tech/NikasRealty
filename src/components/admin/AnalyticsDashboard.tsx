@@ -51,6 +51,8 @@ interface TopPage {
     color: string;
 }
 
+import { analyticsService } from '@/services/firestore/analytics';
+
 const AnalyticsDashboard = () => {
     const [analytics, setAnalytics] = useState<AnalyticsData>({
         totalVisits: 0,
@@ -62,41 +64,61 @@ const AnalyticsDashboard = () => {
         trafficByDay: [],
         topPages: [],
     });
+    const [realTimeStats, setRealTimeStats] = useState<{ activeNow: number }>({ activeNow: 0 });
     const [timeRange, setTimeRange] = useState<'24h' | '7d' | '30d'>('7d');
 
     useEffect(() => {
-        // Fetch analytics data from Google Analytics
-        // This is a placeholder - you'll need to implement GA4 API integration
         fetchAnalytics(timeRange);
+
+        // Polling for real-time stats every 30 seconds
+        const rtInterval = setInterval(async () => {
+            const stats = await analyticsService.getRealTimeStats();
+            if (stats) {
+                setRealTimeStats({ activeNow: stats.activeNow });
+            }
+        }, 30000);
+
+        // Initial fetch
+        analyticsService.getRealTimeStats().then(stats => {
+            if (stats) setRealTimeStats({ activeNow: stats.activeNow });
+        });
+
+        return () => clearInterval(rtInterval);
     }, [timeRange]);
 
     const fetchAnalytics = async (range: string) => {
-        // Placeholder mock data
-        // In production, fetch from Google Analytics API
-        const mockData: AnalyticsData = {
-            totalVisits: 12543,
-            uniqueVisitors: 8234,
-            avgSessionDuration: 245, // seconds
-            bounceRate: 42.5,
-            pageViews: [
-                { path: '/properties', views: 4523 },
-                { path: '/', views: 3821 },
-                { path: '/blog', views: 2134 },
-                { path: '/rentals', views: 1543 },
-                { path: '/contact', views: 522 },
-            ],
-            trafficByTime: generateHourlyData(),
-            trafficByDay: generateDailyData(range),
-            topPages: [
-                { page: 'Home', views: 3821, color: '#D4AF37' },
-                { page: 'Properties', views: 4523, color: '#C5A572' },
-                { page: 'Blog', views: 2134, color: '#B8956A' },
-                { page: 'Rentals', views: 1543, color: '#A98862' },
-                { page: 'Other', views: 522, color: '#9A7B5A' },
-            ],
-        };
+        try {
+            const stats = await analyticsService.getRealTimeStats();
+            if (!stats) return;
 
-        setAnalytics(mockData);
+            // Map Firestore stats to Dashboard format
+            const pageViews = Object.entries(stats.pageViews)
+                .filter(([key]) => key !== 'total' && key !== 'lastUpdated')
+                .map(([key, value]) => ({
+                    path: key.replace(/_/g, '/'),
+                    views: value as number
+                }))
+                .sort((a, b) => b.views - a.views);
+
+            const colors = ['#D4AF37', '#C5A572', '#B8956A', '#A98862', '#9A7B5A'];
+            const topPages = pageViews.slice(0, 5).map((pv, i) => ({
+                page: pv.path === 'home' ? 'Home' : pv.path,
+                views: pv.views,
+                color: colors[i % colors.length]
+            }));
+
+            setAnalytics(prev => ({
+                ...prev,
+                totalVisits: (stats.pageViews.total as number) || 0,
+                uniqueVisitors: stats.activeNow, // Placeholder: using active users as active visitors proxy
+                pageViews: pageViews,
+                topPages: topPages,
+                trafficByTime: generateHourlyData(), // Still mock for now, but stats are real
+                trafficByDay: generateDailyData(range), // Still mock for now
+            }));
+        } catch (error) {
+            console.error('Error fetching dashboard analytics:', error);
+        }
     };
 
     const generateHourlyData = (): TrafficData[] => {
@@ -157,16 +179,28 @@ const AnalyticsDashboard = () => {
 
             {/* Stats Cards */}
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                <Card className="bg-primary/5 border-primary/20">
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-sm font-medium text-primary">Active Now</CardTitle>
+                        <Activity className="h-4 w-4 text-primary animate-pulse" />
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-3xl font-bold text-primary">{realTimeStats.activeNow}</div>
+                        <p className="text-xs text-muted-foreground mt-1">
+                            Users online right now
+                        </p>
+                    </CardContent>
+                </Card>
+
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Total Visits</CardTitle>
-                        <Activity className="h-4 w-4 text-muted-foreground" />
+                        <CardTitle className="text-sm font-medium">Total Page Views</CardTitle>
+                        <Eye className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
                         <div className="text-2xl font-bold">{analytics.totalVisits.toLocaleString()}</div>
-                        <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
-                            <TrendingUp className="h-3 w-3 text-green-500" />
-                            <span className="text-green-500">+12.5%</span> from last period
+                        <p className="text-xs text-muted-foreground mt-1">
+                            Across all pages
                         </p>
                     </CardContent>
                 </Card>
