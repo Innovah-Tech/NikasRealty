@@ -21,9 +21,9 @@ const NewsletterSubscribe = ({ variant = 'default' }: NewsletterSubscribeProps) 
             return;
         }
 
-        // Basic email validation
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(email)) {
+        // Robust email validation
+        const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+        if (!emailRegex.test(email.trim())) {
             toast.error('Please enter a valid email address');
             return;
         }
@@ -32,7 +32,9 @@ const NewsletterSubscribe = ({ variant = 'default' }: NewsletterSubscribeProps) 
 
         try {
             await newsletterService.subscribe(email);
-            toast.success('Successfully subscribed! You\'ll receive notifications about new properties.');
+            toast.success('Successfully subscribed!', {
+                description: 'You\'ll receive notifications about new properties.'
+            });
             setEmail('');
         } catch (error: any) {
             toast.error(error.message || 'Failed to subscribe. Please try again.');
