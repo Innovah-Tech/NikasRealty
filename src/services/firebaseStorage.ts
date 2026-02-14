@@ -16,12 +16,15 @@ export const firebaseStorage = {
   async uploadFile(file: File, path: string): Promise<string> {
     // Use Cloudinary if configured
     if (useCloudinary()) {
+      console.log('Using Cloudinary for file upload');
       try {
         return await imageHosting.uploadImage(file);
       } catch (error: any) {
         console.error('Cloudinary upload failed, falling back to Firebase:', error);
         // Fall through to Firebase Storage
       }
+    } else {
+      console.log('Cloudinary not configured, using Firebase Storage');
     }
 
     // Fallback to Firebase Storage
@@ -37,7 +40,7 @@ export const firebaseStorage = {
       return downloadURL;
     } catch (error: any) {
       console.error('Error uploading file:', error);
-      
+
       // Provide more helpful error messages
       if (error.code === 'storage/unauthorized') {
         throw new Error('You do not have permission to upload files. Please check Firebase Storage rules.');
@@ -46,7 +49,7 @@ export const firebaseStorage = {
       } else if (error.code === 'storage/unknown') {
         throw new Error('An unknown error occurred. This might be a CORS issue. Please check Firebase Storage CORS configuration.');
       } else if (error.message) {
-      throw error;
+        throw error;
       } else {
         throw new Error('Failed to upload file. Please check your internet connection and try again.');
       }
@@ -57,12 +60,15 @@ export const firebaseStorage = {
   async uploadFiles(files: File[], basePath: string): Promise<string[]> {
     // Use Cloudinary if configured
     if (useCloudinary()) {
+      console.log(`Using Cloudinary for batch upload of ${files.length} files`);
       try {
         return await imageHosting.uploadImages(files);
       } catch (error: any) {
         console.error('Cloudinary upload failed, falling back to Firebase:', error);
         // Fall through to Firebase Storage
       }
+    } else {
+      console.log('Cloudinary not configured, using Firebase Storage for batch upload');
     }
 
     // Fallback to Firebase Storage

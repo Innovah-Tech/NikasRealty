@@ -33,11 +33,14 @@ export const imageHosting = {
   async uploadImage(file: File): Promise<string> {
     try {
       const { cloudName, uploadPreset } = getCloudinaryConfig();
-      
+
+      console.log('Uploading to Cloudinary:', { cloudName, uploadPreset, fileName: file.name, fileSize: file.size });
+
       const formData = new FormData();
       formData.append('file', file);
       formData.append('upload_preset', uploadPreset);
-      
+      formData.append('folder', 'properties'); // Explicitly set folder to match preset
+
       const response = await fetch(
         `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
         {
@@ -45,23 +48,40 @@ export const imageHosting = {
           body: formData,
         }
       );
-      
+
       if (!response.ok) {
         const error = await response.json();
+        console.error('Cloudinary upload error response:', error);
+
         let errorMessage = error.error?.message || 'Failed to upload image';
-        
+
         // Provide helpful error messages for common issues
-        if (errorMessage.includes('whitelisted') || errorMessage.includes('unsigned')) {
-          errorMessage = `Upload configuration error. Please contact support if this issue persists.`;
+        if (errorMessage.includes('Invalid upload preset') || errorMessage.includes('preset')) {
+          errorMessage = `Upload preset '${uploadPreset}' is invalid or not found. Please check Cloudinary dashboard.`;
+        } else if (errorMessage.includes('whitelisted') || errorMessage.includes('unsigned')) {
+          errorMessage = `Upload configuration error. The preset must allow unsigned uploads.`;
+        } else if (errorMessage.includes('Invalid image file')) {
+          errorMessage = `Invalid image file. Please upload a valid image format (JPG, PNG, etc.)`;
+        } else if (response.status === 401) {
+          errorMessage = `Authentication failed. Upload preset may not be configured for unsigned uploads.`;
+        } else if (response.status === 400) {
+          errorMessage = `Bad request: ${errorMessage}`;
         }
-        
+
         throw new Error(errorMessage);
       }
-      
+
       const data = await response.json();
+      console.log('Cloudinary upload successful:', data.secure_url);
       return data.secure_url; // Returns the CDN URL
     } catch (error: any) {
       console.error('Image upload error:', error);
+
+      // Network error handling
+      if (error.name === 'TypeError' && error.message.includes('fetch')) {
+        throw new Error('Network error. Please check your internet connection and try again.');
+      }
+
       throw new Error(error.message || 'Failed to upload image');
     }
   },

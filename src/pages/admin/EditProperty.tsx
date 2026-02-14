@@ -202,24 +202,30 @@ const AdminEditProperty = () => {
         else if (priceDaily) mainPrice = priceDaily * 30; // Approximation for sorting
       }
 
-      await propertiesService.update(id, {
+      // Build property data object, excluding undefined fields (Firestore doesn't accept undefined)
+      const propertyData: any = {
         title: sanitizeText(formData.title),
         description: sanitizeText(formData.description),
         type: formData.type,
         price: mainPrice,
-        priceDaily,
-        priceMonthly,
         location: sanitizeText(formData.location),
         status: formData.status,
-        projectStage: formData.projectStage ? sanitizeText(formData.projectStage) : undefined,
-        bedrooms: formData.bedrooms ? Number(formData.bedrooms) : undefined,
-        bathrooms: formData.bathrooms ? Number(formData.bathrooms) : undefined,
-        size: formData.size ? sanitizeText(withSizeUnit(formData.size)) : undefined,
         featured: formData.featured,
         offplan: formData.offplan,
         features: sanitizedFeatures,
         images: imageUrls,
-      });
+      };
+
+      // Only include optional fields if they have values
+      if (priceDaily !== undefined) propertyData.priceDaily = priceDaily;
+      if (priceMonthly !== undefined) propertyData.priceMonthly = priceMonthly;
+      if (formData.projectStage) propertyData.projectStage = sanitizeText(formData.projectStage);
+      if (formData.bedrooms) propertyData.bedrooms = Number(formData.bedrooms);
+      if (formData.bathrooms) propertyData.bathrooms = Number(formData.bathrooms);
+      if (formData.size) propertyData.size = sanitizeText(withSizeUnit(formData.size));
+
+      await propertiesService.update(id, propertyData);
+
 
       toast.success(`Property updated successfully!`);
       navigate("/admin/properties");
