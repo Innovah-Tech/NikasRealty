@@ -145,7 +145,7 @@ const AnalyticsDashboard = () => {
                     <h2 className="text-3xl font-bold text-foreground">Analytics Dashboard</h2>
                     <p className="text-muted-foreground">Monitor your website traffic and user behavior</p>
                 </div>
-                <Tabs value={timeRange} onValueChange={(v) => setTimeRange(v as any)}>
+                <Tabs value={timeRange} onValueChange={(v) => setTimeRange(v as '24h' | '7d' | '30d')}>
                     <TabsList>
                         <TabsTrigger value="24h">24 Hours</TabsTrigger>
                         <TabsTrigger value="7d">7 Days</TabsTrigger>

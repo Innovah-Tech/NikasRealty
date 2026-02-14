@@ -21,7 +21,7 @@ const STATS_COLLECTION = 'analytics_stats';
 export interface Visit {
     id?: string;
     path: string;
-    timestamp: any;
+    timestamp: Timestamp | Date | null;
     sessionId: string;
 }
 
@@ -115,10 +115,14 @@ export const analyticsService = {
             const now = new Date();
             const last24h = new Date(now.getTime() - 24 * 60 * 60 * 1000);
 
-            visits.forEach((visit: any) => {
-                const date = visit.timestamp;
+            visits.forEach((visit: Visit) => {
+                const timestamp = visit.timestamp;
+                if (!timestamp) return;
+
+                // Ensure we have a Date object
+                const date = timestamp instanceof Timestamp ? timestamp.toDate() : timestamp;
+
                 const sessionId = visit.sessionId || 'anonymous';
-                if (!date) return;
 
                 // 1. Basic Tracking (Daily/Hourly)
                 const dayKey = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
