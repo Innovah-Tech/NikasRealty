@@ -23,13 +23,8 @@ export const newsletterService = {
     // Subscribe a new email
     async subscribe(email: string) {
         try {
-            // Check if email already exists
-            const q = query(collection(db, COLLECTION_NAME), where('email', '==', email.toLowerCase()));
-            const querySnapshot = await getDocs(q);
-
-            if (!querySnapshot.empty) {
-                throw new Error('This email is already subscribed to our newsletter.');
-            }
+            // NOTE: We're removing the check for existing emails here because it requires 'list' permissions
+            // which public users typically don't have in Firestore rules.
 
             const subscriberData = {
                 email: email.toLowerCase().trim(),
