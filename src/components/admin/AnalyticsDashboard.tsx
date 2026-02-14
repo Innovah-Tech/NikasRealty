@@ -88,10 +88,15 @@ const AnalyticsDashboard = () => {
 
     const fetchAnalytics = async (range: string) => {
         try {
-            const stats = await analyticsService.getRealTimeStats();
+            const days = range === '24h' ? 1 : range === '7d' ? 7 : 30;
+            const [stats, traffic] = await Promise.all([
+                analyticsService.getRealTimeStats(),
+                analyticsService.getHistoricalTraffic(days)
+            ]);
+
             if (!stats) return;
 
-            // Map Firestore stats to Dashboard format
+            // Map Firestore stats to Dashboard format for Pie Chart and Table
             const pageViews = Object.entries(stats.pageViews)
                 .filter(([key]) => key !== 'total' && key !== 'lastUpdated')
                 .map(([key, value]) => ({
@@ -102,56 +107,26 @@ const AnalyticsDashboard = () => {
 
             const colors = ['#D4AF37', '#C5A572', '#B8956A', '#A98862', '#9A7B5A'];
             const topPages = pageViews.slice(0, 5).map((pv, i) => ({
-                page: pv.path === 'home' ? 'Home' : pv.path,
+                page: pv.path === '/' || pv.path === 'home' ? 'Home' : pv.path,
                 views: pv.views,
                 color: colors[i % colors.length]
             }));
 
+            // Calculate estimated visitors (simplified)
+            const uniqueVisitors = traffic.daily.reduce((acc, curr) => acc + curr.visitors, 0);
+
             setAnalytics(prev => ({
                 ...prev,
                 totalVisits: (stats.pageViews.total as number) || 0,
-                uniqueVisitors: stats.activeNow, // Placeholder: using active users as active visitors proxy
+                uniqueVisitors: uniqueVisitors,
                 pageViews: pageViews,
                 topPages: topPages,
-                trafficByTime: generateHourlyData(), // Still mock for now, but stats are real
-                trafficByDay: generateDailyData(range), // Still mock for now
+                trafficByTime: traffic.hourly,
+                trafficByDay: traffic.daily.length > 0 ? traffic.daily : [{ day: 'No Data', visitors: 0 }],
             }));
         } catch (error) {
             console.error('Error fetching dashboard analytics:', error);
         }
-    };
-
-    const generateHourlyData = (): TrafficData[] => {
-        const data: TrafficData[] = [];
-        const now = new Date();
-
-        for (let i = 23; i >= 0; i--) {
-            const hour = new Date(now);
-            hour.setHours(hour.getHours() - i);
-            data.push({
-                time: hour.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
-                visitors: Math.floor(Math.random() * 100) + 50,
-                pageViews: Math.floor(Math.random() * 150) + 80,
-            });
-        }
-
-        return data;
-    };
-
-    const generateDailyData = (range: string): DailyTraffic[] => {
-        const data: DailyTraffic[] = [];
-        const days = range === '24h' ? 1 : range === '7d' ? 7 : 30;
-
-        for (let i = days - 1; i >= 0; i--) {
-            const date = new Date();
-            date.setDate(date.getDate() - i);
-            data.push({
-                day: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-                visitors: Math.floor(Math.random() * 500) + 200,
-            });
-        }
-
-        return data;
     };
 
     const formatDuration = (seconds: number): string => {

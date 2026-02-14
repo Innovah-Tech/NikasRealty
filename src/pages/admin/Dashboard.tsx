@@ -5,6 +5,8 @@ import { Building2, DollarSign, Home, MessageSquare, FileText } from 'lucide-rea
 import { propertiesService } from '@/services/firestore/properties';
 import { requestsService } from '@/services/firestore/requests';
 import { blogsService } from '@/services/firestore/blogs';
+import { analyticsService } from '@/services/firestore/analytics';
+import { formatDistanceToNow } from 'date-fns';
 import { toast } from 'sonner';
 
 interface Stats {
@@ -25,6 +27,7 @@ const AdminDashboard = () => {
     totalBlogs: 0,
     publishedBlogs: 0,
   });
+  const [recentVisits, setRecentVisits] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -33,10 +36,11 @@ const AdminDashboard = () => {
 
   const fetchStats = async () => {
     try {
-      const [propertiesStats, requestsStats, blogsStats] = await Promise.all([
+      const [propertiesStats, requestsStats, blogsStats, visits] = await Promise.all([
         propertiesService.getStats(),
         requestsService.getStats(),
         blogsService.getStats().catch(() => ({ total: 0, published: 0 })),
+        analyticsService.getRecentVisits(6)
       ]);
 
       setStats({
@@ -47,6 +51,7 @@ const AdminDashboard = () => {
         totalBlogs: blogsStats.total || 0,
         publishedBlogs: blogsStats.published || 0,
       });
+      setRecentVisits(visits);
     } catch (error) {
       toast.error('Failed to fetch statistics');
       console.error(error);
@@ -143,9 +148,32 @@ const AdminDashboard = () => {
             <CardTitle>Recent Activity</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-muted-foreground">
-              Property management and analytics coming soon...
-            </p>
+            {recentVisits.length > 0 ? (
+              <div className="space-y-4">
+                {recentVisits.map((visit) => (
+                  <div key={visit.id} className="flex items-center justify-between border-b pb-2 last:border-0 last:pb-0">
+                    <div className="flex items-center gap-3">
+                      <div className="h-2 w-2 rounded-full bg-primary" />
+                      <div>
+                        <p className="text-sm font-medium">
+                          Visitor viewed <span className="text-primary">{visit.path}</span>
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {visit.timestamp ? formatDistanceToNow(visit.timestamp, { addSuffix: true }) : 'Just now'}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="text-xs text-muted-foreground font-mono">
+                      ID: {visit.sessionId.substring(0, 8)}...
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                No recent activity recorded yet.
+              </p>
+            )}
           </CardContent>
         </Card>
       </div>
