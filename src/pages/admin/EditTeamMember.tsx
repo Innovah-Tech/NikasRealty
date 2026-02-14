@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Upload, X, ArrowLeft } from "lucide-react";
-import { teamService } from "@/services/firestore/team";
+import { teamService, type TeamMember } from "@/services/firestore/team";
 import { firebaseStorage } from "@/services/firebaseStorage";
 import { toast } from "sonner";
 import { sanitizeText, sanitizeEmail, sanitizePhone } from "@/utils/sanitize";
@@ -29,35 +29,34 @@ const AdminEditTeamMember = () => {
   const [photo, setPhoto] = useState<string>("");
 
   useEffect(() => {
-    if (id) {
-      fetchTeamMember();
-    }
-  }, [id]);
-
-  const fetchTeamMember = async () => {
-    try {
-      const member = await teamService.getById(id!);
-      if (member) {
-        setFormData({
-          name: member.name || "",
-          role: member.role || "",
-          email: member.email || "",
-          phone: member.phone || "",
-          bio: member.bio || "",
-        });
-        setPhoto(member.photo || "");
-      } else {
-        toast.error("Team member not found");
-        navigate("/admin/team");
+    const fetchMember = async () => {
+      if (id) {
+        try {
+          const member = await teamService.getById(id);
+          if (member) {
+            setFormData({
+              name: member.name || "",
+              role: member.role || "",
+              email: member.email || "",
+              phone: member.phone || "",
+              bio: member.bio || "",
+            });
+            setPhoto(member.photo || "");
+          } else {
+            toast.error("Team member not found");
+            navigate("/admin/team");
+          }
+        } catch (error) {
+          toast.error("Failed to fetch team member");
+          console.error(error);
+          navigate("/admin/team");
+        } finally {
+          setLoading(false);
+        }
       }
-    } catch (error) {
-      toast.error("Failed to fetch team member");
-      console.error(error);
-      navigate("/admin/team");
-    } finally {
-      setLoading(false);
-    }
-  };
+    };
+    fetchMember();
+  }, [id, navigate]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -81,8 +80,8 @@ const AdminEditTeamMember = () => {
       );
       setPhoto(url);
       toast.success("Photo uploaded successfully");
-    } catch (error: any) {
-      const errorMessage = error?.message || "Failed to upload photo";
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : "Failed to upload photo";
       toast.error(errorMessage);
       console.error("Upload error:", error);
     } finally {
@@ -97,20 +96,20 @@ const AdminEditTeamMember = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Validate inputs
     const nameValidation = validateName(formData.name);
     if (!nameValidation.valid) {
       toast.error(nameValidation.error || 'Invalid name');
       return;
     }
-    
+
     const roleValidation = validateName(formData.role);
     if (!roleValidation.valid) {
       toast.error('Role is required');
       return;
     }
-    
+
     if (formData.email) {
       const emailValidation = validateEmail(formData.email, false);
       if (!emailValidation.valid) {
@@ -118,7 +117,7 @@ const AdminEditTeamMember = () => {
         return;
       }
     }
-    
+
     if (formData.phone) {
       const phoneValidation = validatePhone(formData.phone);
       if (!phoneValidation.valid) {
@@ -130,19 +129,23 @@ const AdminEditTeamMember = () => {
     setSubmitting(true);
 
     try {
-      // Sanitize all inputs
-      await teamService.update(id!, {
+      // Construct updates object, only including optional fields if they have values
+      const updates = {
         name: sanitizeText(formData.name),
         role: sanitizeText(formData.role),
-        email: formData.email ? sanitizeEmail(formData.email) : undefined,
-        phone: formData.phone ? sanitizePhone(formData.phone) : undefined,
-        bio: formData.bio ? sanitizeText(formData.bio) : undefined,
-        photo: photo || undefined,
-      });
-      
+      } as Partial<TeamMember>;
+
+      // For updates, we omit untrimmed fields to avoid passing undefined
+      if (formData.email?.trim()) updates.email = sanitizeEmail(formData.email);
+      if (formData.phone?.trim()) updates.phone = sanitizePhone(formData.phone);
+      if (formData.bio?.trim()) updates.bio = sanitizeText(formData.bio);
+      if (photo) updates.photo = photo;
+
+      await teamService.update(id!, updates);
+
       toast.success("Team member updated successfully");
       navigate("/admin/team");
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error updating team member:", error);
       toast.error("Failed to update team member. Please try again.");
     } finally {

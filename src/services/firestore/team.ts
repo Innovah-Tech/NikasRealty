@@ -1,14 +1,14 @@
-import { 
-  collection, 
-  doc, 
-  getDocs, 
-  getDoc, 
-  addDoc, 
-  updateDoc, 
-  deleteDoc, 
-  query, 
+import {
+  collection,
+  doc,
+  getDocs,
+  getDoc,
+  addDoc,
+  updateDoc,
+  deleteDoc,
+  query,
   orderBy,
-  Timestamp 
+  Timestamp
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 
@@ -49,7 +49,7 @@ export const teamService = {
     try {
       const docRef = doc(db, COLLECTION_NAME, id);
       const docSnap = await getDoc(docRef);
-      
+
       if (docSnap.exists()) {
         return {
           id: docSnap.id,
@@ -68,8 +68,13 @@ export const teamService = {
   // Create team member
   async create(member: Omit<TeamMember, 'id' | 'createdAt' | 'updatedAt'>) {
     try {
+      // Filter out undefined fields which Firebase doesn't support
+      const cleanedData = Object.fromEntries(
+        Object.entries(member).filter(([_, v]) => v !== undefined)
+      );
+
       const memberData = {
-        ...member,
+        ...cleanedData,
         createdAt: Timestamp.now(),
         updatedAt: Timestamp.now(),
       };
@@ -84,9 +89,14 @@ export const teamService = {
   // Update team member
   async update(id: string, updates: Partial<TeamMember>) {
     try {
+      // Filter out undefined fields
+      const cleanedUpdates = Object.fromEntries(
+        Object.entries(updates).filter(([_, v]) => v !== undefined)
+      );
+
       const docRef = doc(db, COLLECTION_NAME, id);
       await updateDoc(docRef, {
-        ...updates,
+        ...cleanedUpdates,
         updatedAt: Timestamp.now(),
       });
       return await this.getById(id);

@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Upload, X, ArrowLeft } from "lucide-react";
-import { teamService } from "@/services/firestore/team";
+import { teamService, type TeamMember } from "@/services/firestore/team";
 import { firebaseStorage } from "@/services/firebaseStorage";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
@@ -48,8 +48,8 @@ const AdminAddTeamMember = () => {
       );
       setPhoto(url);
       toast.success("Photo uploaded successfully");
-    } catch (error: any) {
-      const errorMessage = error?.message || "Failed to upload photo";
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : "Failed to upload photo";
       toast.error(errorMessage);
       console.error("Upload error:", error);
     } finally {
@@ -64,20 +64,20 @@ const AdminAddTeamMember = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Validate inputs
     const nameValidation = validateName(formData.name);
     if (!nameValidation.valid) {
       toast.error(nameValidation.error || 'Invalid name');
       return;
     }
-    
+
     const roleValidation = validateName(formData.role);
     if (!roleValidation.valid) {
       toast.error('Role is required');
       return;
     }
-    
+
     if (formData.email) {
       const emailValidation = validateEmail(formData.email, false);
       if (!emailValidation.valid) {
@@ -85,7 +85,7 @@ const AdminAddTeamMember = () => {
         return;
       }
     }
-    
+
     if (formData.phone) {
       const phoneValidation = validatePhone(formData.phone);
       if (!phoneValidation.valid) {
@@ -97,19 +97,22 @@ const AdminAddTeamMember = () => {
     setSubmitting(true);
 
     try {
-      // Sanitize all inputs
-      await teamService.create({
+      // Construct data object, only including optional fields if they have values
+      const memberToCreate = {
         name: sanitizeText(formData.name),
         role: sanitizeText(formData.role),
-        email: formData.email ? sanitizeEmail(formData.email) : undefined,
-        phone: formData.phone ? sanitizePhone(formData.phone) : undefined,
-        bio: formData.bio ? sanitizeText(formData.bio) : undefined,
-        photo: photo || undefined,
-      });
-      
+      } as Omit<TeamMember, 'id' | 'createdAt' | 'updatedAt'>;
+
+      if (formData.email?.trim()) memberToCreate.email = sanitizeEmail(formData.email);
+      if (formData.phone?.trim()) memberToCreate.phone = sanitizePhone(formData.phone);
+      if (formData.bio?.trim()) memberToCreate.bio = sanitizeText(formData.bio);
+      if (photo) memberToCreate.photo = photo;
+
+      await teamService.create(memberToCreate);
+
       toast.success("Team member added successfully");
       navigate("/admin/team");
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error adding team member:", error);
       toast.error("Failed to add team member. Please try again.");
     } finally {
