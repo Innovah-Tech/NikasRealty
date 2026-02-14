@@ -105,36 +105,44 @@ export const analyticsService = {
                 timestamp: doc.data().timestamp?.toDate()
             }));
 
-            // Group by day for the daily chart
-            const dailyData: { [key: string]: number } = {};
-            // Group by hour for the hourly chart (last 24h)
-            const hourlyData: { [key: string]: { visitors: number, pageViews: number } } = {};
+            // Use Sets to track unique sessions per day and per hour
+            const dailySessions: { [key: string]: Set<string> } = {};
+            const hourlySessions: { [key: string]: { visitors: Set<string>, pageViews: number } } = {};
 
             const now = new Date();
             const last24h = new Date(now.getTime() - 24 * 60 * 60 * 1000);
 
             visits.forEach((visit: any) => {
                 const date = visit.timestamp;
+                const sessionId = visit.sessionId || 'anonymous';
                 if (!date) return;
 
                 // Daily grouping
                 const dayKey = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-                dailyData[dayKey] = (dailyData[dayKey] || 0) + 1;
+                if (!dailySessions[dayKey]) dailySessions[dayKey] = new Set();
+                dailySessions[dayKey].add(sessionId);
 
                 // Hourly grouping (if within last 24h)
                 if (date >= last24h) {
                     const hourKey = date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
-                    if (!hourlyData[hourKey]) {
-                        hourlyData[hourKey] = { visitors: 0, pageViews: 0 };
+                    if (!hourlySessions[hourKey]) {
+                        hourlySessions[hourKey] = { visitors: new Set(), pageViews: 0 };
                     }
-                    hourlyData[hourKey].pageViews += 1;
-                    hourlyData[hourKey].visitors += 1;
+                    hourlySessions[hourKey].pageViews += 1;
+                    hourlySessions[hourKey].visitors.add(sessionId);
                 }
             });
 
             return {
-                daily: Object.entries(dailyData).map(([day, visitors]) => ({ day, visitors })),
-                hourly: Object.entries(hourlyData).map(([time, data]) => ({ time, ...data }))
+                daily: Object.entries(dailySessions).map(([day, sessions]) => ({
+                    day,
+                    visitors: sessions.size
+                })),
+                hourly: Object.entries(hourlySessions).map(([time, data]) => ({
+                    time,
+                    visitors: data.visitors.size,
+                    pageViews: data.pageViews
+                }))
             };
         } catch (error) {
             console.error('Error fetching historical traffic:', error);
