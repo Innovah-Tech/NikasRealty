@@ -105,9 +105,12 @@ export const analyticsService = {
                 timestamp: doc.data().timestamp?.toDate()
             }));
 
-            // Use Sets to track unique sessions per day and per hour
+            // Tracking for various metrics
             const dailySessions: { [key: string]: Set<string> } = {};
             const hourlySessions: { [key: string]: { visitors: Set<string>, pageViews: number } } = {};
+
+            // Session detail tracking for Duration and Bounce Rate
+            const sessions: { [key: string]: { first: Date, last: Date, count: number } } = {};
 
             const now = new Date();
             const last24h = new Date(now.getTime() - 24 * 60 * 60 * 1000);
@@ -117,12 +120,11 @@ export const analyticsService = {
                 const sessionId = visit.sessionId || 'anonymous';
                 if (!date) return;
 
-                // Daily grouping
+                // 1. Basic Tracking (Daily/Hourly)
                 const dayKey = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
                 if (!dailySessions[dayKey]) dailySessions[dayKey] = new Set();
                 dailySessions[dayKey].add(sessionId);
 
-                // Hourly grouping (if within last 24h)
                 if (date >= last24h) {
                     const hourKey = date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
                     if (!hourlySessions[hourKey]) {
@@ -131,7 +133,30 @@ export const analyticsService = {
                     hourlySessions[hourKey].pageViews += 1;
                     hourlySessions[hourKey].visitors.add(sessionId);
                 }
+
+                // 2. Advanced Metrics Tracking
+                if (!sessions[sessionId]) {
+                    sessions[sessionId] = { first: date, last: date, count: 0 };
+                }
+                sessions[sessionId].last = date;
+                sessions[sessionId].count += 1;
             });
+
+            // Calculate Aggregate Metrics
+            const sessionData = Object.values(sessions);
+            const totalSessions = sessionData.length;
+
+            let totalDurationMs = 0;
+            let bounceCount = 0;
+
+            sessionData.forEach(session => {
+                const duration = session.last.getTime() - session.first.getTime();
+                totalDurationMs += duration;
+                if (session.count === 1) bounceCount++;
+            });
+
+            const avgDurationSeconds = totalSessions > 0 ? (totalDurationMs / 1000) / totalSessions : 0;
+            const bounceRate = totalSessions > 0 ? (bounceCount / totalSessions) * 100 : 0;
 
             return {
                 daily: Object.entries(dailySessions).map(([day, sessions]) => ({
@@ -142,11 +167,13 @@ export const analyticsService = {
                     time,
                     visitors: data.visitors.size,
                     pageViews: data.pageViews
-                }))
+                })),
+                avgSessionDuration: Math.round(avgDurationSeconds),
+                bounceRate: Math.round(bounceRate)
             };
         } catch (error) {
             console.error('Error fetching historical traffic:', error);
-            return { daily: [], hourly: [] };
+            return { daily: [], hourly: [], avgSessionDuration: 0, bounceRate: 0 };
         }
     },
 

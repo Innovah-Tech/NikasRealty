@@ -119,6 +119,8 @@ const AnalyticsDashboard = () => {
                 ...prev,
                 totalVisits: (stats.pageViews.total as number) || 0,
                 uniqueVisitors: uniqueVisitors,
+                avgSessionDuration: traffic.avgSessionDuration,
+                bounceRate: traffic.bounceRate,
                 pageViews: pageViews,
                 topPages: topPages,
                 trafficByTime: traffic.hourly,
@@ -201,7 +203,7 @@ const AnalyticsDashboard = () => {
                     <CardContent>
                         <div className="text-2xl font-bold">{formatDuration(analytics.avgSessionDuration)}</div>
                         <p className="text-xs text-muted-foreground mt-1">
-                            Coming soon from Firestore
+                            Average time on site
                         </p>
                     </CardContent>
                 </Card>
@@ -214,7 +216,7 @@ const AnalyticsDashboard = () => {
                     <CardContent>
                         <div className="text-2xl font-bold">{analytics.bounceRate}%</div>
                         <p className="text-xs text-muted-foreground mt-1">
-                            Coming soon from Firestore
+                            Single page sessions
                         </p>
                     </CardContent>
                 </Card>
