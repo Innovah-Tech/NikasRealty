@@ -1,9 +1,14 @@
+import { useEffect, useState } from "react";
 import { Building2, Award, Users, TrendingUp } from "lucide-react";
 import aboutImage from "@/assets/images/about.jpg";
+import { teamService, type TeamMember as DBTeamMember } from "@/services/firestore/team";
 import NewsletterSubscribe from "@/components/NewsletterSubscribe";
 
 const About = () => {
-  const teamMembers = [
+  const [dynamicMembers, setDynamicMembers] = useState<DBTeamMember[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const hardcodedMembers = [
     {
       id: 'native-monica',
       name: 'Monicah Githinji',
@@ -19,6 +24,23 @@ const About = () => {
       bio: 'Brian is committed to delivering seamless real estate services, leveraging local knowledge and strong client relationships to achieve successful outcomes.',
     },
   ];
+
+  useEffect(() => {
+    const fetchDynamicMembers = async () => {
+      try {
+        const members = await teamService.getAll();
+        setDynamicMembers(members);
+      } catch (error) {
+        console.error("Error fetching dynamic team members:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDynamicMembers();
+  }, []);
+
+  const allMembers = [...hardcodedMembers, ...dynamicMembers];
 
   const stats = [
     { icon: Users, value: "100+", label: "Happy Clients" },
@@ -107,18 +129,24 @@ const About = () => {
         {/* Team Section */}
         <div className="mt-20">
           <h3 className="text-3xl font-bold text-center text-foreground mb-8">Meet Our Team</h3>
-          <div className="flex flex-wrap gap-8 justify-center items-stretch">
-            {teamMembers.map((member) => (
-              <TeamMember
-                key={member.id}
-                name={member.name}
-                title={member.role}
-                image={member.photo}
-                bio={member.bio}
-                objectPosition={member.id?.includes('native-monica') ? "object-top" : "object-center"}
-              />
-            ))}
-          </div>
+          {loading ? (
+            <div className="flex justify-center items-center py-12">
+              <p className="text-muted-foreground">Loading team members...</p>
+            </div>
+          ) : (
+            <div className="flex flex-wrap gap-8 justify-center items-stretch">
+              {allMembers.map((member) => (
+                <TeamMember
+                  key={member.id}
+                  name={member.name}
+                  title={member.role}
+                  image={member.photo || '/placeholder.svg'}
+                  bio={member.bio || ''}
+                  objectPosition={member.id?.includes('native-monica') ? "object-top" : "object-center"}
+                />
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Newsletter Section */}

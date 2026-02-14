@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { DashboardLayout } from '@/components/admin/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Building2, DollarSign, Home, MessageSquare, FileText } from 'lucide-react';
+import { Building2, DollarSign, Home, MessageSquare, FileText, Users } from 'lucide-react';
 import { propertiesService } from '@/services/firestore/properties';
 import { requestsService } from '@/services/firestore/requests';
 import { blogsService } from '@/services/firestore/blogs';
-import { analyticsService } from '@/services/firestore/analytics';
+import { analyticsService, type Visit } from '@/services/firestore/analytics';
+import { teamService } from '@/services/firestore/team';
 import { formatDistanceToNow } from 'date-fns';
 import { toast } from 'sonner';
 
@@ -16,9 +18,11 @@ interface Stats {
   totalRequests: number;
   totalBlogs: number;
   publishedBlogs: number;
+  totalTeam: number;
 }
 
 const AdminDashboard = () => {
+  const navigate = useNavigate();
   const [stats, setStats] = useState<Stats>({
     totalProperties: 0,
     totalSales: 0,
@@ -26,8 +30,9 @@ const AdminDashboard = () => {
     totalRequests: 0,
     totalBlogs: 0,
     publishedBlogs: 0,
+    totalTeam: 0,
   });
-  const [recentVisits, setRecentVisits] = useState<any[]>([]);
+  const [recentVisits, setRecentVisits] = useState<Visit[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -36,11 +41,12 @@ const AdminDashboard = () => {
 
   const fetchStats = async () => {
     try {
-      const [propertiesStats, requestsStats, blogsStats, visits] = await Promise.all([
+      const [propertiesStats, requestsStats, blogsStats, visits, teamMembers] = await Promise.all([
         propertiesService.getStats(),
         requestsService.getStats(),
         blogsService.getStats().catch(() => ({ total: 0, published: 0 })),
-        analyticsService.getRecentVisits(6)
+        analyticsService.getRecentVisits(6),
+        teamService.getAll().catch(() => [])
       ]);
 
       setStats({
@@ -50,8 +56,9 @@ const AdminDashboard = () => {
         totalRequests: requestsStats.total || 0,
         totalBlogs: blogsStats.total || 0,
         publishedBlogs: blogsStats.published || 0,
+        totalTeam: (teamMembers as any[]).length,
       });
-      setRecentVisits(visits);
+      setRecentVisits(visits as Visit[]);
     } catch (error) {
       toast.error('Failed to fetch statistics');
       console.error(error);
@@ -97,6 +104,13 @@ const AdminDashboard = () => {
       icon: FileText,
       color: 'text-indigo-600',
     },
+    {
+      title: 'Team Members',
+      value: stats.totalTeam,
+      icon: Users,
+      color: 'text-rose-600',
+      href: '/admin/team'
+    },
   ];
 
   if (loading) {
@@ -129,7 +143,11 @@ const AdminDashboard = () => {
 
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {cards.map((card) => (
-            <Card key={card.title}>
+            <Card
+              key={card.title}
+              className={card.href ? "cursor-pointer hover:border-primary/50 transition-colors" : ""}
+              onClick={() => card.href && navigate(card.href)}
+            >
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-sm font-medium text-muted-foreground">
                   {card.title}
@@ -159,7 +177,7 @@ const AdminDashboard = () => {
                           Visitor viewed <span className="text-primary">{visit.path}</span>
                         </p>
                         <p className="text-xs text-muted-foreground">
-                          {visit.timestamp ? formatDistanceToNow(visit.timestamp, { addSuffix: true }) : 'Just now'}
+                          {visit.timestamp ? formatDistanceToNow(new Date(visit.timestamp as any), { addSuffix: true }) : 'Just now'}
                         </p>
                       </div>
                     </div>
