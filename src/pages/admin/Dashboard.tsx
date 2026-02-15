@@ -2,7 +2,8 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { DashboardLayout } from '@/components/admin/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Building2, DollarSign, Home, MessageSquare, FileText, Users } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Building2, DollarSign, Home, MessageSquare, FileText, Users, Download } from 'lucide-react';
 import { propertiesService } from '@/services/firestore/properties';
 import { requestsService } from '@/services/firestore/requests';
 import { blogsService } from '@/services/firestore/blogs';
@@ -64,6 +65,41 @@ const AdminDashboard = () => {
       console.error(error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleExportCSV = async () => {
+    try {
+      const allVisits = await analyticsService.getRecentVisits(500);
+      if (allVisits.length === 0) {
+        toast.info("No activity to export");
+        return;
+      }
+
+      const headers = ["Path", "Timestamp", "Session ID"];
+      const csvContent = [
+        headers.join(","),
+        ...(allVisits as Visit[]).map(visit => [
+          visit.path,
+          visit.timestamp ? new Date(visit.timestamp as any).toISOString() : "N/A",
+          visit.sessionId
+        ].join(","))
+      ].join("\n");
+
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.setAttribute("href", url);
+      link.setAttribute("download", `nikas_realty_activity_${new Date().toISOString().split('T')[0]}.csv`);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      toast.success("Recent activity exported successfully");
+    } catch (error) {
+      toast.error("Failed to export activity");
+      console.error(error);
     }
   };
 
@@ -162,8 +198,17 @@ const AdminDashboard = () => {
         </div>
 
         <Card>
-          <CardHeader>
+          <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle>Recent Activity</CardTitle>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleExportCSV}
+              className="flex items-center gap-2"
+            >
+              <Download className="h-4 w-4" />
+              Export CSV
+            </Button>
           </CardHeader>
           <CardContent>
             {recentVisits.length > 0 ? (
