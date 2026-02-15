@@ -9,12 +9,21 @@ import { requestsService, type Request } from "@/services/firestore/requests";
 import { toast } from "sonner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import NewsletterManagement from "@/components/admin/NewsletterManagement";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import { Eye } from "lucide-react";
 
 const AdminRequests = () => {
   const [requests, setRequests] = useState<Request[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
+  const [selectedRequest, setSelectedRequest] = useState<Request | null>(null);
   const ITEMS_PER_PAGE = 10;
 
   useEffect(() => {
@@ -137,7 +146,7 @@ const AdminRequests = () => {
                         <TableRow key={request.id}>
                           <TableCell className="font-medium">{request.name}</TableCell>
                           <TableCell>{request.phone}</TableCell>
-                          <TableCell className="max-w-xs truncate">{request.message}</TableCell>
+                          <TableCell className="max-w-[200px] truncate">{request.message}</TableCell>
                           <TableCell>{request.createdAt ? new Date(request.createdAt).toLocaleDateString() : 'N/A'}</TableCell>
                           <TableCell>
                             <span
@@ -149,6 +158,14 @@ const AdminRequests = () => {
                           </TableCell>
                           <TableCell>
                             <div className="flex gap-2">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => setSelectedRequest(request)}
+                              >
+                                <Eye className="h-4 w-4 mr-1" />
+                                View
+                              </Button>
                               {!request.contacted && (
                                 <Button
                                   size="sm"
@@ -186,6 +203,59 @@ const AdminRequests = () => {
           </TabsContent>
         </Tabs>
       </div>
+      <Dialog open={!!selectedRequest} onOpenChange={(open) => !open && setSelectedRequest(null)}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Request Details</DialogTitle>
+            <DialogDescription>
+              Full information from the customer inquiry.
+            </DialogDescription>
+          </DialogHeader>
+          {selectedRequest && (
+            <div className="space-y-4 py-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm font-semibold text-muted-foreground">Name</label>
+                  <p className="text-foreground">{selectedRequest.name}</p>
+                </div>
+                <div>
+                  <label className="text-sm font-semibold text-muted-foreground">Phone</label>
+                  <p className="text-foreground">{selectedRequest.phone}</p>
+                </div>
+                <div>
+                  <label className="text-sm font-semibold text-muted-foreground">Email</label>
+                  <p className="text-foreground">{selectedRequest.email || "N/A"}</p>
+                </div>
+                <div>
+                  <label className="text-sm font-semibold text-muted-foreground">Date</label>
+                  <p className="text-foreground">
+                    {selectedRequest.createdAt ? new Date(selectedRequest.createdAt).toLocaleString() : 'N/A'}
+                  </p>
+                </div>
+              </div>
+              <div>
+                <label className="text-sm font-semibold text-muted-foreground">Message</label>
+                <div className="mt-1 p-3 bg-muted rounded-md text-foreground whitespace-pre-wrap">
+                  {selectedRequest.message}
+                </div>
+              </div>
+              <div className="flex justify-end gap-2 pt-4">
+                {!selectedRequest.contacted && (
+                  <Button
+                    onClick={() => {
+                      handleMarkContacted(selectedRequest.id!);
+                      setSelectedRequest(null);
+                    }}
+                  >
+                    Mark Contacted
+                  </Button>
+                )}
+                <Button variant="outline" onClick={() => setSelectedRequest(null)}>Close</Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </DashboardLayout>
   );
 };
