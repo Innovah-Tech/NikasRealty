@@ -26,18 +26,40 @@ const About = () => {
   ];
 
   useEffect(() => {
+    let isMounted = true;
+    const controller = new AbortController();
+
     const fetchDynamicMembers = async () => {
+      // Create a timeout promise
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error("Fetch timeout")), 10000)
+      );
+
       try {
-        const members = await teamService.getAll();
-        setDynamicMembers(members);
+        // Race the fetch against a 10s timeout
+        const members = await Promise.race([
+          teamService.getAll(),
+          timeoutPromise
+        ]) as DBTeamMember[];
+
+        if (isMounted) {
+          setDynamicMembers(members);
+        }
       } catch (error) {
         console.error("Error fetching dynamic team members:", error);
       } finally {
-        setLoading(false);
+        if (isMounted) {
+          setLoading(false);
+        }
       }
     };
 
     fetchDynamicMembers();
+
+    return () => {
+      isMounted = false;
+      controller.abort();
+    };
   }, []);
 
   const allMembers = [...hardcodedMembers, ...dynamicMembers];
@@ -126,27 +148,27 @@ const About = () => {
           </div>
         </div>
 
-        {/* Team Section */}
         <div className="mt-20">
           <h3 className="text-3xl font-bold text-center text-foreground mb-8">Meet Our Team</h3>
-          {loading ? (
-            <div className="flex justify-center items-center py-12">
-              <p className="text-muted-foreground">Loading team members...</p>
-            </div>
-          ) : (
-            <div className="flex flex-wrap gap-8 justify-center items-stretch">
-              {allMembers.map((member) => (
-                <TeamMember
-                  key={member.id}
-                  name={member.name}
-                  title={member.role}
-                  image={member.photo || '/placeholder.svg'}
-                  bio={member.bio || ''}
-                  objectPosition={member.id?.includes('native-monica') ? "object-top" : "object-center"}
-                />
-              ))}
-            </div>
-          )}
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 justify-items-center items-stretch">
+            {allMembers.map((member) => (
+              <TeamMember
+                key={member.id}
+                name={member.name}
+                title={member.role}
+                image={member.photo || '/placeholder.svg'}
+                bio={member.bio || ''}
+                objectPosition={member.id?.includes('native-monica') ? "object-top" : "object-center"}
+              />
+            ))}
+
+            {loading && allMembers.length === hardcodedMembers.length && (
+              <div className="col-span-full flex justify-center items-center py-12">
+                <p className="text-muted-foreground animate-pulse">Loading additional team members...</p>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Newsletter Section */}
@@ -160,7 +182,7 @@ const About = () => {
 
 // Simple Team Member Card component
 const TeamMember = ({ name, title, image, bio, objectPosition = "object-center" }: { name: string; title: string; image: string; bio: string; objectPosition?: string }) => (
-  <div className="bg-card rounded-xl shadow-card p-6 max-w-xs flex flex-col items-center text-center gap-3">
+  <div className="bg-card rounded-xl shadow-card p-6 w-full max-w-sm flex flex-col items-center text-center gap-3 h-full">
     <img
       src={image}
       alt={name}
