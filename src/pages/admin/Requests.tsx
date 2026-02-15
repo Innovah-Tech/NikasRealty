@@ -4,7 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Search } from "lucide-react";
+import { Search, Download } from "lucide-react";
 import { requestsService, type Request } from "@/services/firestore/requests";
 import { toast } from "sonner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -81,6 +81,44 @@ const AdminRequests = () => {
     }
   };
 
+  const handleExportCSV = async () => {
+    try {
+      const allRequests = await requestsService.getAll();
+      if (allRequests.length === 0) {
+        toast.info("No requests to export");
+        return;
+      }
+
+      const headers = ["Name", "Phone", "Email", "Message", "Date", "Status"];
+      const csvContent = [
+        headers.join(","),
+        ...allRequests.map(r => [
+          `"${r.name || ''}"`,
+          `"${r.phone || ''}"`,
+          `"${r.email || ''}"`,
+          `"${(r.message || '').replace(/"/g, '""')}"`,
+          r.createdAt ? new Date(r.createdAt).toISOString() : "N/A",
+          r.contacted ? "Contacted" : "Pending"
+        ].join(","))
+      ].join("\n");
+
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.setAttribute("href", url);
+      link.setAttribute("download", `property_requests_${new Date().toISOString().split('T')[0]}.csv`);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      toast.success("Requests exported successfully");
+    } catch (error) {
+      toast.error("Failed to export requests");
+      console.error(error);
+    }
+  };
+
   return (
     <DashboardLayout>
       <div className="space-y-6">
@@ -96,6 +134,12 @@ const AdminRequests = () => {
           </TabsList>
 
           <TabsContent value="requests" className="space-y-6 mt-6">
+            <div className="flex justify-end">
+              <Button onClick={handleExportCSV} variant="outline" className="flex items-center gap-2">
+                <Download className="h-4 w-4" />
+                Export CSV
+              </Button>
+            </div>
             <Card>
               <CardContent className="pt-6">
                 <form

@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { newsletterService, type Subscriber } from '@/services/firestore/newsletters';
-import { Mail, Trash2, Loader2, Users } from 'lucide-react';
+import { Mail, Trash2, Loader2, Users, Download } from 'lucide-react';
 import { toast } from 'sonner';
 import {
   Table,
@@ -62,12 +62,23 @@ const NewsletterManagement = () => {
   };
 
   const exportSubscribers = () => {
-    const emails = subscribers.map(s => s.email).join('\n');
-    const blob = new Blob([emails], { type: 'text/plain' });
+    if (subscribers.length === 0) return;
+
+    const headers = ["Email", "Status", "Subscribed On"];
+    const csvContent = [
+      headers.join(","),
+      ...subscribers.map(s => [
+        s.email,
+        s.isActive ? "Active" : "Inactive",
+        new Date(s.subscribedAt).toISOString()
+      ].join(","))
+    ].join("\n");
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `newsletter-subscribers-${new Date().toISOString().split('T')[0]}.txt`;
+    a.download = `newsletter-subscribers-${new Date().toISOString().split('T')[0]}.csv`;
     a.click();
     URL.revokeObjectURL(url);
     toast.success('Subscribers exported successfully');
@@ -82,8 +93,8 @@ const NewsletterManagement = () => {
           <p className="text-muted-foreground">Manage your email newsletter subscribers</p>
         </div>
         <Button onClick={exportSubscribers} variant="outline" disabled={subscribers.length === 0}>
-          <Mail className="h-4 w-4 mr-2" />
-          Export Emails
+          <Download className="h-4 w-4 mr-2" />
+          Export CSV
         </Button>
       </div>
 
@@ -128,7 +139,7 @@ const NewsletterManagement = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {subscribers.length > 0 
+              {subscribers.length > 0
                 ? ((subscribers.filter(s => s.isActive).length / subscribers.length) * 100).toFixed(0)
                 : 0
               }%
