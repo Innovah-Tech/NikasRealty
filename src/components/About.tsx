@@ -151,7 +151,7 @@ const About = () => {
         <div className="mt-20">
           <h3 className="text-3xl font-bold text-center text-foreground mb-8">Meet Our Team</h3>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 justify-items-center items-stretch">
+          <div className="flex flex-wrap gap-8 justify-center items-stretch">
             {allMembers.map((member) => (
               <TeamMember
                 key={member.id}
@@ -164,7 +164,7 @@ const About = () => {
             ))}
 
             {loading && allMembers.length === hardcodedMembers.length && (
-              <div className="col-span-full flex justify-center items-center py-12">
+              <div className="w-full flex justify-center items-center py-12">
                 <p className="text-muted-foreground animate-pulse">Loading additional team members...</p>
               </div>
             )}
