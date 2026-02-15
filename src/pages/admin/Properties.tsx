@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Slider } from '@/components/ui/slider';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
-import { Edit, Eye, Trash2, Search, RefreshCw, X } from 'lucide-react';
+import { Edit, Eye, Trash2, Search, RefreshCw, X, Download } from 'lucide-react';
 import { propertiesService, type Property } from '@/services/firestore/properties';
 import { toast } from 'sonner';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -67,7 +67,7 @@ const AdminProperties = () => {
       // Don't apply price filter if range is at max (shows all properties)
       const maxPriceFilter = priceRange[1] >= PROPERTY_CONFIG.maxPrice ? undefined : priceRange[1];
       const minPriceFilter = priceRange[0] <= 0 ? undefined : priceRange[0];
-      
+
       const response = await propertiesService.getAll({
         search: search || undefined,
         type: typeFilter === 'all' ? undefined : typeFilter,
@@ -81,26 +81,26 @@ const AdminProperties = () => {
           sortBy === 'price-asc' || sortBy === 'price-desc'
             ? 'price'
             : sortBy === 'newest'
-            ? 'createdAt'
-            : undefined,
+              ? 'createdAt'
+              : undefined,
         order:
           sortBy === 'price-asc'
             ? 'asc'
             : sortBy === 'price-desc'
-            ? 'desc'
-            : 'desc',
+              ? 'desc'
+              : 'desc',
         featured: featuredOnly ? true : undefined,
         page,
         limit: 10,
       });
-      
+
       // Filter out fallback properties (they shouldn't be in Firestore, but just in case)
       const firestoreProperties = (response || []).filter(
         (p) => p.id && !p.id.startsWith('fallback-')
       );
-      
+
       setProperties(firestoreProperties);
-      
+
       if (import.meta.env.DEV) {
         console.log('Properties set in state:', firestoreProperties.length);
         if (firestoreProperties.length > 0) {
@@ -141,6 +141,65 @@ const AdminProperties = () => {
     fetchProperties();
   };
 
+  const handleExportCSV = async () => {
+    try {
+      setLoading(true);
+      // Fetch all properties for export (without pagination)
+      const allProperties = await propertiesService.getAll();
+
+      if (allProperties.length === 0) {
+        toast.info("No properties to export");
+        return;
+      }
+
+      const headers = [
+        "Title",
+        "Price",
+        "Location",
+        "Type",
+        "Status",
+        "Bedrooms",
+        "Bathrooms",
+        "Featured",
+        "Completion",
+        "Created At"
+      ];
+
+      const csvContent = [
+        headers.join(","),
+        ...allProperties.map(p => [
+          `"${p.title.replace(/"/g, '""')}"`,
+          p.price,
+          `"${p.location.replace(/"/g, '""')}"`,
+          p.type,
+          p.status,
+          p.bedrooms || 0,
+          p.bathrooms || 0,
+          p.featured ? "Yes" : "No",
+          p.completion || "N/A",
+          p.createdAt ? new Date(p.createdAt).toISOString() : "N/A"
+        ].join(","))
+      ].join("\n");
+
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.setAttribute("href", url);
+      link.setAttribute("download", `nikas_realty_inventory_${new Date().toISOString().split('T')[0]}.csv`);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      toast.success("Property inventory exported successfully");
+    } catch (error) {
+      toast.error("Failed to export properties");
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <DashboardLayout>
       <div className="space-y-6">
@@ -150,13 +209,17 @@ const AdminProperties = () => {
             <p className="text-muted-foreground">Manage your property listings</p>
           </div>
           <div className="flex gap-2">
+            <Button variant="outline" onClick={handleExportCSV} size="sm">
+              <Download className="mr-2 h-4 w-4" />
+              Export CSV
+            </Button>
             <Button variant="outline" onClick={fetchProperties} size="sm">
               <RefreshCw className="mr-2 h-4 w-4" />
               Refresh
             </Button>
-          <Button onClick={() => navigate('/admin/add-property')}>
-            Add Property
-          </Button>
+            <Button onClick={() => navigate('/admin/add-property')}>
+              Add Property
+            </Button>
           </div>
         </div>
 
@@ -194,19 +257,19 @@ const AdminProperties = () => {
                 <Button type="submit" className="w-full lg:w-auto">
                   Apply Filters
                 </Button>
-                {(search || typeFilter !== 'all' || statusFilter !== 'all' || bedroomsFilter !== 'all' || 
-                  locationFilter !== 'all' || completionFilter !== 'all' || featuredOnly || 
+                {(search || typeFilter !== 'all' || statusFilter !== 'all' || bedroomsFilter !== 'all' ||
+                  locationFilter !== 'all' || completionFilter !== 'all' || featuredOnly ||
                   priceRange[0] > 0 || priceRange[1] < 50000000) && (
-                  <Button 
-                    type="button" 
-                    variant="outline" 
-                    onClick={clearFilters}
-                    className="w-full lg:w-auto"
-                  >
-                    <X className="mr-2 h-4 w-4" />
-                    Clear Filters
-                  </Button>
-                )}
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={clearFilters}
+                      className="w-full lg:w-auto"
+                    >
+                      <X className="mr-2 h-4 w-4" />
+                      Clear Filters
+                    </Button>
+                  )}
               </div>
 
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -356,39 +419,38 @@ const AdminProperties = () => {
                       {property.offplan === true && (
                         <Badge className="bg-blue-600 text-white font-semibold">Off-plan</Badge>
                       )}
-                      <Badge 
+                      <Badge
                         variant={property.status === "for-sale" || property.status === "For Sale" ? "default" : property.status === "for-rent" || property.status === "For Rent" ? "secondary" : "outline"}
-                        className={`font-semibold ${
-                          property.status === "for-sale" || property.status === "For Sale" 
-                            ? "gradient-gold text-secondary" 
+                        className={`font-semibold ${property.status === "for-sale" || property.status === "For Sale"
+                            ? "gradient-gold text-secondary"
                             : property.status === "for-rent" || property.status === "For Rent"
-                            ? "!text-white bg-secondary"
-                            : "!text-white bg-muted"
-                        }`}
+                              ? "!text-white bg-secondary"
+                              : "!text-white bg-muted"
+                          }`}
                       >
-                        {property.status === "for-sale" || property.status === "For Sale" 
-                          ? "For Sale" 
+                        {property.status === "for-sale" || property.status === "For Sale"
+                          ? "For Sale"
                           : property.status === "for-rent" || property.status === "For Rent"
-                          ? "For Rent"
-                          : property.status === "sold" || property.status === "Sold"
-                          ? "Sold"
-                          : property.status}
+                            ? "For Rent"
+                            : property.status === "sold" || property.status === "Sold"
+                              ? "Sold"
+                              : property.status}
                       </Badge>
                     </div>
                   </div>
                   <div className="flex gap-2">
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
+                    <Button
+                      variant="outline"
+                      size="sm"
                       className="flex-1"
                       onClick={() => property.id && navigate(`/properties/${property.id}`)}
                     >
                       <Eye className="mr-1 h-3 w-3" />
                       View
                     </Button>
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
+                    <Button
+                      variant="outline"
+                      size="sm"
                       className="flex-1"
                       onClick={() => property.id && navigate(`/admin/edit-property/${property.id}`)}
                     >
