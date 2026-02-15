@@ -32,6 +32,19 @@ const NewsletterSubscribe = ({ variant = 'default' }: NewsletterSubscribeProps) 
 
         try {
             await newsletterService.subscribe(email);
+
+            // Send email notification via EmailJS
+            try {
+                const { emailService } = await import('@/services/emailService');
+                await emailService.sendNotification({
+                    email: email,
+                    type: 'Newsletter Subscription'
+                });
+            } catch (e) {
+                console.error('Newsletter email notification failed:', e);
+                // Don't block the main success for email failures
+            }
+
             toast.success('Successfully subscribed!', {
                 description: 'You\'ll receive notifications about new properties.'
             });

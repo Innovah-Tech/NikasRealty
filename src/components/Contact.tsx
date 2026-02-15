@@ -19,35 +19,35 @@ const Contact = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Validate inputs
     const nameValidation = validateName(formData.name);
     if (!nameValidation.valid) {
       toast.error(nameValidation.error || 'Invalid name');
       return;
     }
-    
+
     const phoneValidation = validatePhone(formData.phone);
     if (!phoneValidation.valid) {
       toast.error(phoneValidation.error || 'Invalid phone number');
       return;
     }
-    
+
     const emailValidation = validateEmail(formData.email, false);
     if (!emailValidation.valid) {
       toast.error(emailValidation.error || 'Invalid email');
       return;
     }
-    
+
     const messageValidation = validateMessage(formData.message);
     if (!messageValidation.valid) {
       toast.error(messageValidation.error || 'Invalid message');
       return;
     }
-    
+
     setIsSubmitting(true);
 
-        try {
+    try {
       // Sanitize all inputs before sending
       const sanitizedData = {
         name: sanitizeText(formData.name),
@@ -55,12 +55,26 @@ const Contact = () => {
         phone: sanitizePhone(formData.phone),
         message: sanitizeText(formData.message),
       };
-      
-          const { requestsService } = await import('@/services/firestore/requests');
+
+      const { requestsService } = await import('@/services/firestore/requests');
       await requestsService.create(sanitizedData);
 
-          toast.success("Message sent successfully! We'll get back to you soon.");
-      
+      // Send email notification via EmailJS
+      try {
+        const { emailService } = await import('@/services/emailService');
+        await emailService.sendNotification({
+          name: sanitizedData.name,
+          email: sanitizedData.email,
+          phone: sanitizedData.phone,
+          message: sanitizedData.message,
+          type: 'Contact Message'
+        });
+      } catch (e) {
+        console.error('Contact email notification failed:', e);
+      }
+
+      toast.success("Message sent successfully! We'll get back to you soon.");
+
       // Reset form
       setFormData({ name: "", email: "", phone: "", message: "" });
     } catch (error) {
