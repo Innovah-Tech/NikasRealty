@@ -7,7 +7,7 @@ import { APP_CONFIG, THEME_CONFIG } from "@/config/constants";
 // Set theme colors immediately when the script loads
 const applyThemeColors = () => {
   const root = document.documentElement;
-  
+
   // Set theme color variables from config
   const themeColors = {
     '--primary': THEME_CONFIG.primaryColorHSL,
@@ -29,21 +29,21 @@ const applyThemeColors = () => {
 if (typeof window !== 'undefined') {
   // Apply immediately
   applyThemeColors();
-  
+
   // Apply again after DOM is loaded
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', applyThemeColors);
   } else {
     applyThemeColors();
   }
-  
+
   // Also apply on page show (for back/forward cache)
   window.addEventListener('pageshow', applyThemeColors);
-  
+
   // Theme color verification (only in development)
   if (import.meta.env.DEV) {
     setTimeout(() => {
-      const primaryColor = getComputedStyle(root).getPropertyValue('--primary');
+      const primaryColor = getComputedStyle(document.documentElement).getPropertyValue('--primary');
       if (primaryColor.trim() !== THEME_CONFIG.primaryColorHSL) {
         console.warn('⚠️ Theme color mismatch! CSS may be cached. JavaScript fallback applied.');
       }
@@ -56,14 +56,14 @@ if (typeof window !== 'undefined') {
 if (typeof window !== 'undefined') {
   const originalError = console.error;
   const originalWarn = console.warn;
-  
+
   // Override console.error to filter out only the specific token refresh error
   console.error = (...args: any[]) => {
     const message = args[0]?.toString() || '';
     // Only suppress the specific Firebase token refresh 400 error
     // This is a network-level error that appears in console but doesn't affect functionality
-    if (message.includes('securetoken.googleapis.com') && 
-        (message.includes('400') || message.includes('Failed to load resource'))) {
+    if (message.includes('securetoken.googleapis.com') &&
+      (message.includes('400') || message.includes('Failed to load resource'))) {
       // Suppress in production only - still log in development
       if (!import.meta.env.DEV) {
         return;
@@ -72,7 +72,7 @@ if (typeof window !== 'undefined') {
     // Log all other errors normally
     originalError.apply(console, args);
   };
-  
+
   // Keep console.warn for important warnings
   console.warn = (...args: any[]) => {
     originalWarn.apply(console, args);
