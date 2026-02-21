@@ -205,8 +205,8 @@ const AdminProperties = () => {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-foreground">Properties</h1>
-            <p className="text-muted-foreground">Manage your property listings</p>
+            <h1 className="text-3xl font-bold text-foreground">Sales</h1>
+            <p className="text-muted-foreground">Manage your sales listings</p>
           </div>
           <div className="flex gap-2">
             <Button variant="outline" onClick={handleExportCSV} size="sm">
@@ -422,10 +422,10 @@ const AdminProperties = () => {
                       <Badge
                         variant={property.status === "for-sale" || property.status === "For Sale" ? "default" : property.status === "for-rent" || property.status === "For Rent" ? "secondary" : "outline"}
                         className={`font-semibold ${property.status === "for-sale" || property.status === "For Sale"
-                            ? "gradient-gold text-secondary"
-                            : property.status === "for-rent" || property.status === "For Rent"
-                              ? "!text-white bg-secondary"
-                              : "!text-white bg-muted"
+                          ? "gradient-gold text-secondary"
+                          : property.status === "for-rent" || property.status === "For Rent"
+                            ? "!text-white bg-secondary"
+                            : "!text-white bg-muted"
                           }`}
                       >
                         {property.status === "for-sale" || property.status === "For Sale"

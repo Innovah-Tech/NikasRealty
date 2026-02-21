@@ -129,7 +129,7 @@ const Properties = () => {
   });
 
   return (
-    <section id="properties" className="py-20 lg:py-32 bg-muted/30">
+    <section id="sales" className="py-20 lg:py-32 bg-muted/30">
       <div className="container mx-auto px-4 lg:px-8">
         {/* Featured Properties Slides */}
         <FeaturedPropertiesSlides items={featuredSlides} />
@@ -489,7 +489,7 @@ const FeaturedPropertiesSlides = ({
   return (
     <div className="mb-12">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-2xl font-bold text-foreground">Featured Properties</h3>
+        <h3 className="text-2xl font-bold text-foreground">Featured Sales</h3>
         <div className="flex gap-2">
           <button onClick={prev} className="h-9 w-9 rounded-md border border-border text-foreground hover:bg-accent hover:text-accent-foreground transition-smooth">{'<'}</button>
           <button onClick={next} className="h-9 w-9 rounded-md border border-border text-foreground hover:bg-accent hover:text-accent-foreground transition-smooth">{'>'}</button>

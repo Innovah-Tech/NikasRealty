@@ -35,7 +35,7 @@ const Navbar = () => {
   const navLinks = [
     { name: "Home", href: "#home", type: "anchor" },
     { name: "About Us", href: "#about", type: "anchor" },
-    { name: "Properties", href: "#properties", type: "anchor" },
+    { name: "Sales", href: "#sales", type: "anchor" },
     { name: "Rentals", href: "/rentals", type: "route" },
     { name: "Services", href: "#services", type: "anchor" },
     { name: "Blog", href: "/blog", type: "route" },

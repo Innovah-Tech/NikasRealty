@@ -10,7 +10,7 @@ import { useEffect, useState } from "react";
 
 const Hero = () => {
   const scrollToProperties = () => {
-    const element = document.querySelector("#properties");
+    const element = document.querySelector("#sales");
     if (element) {
       element.scrollIntoView({ behavior: "smooth" });
     }
@@ -67,7 +67,7 @@ const Hero = () => {
               size="lg"
               className="gradient-gold text-secondary font-semibold text-lg px-8 py-6 shadow-luxury hover:scale-105 transition-smooth"
             >
-              Explore Properties
+              Explore Sales
               <ArrowRight className="ml-2" size={20} />
             </Button>
             <Button

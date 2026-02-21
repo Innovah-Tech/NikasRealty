@@ -105,7 +105,7 @@ const AdminDashboard = () => {
 
   const cards = [
     {
-      title: 'Total Properties',
+      title: 'Total Sales',
       value: stats.totalProperties,
       icon: Building2,
       color: 'text-primary',
