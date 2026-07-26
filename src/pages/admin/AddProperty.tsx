@@ -21,6 +21,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { PROPERTY_CONFIG } from "@/config/constants";
 import { sanitizeText, sanitizeArray } from "@/utils/sanitize";
 import { validateTitle, validateDescription, validatePrice, validateFeatures } from "@/utils/validate";
+import { getPropertyImageUrl } from "@/utils/imageUtils";
 
 const propertyTypeOptions = PROPERTY_CONFIG.propertyTypes;
 const locationOptions = PROPERTY_CONFIG.locations;
@@ -468,7 +469,7 @@ const AdminAddProperty = () => {
                   <div className="grid gap-4 md:grid-cols-3">
                     {images.map((url, index) => (
                       <div key={index} className="relative">
-                        <img src={url} alt={`Property ${index + 1}`} className="h-32 w-full rounded-lg object-cover" />
+                        <img src={getPropertyImageUrl(url, 'thumbnail')} alt={`Property ${index + 1}`} className="h-32 w-full rounded-lg object-cover" />
                         <Button
                           type="button"
                           variant="destructive"

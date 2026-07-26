@@ -23,6 +23,7 @@ import {
 import { Slider } from "@/components/ui/slider";
 import { useNavigate } from "react-router-dom";
 import { propertiesService, type Property } from "@/services/firestore/properties";
+import { getPropertyImageUrl } from "@/utils/imageUtils";
 import { parsePrice } from "@/data/properties";
 import { PROPERTY_CONFIG } from "@/config/constants";
 
@@ -216,7 +217,10 @@ const RentalsPage = () => {
                             </div>
                         ) : (
                             sortedRentals.map((property) => {
-                                const mainImage = property.images?.[0] || property.image || "/images/property1.jpg";
+                                const mainImage = getPropertyImageUrl(
+                                    property.images?.[0] || property.image || "/images/property1.jpg",
+                                    'card'
+                                );
 
                                 return (
                                     <Card

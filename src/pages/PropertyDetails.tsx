@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { MapPin, Bed, Bath, Square, Loader2, ArrowLeft, X } from "lucide-react";
 import { propertiesService, type Property } from "@/services/firestore/properties";
+import { getPropertyImageUrl } from "@/utils/imageUtils";
 
 const PropertyDetailsPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -47,6 +48,9 @@ const PropertyDetailsPage = () => {
         : property?.image
           ? [property.image]
           : ["/images/property1.jpg"];
+
+  const displayImages = images.map((img) => getPropertyImageUrl(img, 'full'));
+  const thumbnailImages = images.map((img) => getPropertyImageUrl(img, 'thumbnail'));
 
   if (import.meta.env.DEV && property) {
     console.log('Property details images:', {
@@ -129,7 +133,7 @@ const PropertyDetailsPage = () => {
           onClick={() => openLightbox(0)}
         >
           <img
-            src={images[selectedImage]}
+            src={displayImages[selectedImage]}
             alt={property.title}
             className="w-full h-full object-contain"
           />
@@ -192,7 +196,7 @@ const PropertyDetailsPage = () => {
                       }`}
                   >
                     <img
-                      src={img}
+                      src={thumbnailImages[index]}
                       alt={`${property.title} - ${index + 1}`}
                       className="w-full h-full object-cover"
                     />
@@ -339,7 +343,7 @@ const PropertyDetailsPage = () => {
 
             <div className="relative max-w-4xl w-full max-h-[90vh] flex items-center justify-center">
               <img
-                src={images[selectedImage]}
+                src={displayImages[selectedImage]}
                 alt={`${property.title} - ${selectedImage + 1}`}
                 className="max-h-[90vh] max-w-full object-contain"
                 onClick={(e) => e.stopPropagation()}

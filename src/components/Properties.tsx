@@ -23,6 +23,7 @@ import { useNavigate } from "react-router-dom";
 import { propertiesService, type Property } from "@/services/firestore/properties";
 import { parsePrice } from "@/data/properties";
 import { PROPERTY_CONFIG } from "@/config/constants";
+import { getPropertyImageUrl } from "@/utils/imageUtils";
 
 const Properties = () => {
   const navigate = useNavigate();
@@ -108,7 +109,10 @@ const Properties = () => {
   });
 
   const featuredSlides = (allProperties.length ? allProperties : []).slice(0, 5).map((p) => {
-    const slideImage = p.images?.[0] || p.image || "/images/property1.jpg";
+    const slideImage = getPropertyImageUrl(
+      p.images?.[0] || p.image || "/images/property1.jpg",
+      'card'
+    );
 
     let priceDisplay = typeof p.price === "number"
       ? `KES ${p.price.toLocaleString()}`
@@ -268,11 +272,10 @@ const Properties = () => {
             </div>
           ) : (
             sortedProperties.map((property) => {
-              // Use Cloudinary URL if available, otherwise fallback
-              const rawImage = property.images?.[0] || property.image || "/images/property1.jpg";
-              const mainImage = rawImage;
-
-              // Property image processing (silent)
+              const mainImage = getPropertyImageUrl(
+                property.images?.[0] || property.image || "/images/property1.jpg",
+                'card'
+              );
 
               const formatSize = (val?: string) => {
                 if (!val) return "N/A";
@@ -309,8 +312,11 @@ const Properties = () => {
                       className="w-full h-full object-contain group-hover:scale-110 transition-smooth"
                       loading="lazy"
                       onError={(e) => {
-                        console.error('Image failed to load:', mainImage, 'for property:', property.title);
-                        (e.target as HTMLImageElement).src = "/images/property1.jpg";
+                        const img = e.target as HTMLImageElement;
+                        if (!img.dataset.fallback) {
+                          img.dataset.fallback = 'true';
+                          img.src = "/images/property1.jpg";
+                        }
                       }}
                       onLoad={() => {
                         // Image loaded successfully (silent)

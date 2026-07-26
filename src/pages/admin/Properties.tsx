@@ -12,6 +12,7 @@ import { propertiesService, type Property } from '@/services/firestore/propertie
 import { toast } from 'sonner';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { PROPERTY_CONFIG } from '@/config/constants';
+import { getPropertyImageUrl } from '@/utils/imageUtils';
 
 const AdminProperties = () => {
   const [properties, setProperties] = useState<Property[]>([]);
@@ -398,7 +399,7 @@ const AdminProperties = () => {
                 <div className="relative h-48 overflow-hidden bg-muted">
                   {property.images?.[0] && (
                     <img
-                      src={property.images[0]}
+                      src={getPropertyImageUrl(property.images[0], 'thumbnail')}
                       alt={property.title}
                       className="h-full w-full object-cover"
                     />

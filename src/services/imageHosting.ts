@@ -41,6 +41,15 @@ export const imageHosting = {
       formData.append('upload_preset', uploadPreset);
       formData.append('folder', 'properties'); // Explicitly set folder to match preset
 
+      // Browsers cannot display HEIC/HEIF — convert to JPG on upload
+      const isHeic =
+        /\.heic$|\.heif$/i.test(file.name) ||
+        file.type === 'image/heic' ||
+        file.type === 'image/heif';
+      if (isHeic) {
+        formData.append('format', 'jpg');
+      }
+
       const response = await fetch(
         `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
         {

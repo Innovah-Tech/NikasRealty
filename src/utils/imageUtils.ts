@@ -2,6 +2,15 @@
  * Image utility functions for Cloudinary
  */
 
+const CLOUDINARY_UPLOAD_SEGMENT = '/image/upload/';
+
+const isHeicUrl = (url: string): boolean => /\.heic($|\?)/i.test(url) || /\.heif($|\?)/i.test(url);
+
+const hasCloudinaryTransformations = (pathAfterUpload: string): boolean => {
+  const firstSegment = pathAfterUpload.split('/')[0] ?? '';
+  return firstSegment.includes(',') || firstSegment.includes('_');
+};
+
 /**
  * Get optimized Cloudinary image URL
  * @param url - Original image URL (Cloudinary or other)
@@ -16,26 +25,37 @@ export const getOptimizedImageUrl = (
   height?: number,
   quality: number = 80
 ): string => {
-  // If it's a Cloudinary URL, add transformation parameters
-  if (url.includes('cloudinary.com') && url.includes('/image/upload/')) {
-    const parts = url.split('/image/upload/');
-    if (parts.length === 2) {
-      const transformations: string[] = [];
-      
-      if (width) transformations.push(`w_${width}`);
-      if (height) transformations.push(`h_${height}`);
-      if (quality) transformations.push(`q_${quality}`);
-      
-      // Add auto format and quality optimization
-      transformations.push('f_auto', 'c_limit');
-      
-      const transformString = transformations.join(',');
-      return `${parts[0]}/image/upload/${transformString}/${parts[1]}`;
-    }
+  if (!url || url.startsWith('/') || !url.includes('cloudinary.com')) {
+    return url;
   }
-  
-  // Return original URL if not Cloudinary
-  return url;
+
+  const uploadIndex = url.indexOf(CLOUDINARY_UPLOAD_SEGMENT);
+  if (uploadIndex === -1) {
+    return url;
+  }
+
+  const base = url.slice(0, uploadIndex + CLOUDINARY_UPLOAD_SEGMENT.length);
+  const pathAfterUpload = url.slice(uploadIndex + CLOUDINARY_UPLOAD_SEGMENT.length);
+
+  if (hasCloudinaryTransformations(pathAfterUpload)) {
+    return url;
+  }
+
+  const transformations: string[] = ['c_limit'];
+
+  if (width) transformations.unshift(`w_${width}`);
+  if (height) transformations.unshift(`h_${height}`);
+
+  // HEIC/HEIF is not supported in browsers — force JPEG delivery from Cloudinary
+  if (isHeicUrl(url)) {
+    transformations.push('f_jpg');
+  } else {
+    transformations.push('f_auto');
+  }
+
+  transformations.push(quality ? `q_${quality}` : 'q_auto');
+
+  return `${base}${transformations.join(',')}/${pathAfterUpload}`;
 };
 
 /**
@@ -50,5 +70,14 @@ export const isCloudinaryUrl = (url: string): boolean => {
  */
 export const getThumbnailUrl = (url: string, size: number = 300): string => {
   return getOptimizedImageUrl(url, size, size, 75);
+};
+
+/** Resolve a property image URL for display (handles HEIC via Cloudinary transforms). */
+export const getPropertyImageUrl = (
+  url: string,
+  size: 'thumbnail' | 'card' | 'full' = 'card'
+): string => {
+  const widths = { thumbnail: 400, card: 800, full: 1600 };
+  return getOptimizedImageUrl(url, widths[size]);
 };
 
