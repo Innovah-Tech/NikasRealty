@@ -519,6 +519,7 @@ const AdminEditProperty = () => {
                   rows={4}
                   value={formData.description}
                   onChange={handleChange}
+                  placeholder="One sentence per line, or comma-separated (like features)"
                   required
                 />
               </div>

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type SyntheticEvent } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -6,7 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { MapPin, Bed, Bath, Square, Loader2, ArrowLeft, X } from "lucide-react";
 import { propertiesService, type Property } from "@/services/firestore/properties";
+import { PROPERTY_IMAGE_FALLBACK } from "@/constants/propertyImages";
 import { getPropertyImageUrl } from "@/utils/imageUtils";
+import { descriptionToLines } from "@/utils/text";
 
 const PropertyDetailsPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -47,7 +49,17 @@ const PropertyDetailsPage = () => {
         ? property.gallery
         : property?.image
           ? [property.image]
-          : ["/images/property1.jpg"];
+          : [PROPERTY_IMAGE_FALLBACK];
+
+  const descriptionLines = property ? descriptionToLines(property.description) : [];
+
+  const handleImageError = (e: SyntheticEvent<HTMLImageElement>) => {
+    const img = e.currentTarget;
+    if (!img.dataset.fallback) {
+      img.dataset.fallback = 'true';
+      img.src = PROPERTY_IMAGE_FALLBACK;
+    }
+  };
 
   const displayImages = images.map((img) => getPropertyImageUrl(img, 'full'));
   const thumbnailImages = images.map((img) => getPropertyImageUrl(img, 'thumbnail'));
@@ -136,6 +148,7 @@ const PropertyDetailsPage = () => {
             src={displayImages[selectedImage]}
             alt={property.title}
             className="w-full h-full object-contain"
+            onError={handleImageError}
           />
           {/* Overlay with Title and Badges */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent flex flex-col justify-end p-6 md:p-8 lg:p-12">
@@ -199,6 +212,7 @@ const PropertyDetailsPage = () => {
                       src={thumbnailImages[index]}
                       alt={`${property.title} - ${index + 1}`}
                       className="w-full h-full object-cover"
+                      onError={handleImageError}
                     />
                   </button>
                 ))}
@@ -256,10 +270,19 @@ const PropertyDetailsPage = () => {
             </div>
 
             {/* Description */}
-            <div>
-              <h2 className="text-xl font-semibold mb-3 text-foreground">Description</h2>
-              <p className="text-muted-foreground leading-relaxed">{property.description}</p>
-            </div>
+            {descriptionLines.length > 0 && (
+              <div>
+                <h2 className="text-xl font-semibold mb-4 text-foreground">Description</h2>
+                <ul className="space-y-3">
+                  {descriptionLines.map((line, index) => (
+                    <li key={index} className="flex items-start gap-3 text-muted-foreground">
+                      <span className="text-primary mt-1 text-lg">-</span>
+                      <span className="text-base">{line}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
 
             {/* Amenities/Features */}
             {property.features && property.features.length > 0 && (
@@ -347,6 +370,7 @@ const PropertyDetailsPage = () => {
                 alt={`${property.title} - ${selectedImage + 1}`}
                 className="max-h-[90vh] max-w-full object-contain"
                 onClick={(e) => e.stopPropagation()}
+                onError={handleImageError}
               />
             </div>
 

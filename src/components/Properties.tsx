@@ -24,6 +24,7 @@ import { propertiesService, type Property } from "@/services/firestore/propertie
 import { parsePrice } from "@/data/properties";
 import { PROPERTY_CONFIG } from "@/config/constants";
 import { getPropertyImageUrl } from "@/utils/imageUtils";
+import { PROPERTY_IMAGE_FALLBACK } from "@/constants/propertyImages";
 
 const Properties = () => {
   const navigate = useNavigate();
@@ -110,7 +111,7 @@ const Properties = () => {
 
   const featuredSlides = (allProperties.length ? allProperties : []).slice(0, 5).map((p) => {
     const slideImage = getPropertyImageUrl(
-      p.images?.[0] || p.image || "/images/property1.jpg",
+      p.images?.[0] || p.image || PROPERTY_IMAGE_FALLBACK,
       'card'
     );
 
@@ -273,7 +274,7 @@ const Properties = () => {
           ) : (
             sortedProperties.map((property) => {
               const mainImage = getPropertyImageUrl(
-                property.images?.[0] || property.image || "/images/property1.jpg",
+                property.images?.[0] || property.image || PROPERTY_IMAGE_FALLBACK,
                 'card'
               );
 
@@ -315,7 +316,7 @@ const Properties = () => {
                         const img = e.target as HTMLImageElement;
                         if (!img.dataset.fallback) {
                           img.dataset.fallback = 'true';
-                          img.src = "/images/property1.jpg";
+                          img.src = PROPERTY_IMAGE_FALLBACK;
                         }
                       }}
                       onLoad={() => {

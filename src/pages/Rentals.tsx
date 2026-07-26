@@ -24,6 +24,7 @@ import { Slider } from "@/components/ui/slider";
 import { useNavigate } from "react-router-dom";
 import { propertiesService, type Property } from "@/services/firestore/properties";
 import { getPropertyImageUrl } from "@/utils/imageUtils";
+import { PROPERTY_IMAGE_FALLBACK } from "@/constants/propertyImages";
 import { parsePrice } from "@/data/properties";
 import { PROPERTY_CONFIG } from "@/config/constants";
 
@@ -218,7 +219,7 @@ const RentalsPage = () => {
                         ) : (
                             sortedRentals.map((property) => {
                                 const mainImage = getPropertyImageUrl(
-                                    property.images?.[0] || property.image || "/images/property1.jpg",
+                                    property.images?.[0] || property.image || PROPERTY_IMAGE_FALLBACK,
                                     'card'
                                 );
 
@@ -236,7 +237,7 @@ const RentalsPage = () => {
                                                 className="w-full h-full object-cover group-hover:scale-110 transition-smooth"
                                                 loading="lazy"
                                                 onError={(e) => {
-                                                    (e.target as HTMLImageElement).src = "/images/property1.jpg";
+                                                    (e.target as HTMLImageElement).src = PROPERTY_IMAGE_FALLBACK;
                                                 }}
                                             />
                                             <div className="absolute top-4 right-4 flex flex-col gap-2">
