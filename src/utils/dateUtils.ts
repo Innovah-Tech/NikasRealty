@@ -24,3 +24,15 @@ export const formatPostedDate = (date: Date): string => {
     year: 'numeric',
   });
 };
+
+/** Format for card labels, e.g. "Published Aug 1, 2026" */
+export const formatPublishedLabel = (date?: Date | string): string | null => {
+  if (!date) return null;
+  const d = date instanceof Date ? date : new Date(date);
+  if (Number.isNaN(d.getTime())) return null;
+  return `Published ${d.toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  })}`;
+};

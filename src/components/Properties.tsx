@@ -24,6 +24,7 @@ import { propertiesService, type Property } from "@/services/firestore/propertie
 import { parsePrice } from "@/data/properties";
 import { PROPERTY_CONFIG } from "@/config/constants";
 import { formatPropertyPrice } from "@/utils/propertyUtils";
+import { formatPublishedLabel } from "@/utils/dateUtils";
 import { getPropertyImageUrl } from "@/utils/imageUtils";
 import { PROPERTY_IMAGE_FALLBACK } from "@/constants/propertyImages";
 
@@ -131,6 +132,7 @@ const Properties = () => {
       image: slideImage,
       price: priceDisplay,
       location: p.location || "Nairobi",
+      publishedLabel: formatPublishedLabel(p.createdAt),
     };
   });
 
@@ -393,10 +395,17 @@ const Properties = () => {
                     <CardTitle className="text-xl group-hover:text-primary transition-smooth">
                       {property.title}
                     </CardTitle>
-                    <CardDescription className="flex items-center gap-1 text-muted-foreground">
-                      <MapPin size={16} />
-                      {property.location}
-                    </CardDescription>
+                    <div className="space-y-1">
+                      {property.createdAt && formatPublishedLabel(property.createdAt) && (
+                        <p className="text-xs font-medium text-muted-foreground">
+                          {formatPublishedLabel(property.createdAt)}
+                        </p>
+                      )}
+                      <CardDescription className="flex items-center gap-1 text-muted-foreground">
+                        <MapPin size={16} />
+                        {property.location}
+                      </CardDescription>
+                    </div>
                   </CardHeader>
 
                   <CardContent className="space-y-4">
@@ -466,7 +475,7 @@ export default Properties;
 const FeaturedPropertiesSlides = ({
   items,
 }: {
-  items: Array<{ id: string | number; title: string; image: string; price: string; location: string }>;
+  items: Array<{ id: string | number; title: string; image: string; price: string; location: string; publishedLabel?: string | null }>;
 }) => {
   // Hooks must be called before any conditional returns
   const [index, setIndex] = useState(0);
