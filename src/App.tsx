@@ -15,6 +15,8 @@ import BlogDetailsPage from "./pages/BlogDetails";
 import PropertiesPage from "./pages/Properties";
 import RentalsPage from "./pages/Rentals";
 import PropertyDetailsPage from "./pages/PropertyDetails";
+import MediaPage from "./pages/Media";
+import MediaWatchPage from "./pages/MediaWatch";
 import AdminLogin from "./pages/admin/Login";
 import AdminDashboard from "./pages/admin/Dashboard";
 import AdminProperties from "./pages/admin/Properties";
@@ -22,6 +24,9 @@ import AdminAddProperty from "./pages/admin/AddProperty";
 import AdminBlogs from "./pages/admin/Blogs";
 import AdminAddBlog from "./pages/admin/AddBlog";
 import AdminEditBlog from "./pages/admin/EditBlog";
+import AdminMedia from "./pages/admin/Media";
+import AdminAddMedia from "./pages/admin/AddMedia";
+import AdminEditMedia from "./pages/admin/EditMedia";
 import AdminEditProperty from "./pages/admin/EditProperty";
 import AdminRequests from "./pages/admin/Requests";
 import AdminTeam from "./pages/admin/Team";
@@ -82,6 +87,8 @@ const App = () => (
             <Route path="/properties" element={<PropertiesPage />} />
             <Route path="/rentals" element={<RentalsPage />} />
             <Route path="/properties/:id" element={<PropertyDetailsPage />} />
+            <Route path="/media" element={<MediaPage />} />
+            <Route path="/media/:id" element={<MediaWatchPage />} />
 
             {/* Admin Routes */}
             <Route path="/admin/login" element={<AdminLogin />} />
@@ -138,6 +145,30 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <AdminEditBlog />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/media"
+              element={
+                <ProtectedRoute>
+                  <AdminMedia />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/add-media"
+              element={
+                <ProtectedRoute>
+                  <AdminAddMedia />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/edit-media/:id"
+              element={
+                <ProtectedRoute>
+                  <AdminEditMedia />
                 </ProtectedRoute>
               }
             />

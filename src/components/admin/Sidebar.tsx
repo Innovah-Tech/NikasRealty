@@ -11,7 +11,8 @@ import {
   X,
   BarChart3,
   Mail,
-  Home
+  Home,
+  Video
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -23,6 +24,7 @@ const navigation = [
   { name: 'Add Property', href: '/admin/add-property', icon: PlusCircle },
   { name: 'Add Rental', href: '/admin/add-property?mode=rent', icon: Home },
   { name: 'Blogs', href: '/admin/blogs', icon: FileText },
+  { name: 'Media', href: '/admin/media', icon: Video },
   { name: 'Requests', href: '/admin/requests', icon: MessageSquare },
   { name: 'Team', href: '/admin/team', icon: Users },
   { name: 'Analytics', href: '/admin/analytics', icon: BarChart3 },

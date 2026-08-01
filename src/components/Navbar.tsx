@@ -38,6 +38,7 @@ const Navbar = () => {
     { name: "Sales", href: "#sales", type: "anchor" },
     { name: "Rentals", href: "/rentals", type: "route" },
     { name: "Services", href: "#services", type: "anchor" },
+    { name: "Media", href: "/media", type: "route" },
     { name: "Blog", href: "/blog", type: "route" },
     { name: "Contact", href: "#contact", type: "anchor" },
   ];
