@@ -5,6 +5,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Phone, MessageCircle, Send } from 'lucide-react';
 import { toast } from 'sonner';
+import { APP_CONFIG } from '@/config/constants';
 import { sanitizeText, sanitizeEmail, sanitizePhone } from '@/utils/sanitize';
 import { validateName, validateEmail, validatePhone, validateMessage } from '@/utils/validate';
 
@@ -12,9 +13,6 @@ interface PropertyEnquiryCardProps {
   propertyName: string;
   propertyId?: string;
 }
-
-const AGENT_PHONE = '+254700437505';
-const WHATSAPP_NUMBER = '254700437505';
 
 const PropertyEnquiryCard = ({ propertyName, propertyId }: PropertyEnquiryCardProps) => {
   const defaultMessage = `Hello,\n\nI'm interested in:\n${propertyName}`;
@@ -93,20 +91,19 @@ const PropertyEnquiryCard = ({ propertyName, propertyId }: PropertyEnquiryCardPr
 
   const openWhatsApp = () => {
     const message = formData.message || defaultMessage;
-    const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
-    window.open(url, '_blank');
+    window.open(`${APP_CONFIG.whatsappUrl}?text=${encodeURIComponent(message)}`, '_blank');
   };
 
   return (
     <Card className="shadow-luxury border-border/60">
-      <CardHeader className="pb-4">
-        <CardTitle className="text-2xl font-semibold">Contact Me</CardTitle>
-        <p className="text-sm text-muted-foreground">Schedule a showing?</p>
+      <CardHeader className="pb-3">
+        <CardTitle className="text-lg font-semibold">Book a Viewing</CardTitle>
+        <p className="text-xs text-muted-foreground">Contact {APP_CONFIG.name} to schedule a showing</p>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-3">
           <div>
-            <label className="text-sm font-medium text-foreground mb-1.5 block">Name</label>
+            <label className="text-xs font-medium text-foreground mb-1 block">Name</label>
             <Input
               type="text"
               placeholder="Your name"
@@ -118,7 +115,7 @@ const PropertyEnquiryCard = ({ propertyName, propertyId }: PropertyEnquiryCardPr
           </div>
 
           <div>
-            <label className="text-sm font-medium text-foreground mb-1.5 block">Email</label>
+            <label className="text-xs font-medium text-foreground mb-1 block">Email</label>
             <Input
               type="email"
               placeholder="your@email.com"
@@ -129,10 +126,10 @@ const PropertyEnquiryCard = ({ propertyName, propertyId }: PropertyEnquiryCardPr
           </div>
 
           <div>
-            <label className="text-sm font-medium text-foreground mb-1.5 block">Phone</label>
+            <label className="text-xs font-medium text-foreground mb-1 block">Phone</label>
             <Input
               type="tel"
-              placeholder="+254 700 000 000"
+              placeholder="+254 710 132 320"
               value={formData.phone}
               onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
               required
@@ -141,13 +138,13 @@ const PropertyEnquiryCard = ({ propertyName, propertyId }: PropertyEnquiryCardPr
           </div>
 
           <div>
-            <label className="text-sm font-medium text-foreground mb-1.5 block">Message</label>
+            <label className="text-xs font-medium text-foreground mb-1 block">Message</label>
             <Textarea
               value={formData.message}
               onChange={(e) => setFormData({ ...formData, message: e.target.value })}
               required
-              rows={5}
-              className="text-sm leading-relaxed"
+              rows={4}
+              className="text-xs leading-relaxed"
             />
           </div>
 
@@ -156,10 +153,10 @@ const PropertyEnquiryCard = ({ propertyName, propertyId }: PropertyEnquiryCardPr
               type="button"
               variant="outline"
               className="flex-1 h-11"
-              onClick={() => window.open(`tel:${AGENT_PHONE}`, '_self')}
+              onClick={() => window.open(`tel:${APP_CONFIG.phone}`, '_self')}
             >
               <Phone className="mr-2 h-4 w-4" />
-              Call +254 700437505
+              Call {APP_CONFIG.phoneDisplay}
             </Button>
             <Button
               type="button"

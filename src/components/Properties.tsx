@@ -400,10 +400,10 @@ const Properties = () => {
                   </CardHeader>
 
                   <CardContent className="space-y-4">
-                    <p className="text-muted-foreground text-sm line-clamp-2">{property.description}</p>
+                    <p className="text-muted-foreground text-xs line-clamp-2">{property.description}</p>
 
                     {/* Property Details */}
-                    <div className="flex items-center justify-between text-sm text-muted-foreground">
+                    <div className="flex items-center justify-between text-xs text-muted-foreground">
                       <div className="flex items-center gap-1">
                         <Bed size={16} />
                         <span>{property.bedrooms ?? "-"} Beds</span>

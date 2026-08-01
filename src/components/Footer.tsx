@@ -152,7 +152,7 @@ const Footer = () => {
         {/* Bottom Bar */}
         <div className="pt-8 border-t border-white/10 text-center">
           <p className="text-white/60 text-sm">
-            (c) 2025 Nikas Realty. All rights reserved.
+            (c) 2026 Nikas Realty. All rights reserved.
           </p>
         </div>
       </div>

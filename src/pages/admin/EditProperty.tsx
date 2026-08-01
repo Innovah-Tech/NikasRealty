@@ -57,6 +57,8 @@ const AdminEditProperty = () => {
     offplan: false,
     paymentPlanTitle: "Flexible Payment Plan",
     paymentPlanContent: "",
+    paymentPlanCash: false,
+    paymentPlanMortgage: false,
   });
   const [availableUnits, setAvailableUnits] = useState<AvailableUnitsSection>(createEmptyAvailableUnits());
   const [createdAt, setCreatedAt] = useState<Date | null>(null);
@@ -99,6 +101,8 @@ const AdminEditProperty = () => {
         offplan: property.offplan || false,
         paymentPlanTitle: property.paymentPlan?.title || "Flexible Payment Plan",
         paymentPlanContent: property.paymentPlan?.content || "",
+        paymentPlanCash: property.paymentPlan?.paymentMethods?.includes('cash') ?? false,
+        paymentPlanMortgage: property.paymentPlan?.paymentMethods?.includes('mortgage') ?? false,
       });
       setAvailableUnits(property.availableUnits ?? createEmptyAvailableUnits());
       setCreatedAt(property.createdAt ?? null);
@@ -221,6 +225,8 @@ const AdminEditProperty = () => {
         priceType: formData.priceType,
         paymentPlanTitle: formData.paymentPlanTitle,
         paymentPlanContent: formData.paymentPlanContent,
+        paymentPlanCash: formData.paymentPlanCash,
+        paymentPlanMortgage: formData.paymentPlanMortgage,
         availableUnits,
       });
 
@@ -237,7 +243,11 @@ const AdminEditProperty = () => {
       };
 
       // Clear optional sections when emptied
-      if (!formData.paymentPlanContent.trim()) {
+      if (
+        !formData.paymentPlanContent.trim() &&
+        !formData.paymentPlanCash &&
+        !formData.paymentPlanMortgage
+      ) {
         propertyData.paymentPlan = null;
       }
       if (!extendedFields.availableUnits) {
@@ -584,7 +594,7 @@ const AdminEditProperty = () => {
                 <CardHeader className="pb-4">
                   <CardTitle className="text-lg">Payment Plan</CardTitle>
                   <p className="text-sm text-muted-foreground">
-                    Optional. Leave content empty to hide on the property page.
+                    Optional. Select payment options and/or add plan details.
                   </p>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -597,6 +607,29 @@ const AdminEditProperty = () => {
                       onChange={handleChange}
                       placeholder="Flexible Payment Plan"
                     />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Payment Options</Label>
+                    <div className="flex flex-wrap gap-6">
+                      <label className="flex items-center space-x-2 text-sm cursor-pointer">
+                        <Checkbox
+                          checked={formData.paymentPlanCash}
+                          onCheckedChange={(checked) =>
+                            setFormData({ ...formData, paymentPlanCash: Boolean(checked) })
+                          }
+                        />
+                        <span>Cash</span>
+                      </label>
+                      <label className="flex items-center space-x-2 text-sm cursor-pointer">
+                        <Checkbox
+                          checked={formData.paymentPlanMortgage}
+                          onCheckedChange={(checked) =>
+                            setFormData({ ...formData, paymentPlanMortgage: Boolean(checked) })
+                          }
+                        />
+                        <span>Mortgage</span>
+                      </label>
+                    </div>
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="paymentPlanContent">Content</Label>

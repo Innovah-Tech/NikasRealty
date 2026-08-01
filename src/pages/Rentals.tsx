@@ -271,7 +271,7 @@ const RentalsPage = () => {
                                         </CardHeader>
 
                                         <CardContent className="space-y-4">
-                                            <p className="text-muted-foreground text-sm line-clamp-2">{property.description}</p>
+                                            <p className="text-muted-foreground text-xs line-clamp-2">{property.description}</p>
 
                                             {/* Property Details */}
                                             <div className="flex items-center justify-between text-sm text-muted-foreground">

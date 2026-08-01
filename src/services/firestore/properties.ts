@@ -35,6 +35,7 @@ export interface AvailableUnitsSection {
 export interface PaymentPlanSection {
   title: string;
   content: string;
+  paymentMethods?: Array<'cash' | 'mortgage'>;
 }
 
 export interface Property {

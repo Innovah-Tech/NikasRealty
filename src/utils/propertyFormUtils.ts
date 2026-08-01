@@ -8,6 +8,8 @@ export interface PropertyExtendedFormData {
   priceType: 'exact' | 'from';
   paymentPlanTitle: string;
   paymentPlanContent: string;
+  paymentPlanCash: boolean;
+  paymentPlanMortgage: boolean;
   availableUnits: AvailableUnitsSection;
 }
 
@@ -30,10 +32,15 @@ export const buildExtendedPropertyFields = (form: PropertyExtendedFormData) => {
   };
 
   const paymentContent = form.paymentPlanContent.trim();
-  if (paymentContent) {
+  const paymentMethods: Array<'cash' | 'mortgage'> = [];
+  if (form.paymentPlanCash) paymentMethods.push('cash');
+  if (form.paymentPlanMortgage) paymentMethods.push('mortgage');
+
+  if (paymentContent || paymentMethods.length > 0) {
     fields.paymentPlan = {
       title: sanitizeText(form.paymentPlanTitle.trim()) || 'Flexible Payment Plan',
-      content: sanitizeText(form.paymentPlanContent),
+      content: paymentContent ? sanitizeText(form.paymentPlanContent) : '',
+      ...(paymentMethods.length > 0 ? { paymentMethods } : {}),
     } satisfies PaymentPlanSection;
   }
 

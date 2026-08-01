@@ -61,6 +61,9 @@ const PropertyDetailsPage = () => {
     ? contentToParagraphs(property.paymentPlan.content)
     : [];
   const showAvailableUnits = property?.availableUnits && hasAvailableUnitsData(property.availableUnits);
+  const hasPaymentPlan =
+    Boolean(property?.paymentPlan?.content?.trim()) ||
+    Boolean(property?.paymentPlan?.paymentMethods?.length);
 
   const handleImageError = (e: SyntheticEvent<HTMLImageElement>) => {
     const img = e.currentTarget;
@@ -98,9 +101,9 @@ const PropertyDetailsPage = () => {
   const renderParagraphs = (lines: string[]) =>
     lines.map((line, index) =>
       line.trim() === '' ? (
-        <div key={index} className="h-3" aria-hidden="true" />
+        <div key={index} className="h-2" aria-hidden="true" />
       ) : (
-        <p key={index} className="text-sm text-muted-foreground leading-relaxed">
+        <p key={index} className="text-xs text-muted-foreground leading-relaxed">
           {line}
         </p>
       )
@@ -110,7 +113,7 @@ const PropertyDetailsPage = () => {
     return (
       <div className="min-h-screen">
         <Navbar />
-        <div className="container mx-auto px-4 lg:px-8 py-24 flex justify-center">
+        <div className="container mx-auto px-4 lg:px-8 pt-28 pb-24 flex justify-center">
           <Loader2 className="h-10 w-10 animate-spin text-primary" />
         </div>
         <Footer />
@@ -122,7 +125,7 @@ const PropertyDetailsPage = () => {
     return (
       <div className="min-h-screen">
         <Navbar />
-        <div className="container mx-auto px-4 lg:px-8 py-24 text-center">
+        <div className="container mx-auto px-4 lg:px-8 pt-28 pb-24 text-center">
           <h1 className="text-2xl font-semibold mb-4">Property not found</h1>
           <Button variant="outline" onClick={() => navigate(-1)}>Go Back</Button>
         </div>
@@ -136,17 +139,19 @@ const PropertyDetailsPage = () => {
   return (
     <div className="min-h-screen">
       <Navbar />
-      <main className="container mx-auto px-4 lg:px-8 py-10">
-        <div className="mb-6">
+      <main className="container mx-auto px-4 lg:px-8 pt-28 pb-10">
+        <div className="mb-4 flex justify-end">
           <Button
             type="button"
             variant="outline"
+            size="sm"
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
               navigate("/");
             }}
           >
+            <ArrowLeft className="mr-2 h-4 w-4" />
             Back to Home
           </Button>
         </div>
@@ -210,14 +215,14 @@ const PropertyDetailsPage = () => {
           </div>
         </div>
 
-        {/* Main Content Grid */}
+        {/* Main Content Grid — enquiry form first on mobile, sidebar on desktop */}
         <div className="grid gap-8 lg:grid-cols-3">
           {/* Left Column - Details */}
-          <div className="lg:col-span-2 space-y-8">
+          <div className="lg:col-span-2 space-y-8 order-2 lg:order-1">
             {/* Gallery */}
             {images.length > 1 && (
               <div className="space-y-3">
-                <h2 className="text-2xl font-semibold text-foreground">Gallery</h2>
+                <h2 className="text-xl font-semibold text-foreground">Gallery</h2>
                 <div className="grid grid-cols-4 sm:grid-cols-5 gap-2">
                   {images.map((img, index) => (
                     <button
@@ -263,7 +268,7 @@ const PropertyDetailsPage = () => {
                 )}
               </div>
 
-              <div className="flex flex-wrap gap-5 items-center text-sm text-muted-foreground">
+              <div className="flex flex-wrap gap-5 items-center text-xs text-muted-foreground">
                 <span className="flex items-center gap-2">
                   <Bed size={18} />
                   <span>{property.bedrooms ?? "-"} Beds</span>
@@ -290,7 +295,7 @@ const PropertyDetailsPage = () => {
             {/* Description */}
             {descriptionParagraphs.some((p) => p.trim()) && (
               <section className="space-y-3">
-                <h2 className="text-2xl font-semibold text-foreground">Description</h2>
+                <h2 className="text-xl font-semibold text-foreground">Description</h2>
                 <div className="space-y-1">{renderParagraphs(descriptionParagraphs)}</div>
               </section>
             )}
@@ -298,10 +303,10 @@ const PropertyDetailsPage = () => {
             {/* Amenities */}
             {amenities.length > 0 && (
               <section className="space-y-3">
-                <h2 className="text-2xl font-semibold text-foreground">Amenities & Features</h2>
-                <ul className="space-y-2">
+                <h2 className="text-xl font-semibold text-foreground">Amenities & Features</h2>
+                <ul className="space-y-1.5">
                   {amenities.map((item, index) => (
-                    <li key={index} className="flex items-start gap-2.5 text-sm text-muted-foreground leading-relaxed">
+                    <li key={index} className="flex items-start gap-2 text-xs text-muted-foreground leading-relaxed">
                       <span className="text-primary mt-0.5 shrink-0">•</span>
                       <span>{item}</span>
                     </li>
@@ -311,22 +316,42 @@ const PropertyDetailsPage = () => {
             )}
 
             {/* Payment Plan */}
-            {property.paymentPlan?.content?.trim() && (
+            {hasPaymentPlan && property.paymentPlan && (
               <section className="space-y-3">
-                <h2 className="text-2xl font-semibold text-foreground">
+                <h2 className="text-xl font-semibold text-foreground">
                   {property.paymentPlan.title || 'Flexible Payment Plan'}
                 </h2>
-                <div className="space-y-1">{renderParagraphs(paymentPlanParagraphs)}</div>
+
+                {property.paymentPlan.paymentMethods && property.paymentPlan.paymentMethods.length > 0 && (
+                  <ul className="space-y-1.5">
+                    {property.paymentPlan.paymentMethods.includes('cash') && (
+                      <li className="flex items-start gap-2 text-xs text-muted-foreground leading-relaxed">
+                        <span className="text-primary mt-0.5 shrink-0">•</span>
+                        <span>Cash</span>
+                      </li>
+                    )}
+                    {property.paymentPlan.paymentMethods.includes('mortgage') && (
+                      <li className="flex items-start gap-2 text-xs text-muted-foreground leading-relaxed">
+                        <span className="text-primary mt-0.5 shrink-0">•</span>
+                        <span>Mortgage</span>
+                      </li>
+                    )}
+                  </ul>
+                )}
+
+                {paymentPlanParagraphs.some((p) => p.trim()) && (
+                  <div className="space-y-1">{renderParagraphs(paymentPlanParagraphs)}</div>
+                )}
               </section>
             )}
 
             {/* Legacy Payment Options fallback */}
-            {!property.paymentPlan?.content?.trim() && property.paymentOptions && property.paymentOptions.length > 0 && (
+            {!hasPaymentPlan && property.paymentOptions && property.paymentOptions.length > 0 && (
               <section className="space-y-3">
-                <h2 className="text-2xl font-semibold text-foreground">Payment Options</h2>
-                <ul className="space-y-2">
+                <h2 className="text-xl font-semibold text-foreground">Payment Options</h2>
+                <ul className="space-y-1.5">
                   {property.paymentOptions.map((option, index) => (
-                    <li key={index} className="flex items-start gap-2.5 text-sm text-muted-foreground leading-relaxed">
+                    <li key={index} className="flex items-start gap-2 text-xs text-muted-foreground leading-relaxed">
                       <span className="text-primary mt-0.5 shrink-0">•</span>
                       <span>{option}</span>
                     </li>
@@ -337,8 +362,8 @@ const PropertyDetailsPage = () => {
 
             {/* Available Units & Prices */}
             {showAvailableUnits && property.availableUnits && (
-              <section className="space-y-5">
-                <h2 className="text-2xl font-semibold text-foreground">
+              <section className="space-y-4">
+                <h2 className="text-xl font-semibold text-foreground">
                   {property.availableUnits.title || 'Available Units & Prices'}
                 </h2>
 
@@ -348,22 +373,29 @@ const PropertyDetailsPage = () => {
                   </p>
                 )}
 
-                <div className="space-y-6">
+                <div className="space-y-5">
                   {property.availableUnits.categories.map((cat, catIndex) => (
                     cat.units.length > 0 && (
-                      <div key={catIndex} className="space-y-3">
+                      <div key={catIndex} className="space-y-2">
                         {cat.category && (
-                          <h3 className="text-lg font-semibold text-foreground">{cat.category}</h3>
+                          <h3 className="text-sm font-semibold text-foreground">{cat.category}</h3>
                         )}
-                        <ul className="space-y-2.5">
+                        <ul className="space-y-1.5">
                           {cat.units.map((unit, unitIndex) => (
                             <li
                               key={unitIndex}
-                              className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 py-2 border-b border-border/50 last:border-0"
+                              className="flex items-start gap-2 text-sm text-muted-foreground leading-relaxed"
                             >
-                              <span className="text-sm text-foreground">{unit.title}</span>
-                              <span className="text-sm font-medium text-primary shrink-0">
-                                {unit.price ? `Price: ${unit.price}` : ''}
+                              <span className="text-primary mt-0.5 shrink-0">•</span>
+                              <span>
+                                {unit.title}
+                                {unit.price?.trim() && (
+                                  <>
+                                    {' '}
+                                    —{' '}
+                                    <span className="font-semibold text-foreground">{unit.price}</span>
+                                  </>
+                                )}
                               </span>
                             </li>
                           ))}
@@ -384,14 +416,14 @@ const PropertyDetailsPage = () => {
             {/* Completion Date */}
             {property.completionDate && (
               <section className="space-y-2">
-                <h2 className="text-2xl font-semibold text-foreground">Completion Date</h2>
-                <p className="text-sm text-muted-foreground leading-relaxed">{property.completionDate}</p>
+                <h2 className="text-xl font-semibold text-foreground">Completion Date</h2>
+                <p className="text-xs text-muted-foreground leading-relaxed">{property.completionDate}</p>
               </section>
             )}
           </div>
 
-          {/* Right Column - Contact Card */}
-          <div className="lg:col-span-1">
+          {/* Right Column - Contact / Booking Form */}
+          <div className="lg:col-span-1 order-1 lg:order-2">
             <div className="lg:sticky lg:top-24">
               <PropertyEnquiryCard propertyName={property.title} propertyId={property.id} />
             </div>

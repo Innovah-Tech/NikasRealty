@@ -39,6 +39,8 @@ export const APP_CONFIG = {
   linkedin: 'https://www.linkedin.com/company/nikasrealty',
   whatsapp: '254710132320',
   whatsappUrl: 'https://wa.me/254710132320',
+  phone: '+254710132320',
+  phoneDisplay: '0710 132 320',
 } as const;
 
 // Property Configuration
