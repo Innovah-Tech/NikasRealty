@@ -24,6 +24,7 @@ import { propertiesService, type Property } from "@/services/firestore/propertie
 import { parsePrice } from "@/data/properties";
 import { PROPERTY_CONFIG } from "@/config/constants";
 import { formatPropertyPrice } from "@/utils/propertyUtils";
+import { getPropertyImageUrl } from "@/utils/imageUtils";
 import { PROPERTY_IMAGE_FALLBACK } from "@/constants/propertyImages";
 
 const Properties = () => {
