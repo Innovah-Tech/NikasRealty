@@ -2,13 +2,17 @@ import { useEffect, useState, type SyntheticEvent } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import PropertyEnquiryCard from "@/components/PropertyEnquiryCard";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { MapPin, Bed, Bath, Square, Loader2, ArrowLeft, X } from "lucide-react";
+import { MapPin, Bed, Bath, Square, Loader2, ArrowLeft, X, Clock } from "lucide-react";
 import { propertiesService, type Property } from "@/services/firestore/properties";
 import { PROPERTY_IMAGE_FALLBACK } from "@/constants/propertyImages";
 import { getPropertyImageUrl } from "@/utils/imageUtils";
-import { descriptionToLines } from "@/utils/text";
+import { descriptionToParagraphs, contentToParagraphs } from "@/utils/text";
+import { formatPostedDate } from "@/utils/dateUtils";
+import { formatPropertyPrice, getPropertyAmenities } from "@/utils/propertyUtils";
+import { hasAvailableUnitsData } from "@/utils/propertyFormUtils";
 
 const PropertyDetailsPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -51,7 +55,12 @@ const PropertyDetailsPage = () => {
           ? [property.image]
           : [PROPERTY_IMAGE_FALLBACK];
 
-  const descriptionLines = property ? descriptionToLines(property.description) : [];
+  const descriptionParagraphs = property ? descriptionToParagraphs(property.description) : [];
+  const amenities = property ? getPropertyAmenities(property) : [];
+  const paymentPlanParagraphs = property?.paymentPlan?.content
+    ? contentToParagraphs(property.paymentPlan.content)
+    : [];
+  const showAvailableUnits = property?.availableUnits && hasAvailableUnitsData(property.availableUnits);
 
   const handleImageError = (e: SyntheticEvent<HTMLImageElement>) => {
     const img = e.currentTarget;
@@ -63,16 +72,6 @@ const PropertyDetailsPage = () => {
 
   const displayImages = images.map((img) => getPropertyImageUrl(img, 'full'));
   const thumbnailImages = images.map((img) => getPropertyImageUrl(img, 'thumbnail'));
-
-  if (import.meta.env.DEV && property) {
-    console.log('Property details images:', {
-      propertyId: property.id,
-      imagesArray: property.images,
-      imageField: property.image,
-      gallery: property.gallery,
-      finalImages: images
-    });
-  }
 
   const openLightbox = (index: number) => {
     setSelectedImage(index);
@@ -95,6 +94,17 @@ const PropertyDetailsPage = () => {
       return (prev - 1 + images.length) % images.length;
     });
   };
+
+  const renderParagraphs = (lines: string[]) =>
+    lines.map((line, index) =>
+      line.trim() === '' ? (
+        <div key={index} className="h-3" aria-hidden="true" />
+      ) : (
+        <p key={index} className="text-sm text-muted-foreground leading-relaxed">
+          {line}
+        </p>
+      )
+    );
 
   if (loading) {
     return (
@@ -121,6 +131,8 @@ const PropertyDetailsPage = () => {
     );
   }
 
+  const isRental = property.status === 'for-rent' || property.status === 'For Rent';
+
   return (
     <div className="min-h-screen">
       <Navbar />
@@ -139,9 +151,9 @@ const PropertyDetailsPage = () => {
           </Button>
         </div>
 
-        {/* Full Page Main Image */}
+        {/* Hero Image */}
         <div
-          className="relative w-full h-[60vh] md:h-[70vh] lg:h-[80vh] overflow-hidden rounded-xl shadow-lg cursor-zoom-in mb-8 bg-muted"
+          className="relative w-full h-[50vh] md:h-[60vh] lg:h-[65vh] overflow-hidden rounded-xl shadow-lg cursor-zoom-in mb-8 bg-muted"
           onClick={() => openLightbox(0)}
         >
           <img
@@ -150,9 +162,8 @@ const PropertyDetailsPage = () => {
             className="w-full h-full object-contain"
             onError={handleImageError}
           />
-          {/* Overlay with Title and Badges */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent flex flex-col justify-end p-6 md:p-8 lg:p-12">
-            <div className="flex flex-wrap gap-2 mb-4">
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent flex flex-col justify-end p-6 md:p-8 lg:p-10">
+            <div className="flex flex-wrap gap-2 mb-3">
               {property.status && (
                 <Badge
                   variant={property.status === "for-sale" || property.status === "For Sale" ? "default" : property.status === "for-rent" || property.status === "For Rent" ? "secondary" : "outline"}
@@ -183,157 +194,206 @@ const PropertyDetailsPage = () => {
                 <Badge variant="outline" className="capitalize bg-white/90 text-foreground border-white/50">{property.projectStage}</Badge>
               )}
             </div>
-            <h1 className="text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-white mb-3">{property.title}</h1>
-            <div className="flex items-center gap-2 text-white/90">
-              <MapPin size={20} />
-              <span className="text-lg md:text-xl">{property.location}</span>
+            <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">{property.title}</h1>
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-white/90">
+              <span className="flex items-center gap-1.5 text-sm">
+                <MapPin size={16} />
+                {property.location}
+              </span>
+              {property.createdAt && (
+                <span className="flex items-center gap-1.5 text-sm">
+                  <Clock size={16} />
+                  Posted {formatPostedDate(property.createdAt)}
+                </span>
+              )}
             </div>
           </div>
         </div>
 
-        {/* Two Column Layout: Thumbnails Left, Details Right */}
-        <div className="grid gap-8 lg:grid-cols-2">
-          {/* Left Side - Thumbnail Grid */}
-          {images.length > 1 && (
-            <div className="space-y-4">
-              <h2 className="text-2xl font-semibold text-foreground">Gallery</h2>
-              <div className="grid grid-cols-4 gap-2">
-                {images.map((img, index) => (
-                  <button
-                    key={index}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      openLightbox(index);
-                    }}
-                    className={`relative aspect-square overflow-hidden rounded-lg transition-all duration-200 ${selectedImage === index ? 'ring-2 ring-primary' : 'opacity-70 hover:opacity-100'
-                      }`}
-                  >
-                    <img
-                      src={thumbnailImages[index]}
-                      alt={`${property.title} - ${index + 1}`}
-                      className="w-full h-full object-cover"
-                      onError={handleImageError}
-                    />
-                  </button>
-                ))}
+        {/* Main Content Grid */}
+        <div className="grid gap-8 lg:grid-cols-3">
+          {/* Left Column - Details */}
+          <div className="lg:col-span-2 space-y-8">
+            {/* Gallery */}
+            {images.length > 1 && (
+              <div className="space-y-3">
+                <h2 className="text-2xl font-semibold text-foreground">Gallery</h2>
+                <div className="grid grid-cols-4 sm:grid-cols-5 gap-2">
+                  {images.map((img, index) => (
+                    <button
+                      key={index}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        openLightbox(index);
+                      }}
+                      className={`relative aspect-square overflow-hidden rounded-lg transition-all duration-200 ${selectedImage === index ? 'ring-2 ring-primary' : 'opacity-70 hover:opacity-100'
+                        }`}
+                    >
+                      <img
+                        src={thumbnailImages[index]}
+                        alt={`${property.title} - ${index + 1}`}
+                        className="w-full h-full object-cover"
+                        onError={handleImageError}
+                      />
+                    </button>
+                  ))}
+                </div>
               </div>
-            </div>
-          )}
+            )}
 
-          {/* Right Side - Details */}
-          <div className="space-y-6">
-            {/* Price */}
-            <div className="pt-4 border-t border-border">
-              <div className="text-4xl font-bold text-primary">
-                {(() => {
-                  if ((property.status === 'for-rent' || property.status === 'For Rent') && (property.priceDaily || property.priceMonthly)) {
-                    return (
-                      <div className="flex flex-col gap-1">
-                        {property.priceMonthly && (
-                          <span>KES {property.priceMonthly?.toLocaleString() ?? '0'} <span className="text-2xl text-muted-foreground font-normal">/ Month</span></span>
-                        )}
-                        {property.priceDaily && (
-                          <span className="text-2xl text-muted-foreground">KES {property.priceDaily?.toLocaleString() ?? '0'} / Day</span>
-                        )}
-                      </div>
-                    );
-                  }
-                  return typeof property.price === "number"
-                    ? `KES ${property.price.toLocaleString()}`
-                    : property.price;
-                })()}
+            {/* Price & Metadata */}
+            <div className="space-y-4 pb-6 border-b border-border">
+              <div className="text-3xl md:text-4xl font-bold text-primary">
+                {isRental && (property.priceDaily || property.priceMonthly) ? (
+                  <div className="flex flex-col gap-1">
+                    {property.priceMonthly && (
+                      <span>
+                        KES {property.priceMonthly.toLocaleString()}{' '}
+                        <span className="text-lg text-muted-foreground font-normal">/ Month</span>
+                      </span>
+                    )}
+                    {property.priceDaily && (
+                      <span className="text-lg text-muted-foreground font-normal">
+                        KES {property.priceDaily.toLocaleString()} / Day
+                      </span>
+                    )}
+                  </div>
+                ) : (
+                  formatPropertyPrice(property)
+                )}
               </div>
-            </div>
 
-            {/* Property Details */}
-            <div className="flex flex-wrap gap-6 items-center text-base text-muted-foreground pb-4 border-b border-border">
-              <span className="flex items-center gap-2">
-                <Bed size={20} />
-                <span className="font-medium">{property.bedrooms ?? "-"} Beds</span>
-              </span>
-              <span className="flex items-center gap-2">
-                <Bath size={20} />
-                <span className="font-medium">{property.bathrooms ?? "-"} Baths</span>
-              </span>
-              <span className="flex items-center gap-2">
-                <Square size={20} />
-                <span className="font-medium">
-                  {(() => {
-                    const size = property.size?.trim();
-                    if (!size) return "N/A";
-                    const lower = size.toLowerCase();
-                    const hasUnit = /sqm|sq\.?\s*m|sqft|sq\.?\s*ft|m²|ft²|acre/.test(lower);
-                    return hasUnit ? size : `${size} sqm`;
-                  })()}
+              <div className="flex flex-wrap gap-5 items-center text-sm text-muted-foreground">
+                <span className="flex items-center gap-2">
+                  <Bed size={18} />
+                  <span>{property.bedrooms ?? "-"} Beds</span>
                 </span>
-              </span>
+                <span className="flex items-center gap-2">
+                  <Bath size={18} />
+                  <span>{property.bathrooms ?? "-"} Baths</span>
+                </span>
+                <span className="flex items-center gap-2">
+                  <Square size={18} />
+                  <span>
+                    {(() => {
+                      const size = property.size?.trim();
+                      if (!size) return "N/A";
+                      const lower = size.toLowerCase();
+                      const hasUnit = /sqm|sq\.?\s*m|sqft|sq\.?\s*ft|m²|ft²|acre/.test(lower);
+                      return hasUnit ? size : `${size} sqm`;
+                    })()}
+                  </span>
+                </span>
+              </div>
             </div>
 
             {/* Description */}
-            {descriptionLines.length > 0 && (
-              <div>
-                <h2 className="text-xl font-semibold mb-4 text-foreground">Description</h2>
-                <ul className="space-y-3">
-                  {descriptionLines.map((line, index) => (
-                    <li key={index} className="flex items-start gap-3 text-muted-foreground">
-                      <span className="text-primary mt-1 text-lg">-</span>
-                      <span className="text-base">{line}</span>
+            {descriptionParagraphs.some((p) => p.trim()) && (
+              <section className="space-y-3">
+                <h2 className="text-2xl font-semibold text-foreground">Description</h2>
+                <div className="space-y-1">{renderParagraphs(descriptionParagraphs)}</div>
+              </section>
+            )}
+
+            {/* Amenities */}
+            {amenities.length > 0 && (
+              <section className="space-y-3">
+                <h2 className="text-2xl font-semibold text-foreground">Amenities & Features</h2>
+                <ul className="space-y-2">
+                  {amenities.map((item, index) => (
+                    <li key={index} className="flex items-start gap-2.5 text-sm text-muted-foreground leading-relaxed">
+                      <span className="text-primary mt-0.5 shrink-0">•</span>
+                      <span>{item}</span>
                     </li>
                   ))}
                 </ul>
-              </div>
+              </section>
             )}
 
-            {/* Amenities/Features */}
-            {property.features && property.features.length > 0 && (
-              <div>
-                <h2 className="text-xl font-semibold mb-4 text-foreground">Amenities & Features</h2>
-                <ul className="space-y-3">
-                  {property.features.map((feature, index) => (
-                    <li key={index} className="flex items-start gap-3 text-muted-foreground">
-                      <span className="text-primary mt-1 text-lg">-</span>
-                      <span className="text-base">{feature}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
+            {/* Payment Plan */}
+            {property.paymentPlan?.content?.trim() && (
+              <section className="space-y-3">
+                <h2 className="text-2xl font-semibold text-foreground">
+                  {property.paymentPlan.title || 'Flexible Payment Plan'}
+                </h2>
+                <div className="space-y-1">{renderParagraphs(paymentPlanParagraphs)}</div>
+              </section>
             )}
 
-            {/* Payment Options */}
-            {property.paymentOptions && property.paymentOptions.length > 0 && (
-              <div>
-                <h2 className="text-xl font-semibold mb-4 text-foreground">Payment Options</h2>
-                <ul className="space-y-3">
+            {/* Legacy Payment Options fallback */}
+            {!property.paymentPlan?.content?.trim() && property.paymentOptions && property.paymentOptions.length > 0 && (
+              <section className="space-y-3">
+                <h2 className="text-2xl font-semibold text-foreground">Payment Options</h2>
+                <ul className="space-y-2">
                   {property.paymentOptions.map((option, index) => (
-                    <li key={index} className="flex items-start gap-3 text-muted-foreground">
-                      <span className="text-primary mt-1 text-lg">-</span>
-                      <span className="text-base">{option}</span>
+                    <li key={index} className="flex items-start gap-2.5 text-sm text-muted-foreground leading-relaxed">
+                      <span className="text-primary mt-0.5 shrink-0">•</span>
+                      <span>{option}</span>
                     </li>
                   ))}
                 </ul>
-              </div>
+              </section>
+            )}
+
+            {/* Available Units & Prices */}
+            {showAvailableUnits && property.availableUnits && (
+              <section className="space-y-5">
+                <h2 className="text-2xl font-semibold text-foreground">
+                  {property.availableUnits.title || 'Available Units & Prices'}
+                </h2>
+
+                {property.availableUnits.introduction?.trim() && (
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    {property.availableUnits.introduction}
+                  </p>
+                )}
+
+                <div className="space-y-6">
+                  {property.availableUnits.categories.map((cat, catIndex) => (
+                    cat.units.length > 0 && (
+                      <div key={catIndex} className="space-y-3">
+                        {cat.category && (
+                          <h3 className="text-lg font-semibold text-foreground">{cat.category}</h3>
+                        )}
+                        <ul className="space-y-2.5">
+                          {cat.units.map((unit, unitIndex) => (
+                            <li
+                              key={unitIndex}
+                              className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 py-2 border-b border-border/50 last:border-0"
+                            >
+                              <span className="text-sm text-foreground">{unit.title}</span>
+                              <span className="text-sm font-medium text-primary shrink-0">
+                                {unit.price ? `Price: ${unit.price}` : ''}
+                              </span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )
+                  ))}
+                </div>
+
+                {property.availableUnits.closingParagraph?.trim() && (
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    {property.availableUnits.closingParagraph}
+                  </p>
+                )}
+              </section>
             )}
 
             {/* Completion Date */}
             {property.completionDate && (
-              <div>
-                <h2 className="text-xl font-semibold mb-2 text-foreground">Completion Date</h2>
-                <p className="text-muted-foreground text-base">{property.completionDate}</p>
-              </div>
+              <section className="space-y-2">
+                <h2 className="text-2xl font-semibold text-foreground">Completion Date</h2>
+                <p className="text-sm text-muted-foreground leading-relaxed">{property.completionDate}</p>
+              </section>
             )}
+          </div>
 
-            {/* WhatsApp Button */}
-            <div className="pt-4">
-              <Button
-                className="w-full gradient-gold text-secondary font-semibold text-lg py-6"
-                onClick={() => {
-                  const message = `Hi Nikas Realty, I'm interested in ${property.title}.`;
-                  const url = `https://wa.me/254710132320?text=${encodeURIComponent(message)}`;
-                  window.open(url, "_blank");
-                }}
-              >
-                WhatsApp Agent
-              </Button>
+          {/* Right Column - Contact Card */}
+          <div className="lg:col-span-1">
+            <div className="lg:sticky lg:top-24">
+              <PropertyEnquiryCard propertyName={property.title} propertyId={property.id} />
             </div>
           </div>
         </div>
@@ -384,7 +444,7 @@ const PropertyDetailsPage = () => {
               <ArrowLeft className="w-8 h-8 transform rotate-180" />
             </button>
 
-            <div className="absolute bottom-4 text-white text-center w-full">
+            <div className="absolute bottom-4 text-white text-center w-full text-sm">
               {selectedImage + 1} / {images.length}
             </div>
           </div>

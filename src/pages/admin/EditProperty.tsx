@@ -19,9 +19,15 @@ import { firebaseStorage } from "@/services/firebaseStorage";
 import { toast } from "sonner";
 import { useNavigate, useParams } from "react-router-dom";
 import { PROPERTY_CONFIG } from "@/config/constants";
-import { sanitizeText, sanitizeArray } from "@/utils/sanitize";
+import { sanitizeText } from "@/utils/sanitize";
 import { validateTitle, validateDescription, validatePrice, validateFeatures } from "@/utils/validate";
 import { getPropertyImageUrl } from "@/utils/imageUtils";
+import { arrayToLines, linesToArray } from "@/utils/text";
+import { buildExtendedPropertyFields, createEmptyAvailableUnits } from "@/utils/propertyFormUtils";
+import AvailableUnitsBuilder from "@/components/admin/AvailableUnitsBuilder";
+import type { AvailableUnitsSection } from "@/services/firestore/properties";
+import { formatPostedDate } from "@/utils/dateUtils";
+import { getPropertyAmenities } from "@/utils/propertyUtils";
 
 const propertyTypeOptions = PROPERTY_CONFIG.propertyTypes;
 const locationOptions = PROPERTY_CONFIG.locations;
@@ -37,18 +43,23 @@ const AdminEditProperty = () => {
     description: "",
     type: "",
     price: "",
+    priceType: "exact" as "exact" | "from",
     priceDaily: "",
     priceMonthly: "",
     location: "",
     status: "",
     projectStage: "",
-    features: "",
+    amenities: "",
     bedrooms: "",
     bathrooms: "",
     size: "",
     featured: false,
     offplan: false,
+    paymentPlanTitle: "Flexible Payment Plan",
+    paymentPlanContent: "",
   });
+  const [availableUnits, setAvailableUnits] = useState<AvailableUnitsSection>(createEmptyAvailableUnits());
+  const [createdAt, setCreatedAt] = useState<Date | null>(null);
   const [images, setImages] = useState<string[]>([]);
   const [useCustomLocation, setUseCustomLocation] = useState(false);
 
@@ -74,18 +85,23 @@ const AdminEditProperty = () => {
         description: property.description || "",
         type: property.type || "",
         price: property.price?.toString() || "",
+        priceType: property.priceType || "exact",
         priceDaily: property.priceDaily?.toString() || "",
         priceMonthly: property.priceMonthly?.toString() || "",
         location: property.location || "",
         status: property.status || "",
         projectStage: property.projectStage || "",
-        features: property.features?.join(", ") || "",
+        amenities: arrayToLines(getPropertyAmenities(property)),
         bedrooms: property.bedrooms?.toString() || "",
         bathrooms: property.bathrooms?.toString() || "",
         size: property.size || "",
         featured: property.featured || false,
         offplan: property.offplan || false,
+        paymentPlanTitle: property.paymentPlan?.title || "Flexible Payment Plan",
+        paymentPlanContent: property.paymentPlan?.content || "",
       });
+      setAvailableUnits(property.availableUnits ?? createEmptyAvailableUnits());
+      setCreatedAt(property.createdAt ?? null);
       setImages(property.images || []);
       // Check if location is in the predefined list
       setUseCustomLocation(!PROPERTY_CONFIG.locations.includes(property.location as any || ""));
@@ -173,18 +189,14 @@ const AdminEditProperty = () => {
 
     try {
       const imageUrls = images.length > 0 ? images : [];
-      const featuresArray = formData.features
-        ? formData.features.split(",").map((f) => f.trim()).filter(Boolean)
-        : [];
+      const amenitiesArray = linesToArray(formData.amenities);
 
-      const featuresValidation = validateFeatures(featuresArray);
-      if (!featuresValidation.valid) {
-        toast.error(featuresValidation.error || 'Invalid features');
+      const amenitiesValidation = validateFeatures(amenitiesArray);
+      if (!amenitiesValidation.valid) {
+        toast.error(amenitiesValidation.error || 'Invalid amenities');
         setSubmitting(false);
         return;
       }
-
-      const sanitizedFeatures = sanitizeArray(featuresArray);
 
       const withSizeUnit = (val: string) => {
         const size = val.trim();
@@ -203,19 +215,34 @@ const AdminEditProperty = () => {
         else if (priceDaily) mainPrice = priceDaily * 30; // Approximation for sorting
       }
 
-      // Build property data object, excluding undefined fields (Firestore doesn't accept undefined)
+      const extendedFields = buildExtendedPropertyFields({
+        description: formData.description,
+        amenities: formData.amenities,
+        priceType: formData.priceType,
+        paymentPlanTitle: formData.paymentPlanTitle,
+        paymentPlanContent: formData.paymentPlanContent,
+        availableUnits,
+      });
+
       const propertyData: any = {
         title: sanitizeText(formData.title),
-        description: sanitizeText(formData.description),
         type: formData.type,
         price: mainPrice,
         location: sanitizeText(formData.location),
         status: formData.status,
         featured: formData.featured,
         offplan: formData.offplan,
-        features: sanitizedFeatures,
         images: imageUrls,
+        ...extendedFields,
       };
+
+      // Clear optional sections when emptied
+      if (!formData.paymentPlanContent.trim()) {
+        propertyData.paymentPlan = null;
+      }
+      if (!extendedFields.availableUnits) {
+        propertyData.availableUnits = null;
+      }
 
       // Only include optional fields if they have values
       if (priceDaily !== undefined) propertyData.priceDaily = priceDaily;
@@ -277,6 +304,11 @@ const AdminEditProperty = () => {
           <div>
             <h1 className="text-3xl font-bold text-foreground">Edit Property</h1>
             <p className="text-muted-foreground">Update property details</p>
+            {createdAt && (
+              <p className="text-sm text-muted-foreground mt-1">
+                Posted {formatPostedDate(createdAt)} · {createdAt.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
+              </p>
+            )}
           </div>
         </div>
 
@@ -344,17 +376,36 @@ const AdminEditProperty = () => {
                     </div>
                   </div>
                 ) : (
-                  <div className="space-y-2">
-                    <Label htmlFor="price">Price (KSh)</Label>
-                    <Input
-                      id="price"
-                      name="price"
-                      type="number"
-                      value={formData.price}
-                      onChange={handleChange}
-                      required={formData.status !== 'for-rent'}
-                    />
-                  </div>
+                  <>
+                    <div className="space-y-2">
+                      <Label htmlFor="priceType">Price Type</Label>
+                      <Select
+                        value={formData.priceType}
+                        onValueChange={(value: "exact" | "from") =>
+                          setFormData({ ...formData, priceType: value })
+                        }
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="exact">Exact Price</SelectItem>
+                          <SelectItem value="from">From Price</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="price">Price (KSh)</Label>
+                      <Input
+                        id="price"
+                        name="price"
+                        type="number"
+                        value={formData.price}
+                        onChange={handleChange}
+                        required={formData.status !== 'for-rent'}
+                      />
+                    </div>
+                  </>
                 )}
 
                 <div className="space-y-2">
@@ -478,18 +529,7 @@ const AdminEditProperty = () => {
                   />
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="features">Features (comma-separated)</Label>
-                  <Input
-                    id="features"
-                    name="features"
-                    placeholder="e.g., Pool, Garden, Parking"
-                    value={formData.features}
-                    onChange={handleChange}
-                  />
-                </div>
-
-                <div className="flex items-center space-x-2 pt-6">
+                <div className="flex items-center space-x-2 pt-6 md:col-span-2">
                   <Checkbox
                     id="featured"
                     checked={formData.featured}
@@ -516,13 +556,62 @@ const AdminEditProperty = () => {
                 <Textarea
                   id="description"
                   name="description"
-                  rows={4}
+                  rows={8}
                   value={formData.description}
                   onChange={handleChange}
-                  placeholder="One sentence per line, or comma-separated (like features)"
+                  placeholder="Enter each paragraph on a new line. Use blank lines to add spacing between paragraphs."
                   required
+                  className="leading-relaxed"
                 />
               </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="amenities">Amenities & Features</Label>
+                <Textarea
+                  id="amenities"
+                  name="amenities"
+                  rows={6}
+                  placeholder="One amenity per line"
+                  value={formData.amenities}
+                  onChange={handleChange}
+                  className="leading-relaxed"
+                />
+              </div>
+
+              <AvailableUnitsBuilder value={availableUnits} onChange={setAvailableUnits} />
+
+              <Card>
+                <CardHeader className="pb-4">
+                  <CardTitle className="text-lg">Payment Plan</CardTitle>
+                  <p className="text-sm text-muted-foreground">
+                    Optional. Leave content empty to hide on the property page.
+                  </p>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="paymentPlanTitle">Section Title</Label>
+                    <Input
+                      id="paymentPlanTitle"
+                      name="paymentPlanTitle"
+                      value={formData.paymentPlanTitle}
+                      onChange={handleChange}
+                      placeholder="Flexible Payment Plan"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="paymentPlanContent">Content</Label>
+                    <Textarea
+                      id="paymentPlanContent"
+                      name="paymentPlanContent"
+                      rows={5}
+                      value={formData.paymentPlanContent}
+                      onChange={handleChange}
+                      placeholder="Enter each paragraph on a new line..."
+                      className="leading-relaxed"
+                    />
+                  </div>
+                </CardContent>
+              </Card>
 
               <div className="space-y-4">
                 <Label>Property Images</Label>

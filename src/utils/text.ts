@@ -3,34 +3,46 @@ const stripListMarker = (line: string): string =>
   line.replace(/^[-•*]\s*/, '').trim();
 
 /**
- * Split stored property description into display lines (sentences/bullets),
- * matching how amenities & features are shown as a list.
+ * Split multiline text into display lines for list-style content (amenities, etc.).
+ * Each non-empty line becomes one item. Does not split by commas.
  */
-export const descriptionToLines = (description: string): string[] => {
-  const trimmed = description?.trim();
+export const linesToArray = (text: string): string[] => {
+  const trimmed = text?.trim();
   if (!trimmed) return [];
 
-  const byNewline = trimmed
+  return trimmed
     .split(/\r?\n/)
     .map(stripListMarker)
     .filter(Boolean);
+};
 
-  if (byNewline.length > 1) {
-    return byNewline;
-  }
+/**
+ * Join array items into multiline text for admin textarea editing.
+ */
+export const arrayToLines = (items?: string[]): string =>
+  items?.join('\n') ?? '';
 
-  const byComma = trimmed.split(',').map(stripListMarker).filter(Boolean);
-  if (byComma.length > 1) {
-    return byComma;
-  }
+/**
+ * Split stored property description into paragraphs, preserving empty lines as spacing.
+ * Does not split by commas or sentences.
+ */
+export const descriptionToParagraphs = (description: string): string[] => {
+  if (!description) return [];
+  return description.split(/\r?\n/);
+};
 
-  const single = byComma[0] ?? trimmed;
-  if (single.includes('. ') || single.includes('! ') || single.includes('? ')) {
-    return single
-      .split(/(?<=[.!?])\s+/)
-      .map(stripListMarker)
-      .filter(Boolean);
-  }
+/**
+ * Split payment plan content into paragraphs, preserving empty lines.
+ */
+export const contentToParagraphs = (content: string): string[] => {
+  if (!content) return [];
+  return content.split(/\r?\n/);
+};
 
-  return [single];
+/**
+ * @deprecated Use descriptionToParagraphs instead.
+ */
+export const descriptionToLines = (description: string): string[] => {
+  const paragraphs = descriptionToParagraphs(description);
+  return paragraphs.filter(Boolean);
 };

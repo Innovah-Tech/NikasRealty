@@ -12,6 +12,7 @@ import { propertiesService, type Property } from '@/services/firestore/propertie
 import { toast } from 'sonner';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { PROPERTY_CONFIG } from '@/config/constants';
+import { formatPropertyPrice } from '@/utils/propertyUtils';
 import { getPropertyImageUrl } from '@/utils/imageUtils';
 
 const AdminProperties = () => {
@@ -412,9 +413,7 @@ const AdminProperties = () => {
                   </div>
                   <div className="flex items-center justify-between gap-2 flex-wrap">
                     <span className="text-sm font-medium text-primary">
-                      {typeof property.price === 'number'
-                        ? `KSh ${property.price.toLocaleString()}`
-                        : property.price}
+                      {formatPropertyPrice(property).replace('KES', 'KSh')}
                     </span>
                     <div className="flex items-center gap-2">
                       {property.offplan === true && (

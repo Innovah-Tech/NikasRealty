@@ -66,6 +66,9 @@ export const PROPERTY_CONFIG = {
     'Riverside',
     'Kiambu Road',
     'Ngong',
+    'Westlands',
+    'Parklands',
+    'Loresho',
   ],
   statusOptions: ['for-sale', 'for-rent', 'sold'] as const,
 } as const;

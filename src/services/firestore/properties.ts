@@ -9,12 +9,33 @@ import {
   query,
   where,
   orderBy,
-  limit,
   Timestamp
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 
 const COLLECTION_NAME = 'properties';
+
+export interface AvailableUnitItem {
+  title: string;
+  price: string;
+}
+
+export interface AvailableUnitCategory {
+  category: string;
+  units: AvailableUnitItem[];
+}
+
+export interface AvailableUnitsSection {
+  title?: string;
+  introduction?: string;
+  closingParagraph?: string;
+  categories: AvailableUnitCategory[];
+}
+
+export interface PaymentPlanSection {
+  title: string;
+  content: string;
+}
 
 export interface Property {
   id?: string;
@@ -22,6 +43,7 @@ export interface Property {
   description: string;
   type: string;
   price: number | string;
+  priceType?: 'exact' | 'from';
   priceDaily?: number;
   priceMonthly?: number;
   location: string;
@@ -36,8 +58,12 @@ export interface Property {
   offplan?: boolean;
   completion?: string;
   projectStage?: string;
+  /** @deprecated Use amenities instead */
   features?: string[];
+  amenities?: string[];
   paymentOptions?: string[];
+  paymentPlan?: PaymentPlanSection;
+  availableUnits?: AvailableUnitsSection;
   completionDate?: string;
   createdAt?: Date;
   updatedAt?: Date;
@@ -87,11 +113,6 @@ export const propertiesService = {
         } else if (filters?.sortBy) {
           // If we have filters, try orderBy on createdAt (most common index)
           q = query(q, orderBy('createdAt', 'desc'));
-        }
-
-        // Apply pagination
-        if (filters?.limit) {
-          q = query(q, limit(filters.limit * 2)); // Get more to account for client-side filtering
         }
 
         const querySnapshot = await getDocs(q);

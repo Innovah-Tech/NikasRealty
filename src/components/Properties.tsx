@@ -23,7 +23,7 @@ import { useNavigate } from "react-router-dom";
 import { propertiesService, type Property } from "@/services/firestore/properties";
 import { parsePrice } from "@/data/properties";
 import { PROPERTY_CONFIG } from "@/config/constants";
-import { getPropertyImageUrl } from "@/utils/imageUtils";
+import { formatPropertyPrice } from "@/utils/propertyUtils";
 import { PROPERTY_IMAGE_FALLBACK } from "@/constants/propertyImages";
 
 const Properties = () => {
@@ -286,10 +286,7 @@ const Properties = () => {
                 return hasUnit ? size : `${size} sqm`;
               };
 
-              let displayPrice =
-                typeof property.price === "number"
-                  ? `KES ${property.price.toLocaleString()}`
-                  : property.price;
+              let displayPrice = formatPropertyPrice(property);
 
               if ((property.status === 'for-rent' || property.status === 'For Rent') && (property.priceDaily || property.priceMonthly)) {
                 if (property.priceMonthly) {

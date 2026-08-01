@@ -126,75 +126,61 @@ export const blogsService = {
   },
 
   // Get published blogs (public)
-  // Always use client-side filtering to ensure reliability regardless of Firestore indexes
+  // Query by status so Firestore security rules allow unauthenticated reads
   async getPublished() {
-    try {
-      // Fetch all blogs and filter client-side to avoid index issues
-      const querySnapshot = await getDocs(collection(db, COLLECTION_NAME));
-      let allBlogs = querySnapshot.docs.map(doc => {
-        const data = doc.data();
-        // Normalize status field - handle various formats
-        let status = data.status;
-        if (status) {
-          status = String(status).toLowerCase().trim();
-          // Normalize to 'published' or 'draft'
-          status = status === 'published' ? 'published' : 'draft';
-        } else {
-          status = 'draft'; // Default to draft if status is missing
-        }
-        
-        return {
-          id: doc.id,
-          ...data,
-          status: status,
-          publishedAt: data.publishedAt?.toDate(),
-          createdAt: data.createdAt?.toDate(),
-          updatedAt: data.updatedAt?.toDate(),
-        };
-      }) as Blog[];
+    const mapBlogDoc = (docSnap: { id: string; data: () => Record<string, unknown> }): Blog => {
+      const data = docSnap.data();
+      const status = data.status ? String(data.status).toLowerCase().trim() : 'draft';
+      const normalizedStatus = status === 'published' ? 'published' : 'draft';
+      return {
+        id: docSnap.id,
+        ...data,
+        status: normalizedStatus,
+        publishedAt: (data.publishedAt as { toDate?: () => Date })?.toDate?.(),
+        createdAt: (data.createdAt as { toDate?: () => Date })?.toDate?.(),
+        updatedAt: (data.updatedAt as { toDate?: () => Date })?.toDate?.(),
+      } as Blog;
+    };
 
-      if (import.meta.env.DEV) {
-        console.log(`Fetched ${allBlogs.length} total blogs from Firestore`);
-        if (allBlogs.length > 0) {
-          allBlogs.forEach(blog => {
-            console.log(`Blog: "${blog.title}", Status: "${blog.status}", PublishedAt: ${blog.publishedAt || 'N/A'}`);
-          });
-        } else {
-          console.warn('No blogs found in Firestore collection "blogs"');
-        }
-      }
-
-      // Filter by published status (client-side) - case insensitive
-      let blogs = allBlogs.filter(b => {
-        const status = String(b.status || '').toLowerCase().trim();
-        const isPublished = status === 'published';
-        if (import.meta.env.DEV && !isPublished) {
-          console.log(`Filtering out blog "${b.title}" - status: "${b.status}"`);
-        }
-        return isPublished;
-      });
-
-      if (import.meta.env.DEV) {
-        console.log(`Filtered to ${blogs.length} published blogs`);
-        if (blogs.length === 0 && allBlogs.length > 0) {
-          console.warn('No published blogs found. Available statuses:', 
-            [...new Set(allBlogs.map(b => b.status))]);
-          console.warn('Tip: Set blog status to "published" in admin panel for blogs to appear on public page');
-        }
-      }
-
-      // Sort by createdAt descending (client-side)
+    const sortByCreatedAt = (blogs: Blog[]) =>
       blogs.sort((a, b) => {
         const aDate = a.createdAt ? (a.createdAt instanceof Date ? a.createdAt.getTime() : new Date(a.createdAt).getTime()) : 0;
         const bDate = b.createdAt ? (b.createdAt instanceof Date ? b.createdAt.getTime() : new Date(b.createdAt).getTime()) : 0;
         return bDate - aDate;
       });
 
-      if (import.meta.env.DEV) {
-        console.log(`Returning ${blogs.length} published blogs`);
-      }
+    try {
+      // Scoped query required for public reads when rules restrict drafts
+      try {
+        let q = query(
+          collection(db, COLLECTION_NAME),
+          where('status', 'in', ['published', 'Published']),
+          orderBy('createdAt', 'desc')
+        );
+        const querySnapshot = await getDocs(q);
+        const blogs = querySnapshot.docs.map(mapBlogDoc);
 
-      return blogs;
+        if (import.meta.env.DEV) {
+          console.log(`Fetched ${blogs.length} published blogs from Firestore`);
+        }
+
+        return blogs;
+      } catch (indexError: unknown) {
+        const err = indexError as { code?: string; message?: string };
+        if (err.code === 'failed-precondition' || err.message?.includes('index')) {
+          console.warn('Firestore composite index missing for published blogs, sorting client-side:', err.message);
+          const q = query(collection(db, COLLECTION_NAME), where('status', 'in', ['published', 'Published']));
+          const querySnapshot = await getDocs(q);
+          const blogs = sortByCreatedAt(querySnapshot.docs.map(mapBlogDoc));
+
+          if (import.meta.env.DEV) {
+            console.log(`Fetched ${blogs.length} published blogs (fallback query)`);
+          }
+
+          return blogs;
+        }
+        throw indexError;
+      }
     } catch (error: any) {
       console.error('Error fetching published blogs:', error);
       console.error('Error details:', {
