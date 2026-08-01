@@ -72,7 +72,7 @@ const MediaWatchPage = () => {
           <Button
             variant="outline"
             size="sm"
-            className="border-[#1b7a4e] text-[#1b7a4e]"
+            className="border-primary text-primary hover:bg-primary/10"
             onClick={() => navigate(`/properties/${media.propertyId}`)}
           >
             View Property
@@ -99,14 +99,14 @@ const MediaWatchPage = () => {
 
           <div className="flex flex-col gap-3 sm:flex-row">
             <Button
-              className="flex-1 rounded-full bg-[#1b7a4e] text-white hover:bg-[#156041]"
+              className="flex-1 rounded-full gradient-gold text-secondary font-semibold shadow-luxury hover:opacity-90"
               onClick={() => navigate(`/properties/${media.propertyId}`)}
             >
               View Property Details
             </Button>
             <Button
               variant="outline"
-              className="flex-1 rounded-full"
+              className="flex-1 rounded-full border-primary text-primary hover:bg-primary/10"
               onClick={() => navigate('/media')}
             >
               Browse More Videos

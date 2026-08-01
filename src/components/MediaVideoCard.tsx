@@ -65,8 +65,8 @@ const MediaVideoCard = ({ media }: MediaVideoCardProps) => {
           className="absolute inset-0 flex items-center justify-center bg-black/10 transition-colors hover:bg-black/20"
           aria-label={`Watch ${media.title}`}
         >
-          <span className="flex h-16 w-16 items-center justify-center rounded-full bg-[#1b7a4e] shadow-lg transition-transform hover:scale-105">
-            <Play className="ml-1 h-7 w-7 fill-white text-white" />
+          <span className="flex h-16 w-16 items-center justify-center rounded-full gradient-gold shadow-luxury transition-transform hover:scale-105">
+            <Play className="ml-1 h-7 w-7 fill-secondary text-secondary" />
           </span>
         </button>
 
@@ -87,7 +87,7 @@ const MediaVideoCard = ({ media }: MediaVideoCardProps) => {
 
       {/* Content */}
       <div className="space-y-3 p-5">
-        <p className="text-xs font-bold uppercase tracking-wider text-[#1b7a4e]">
+        <p className="text-xs font-bold uppercase tracking-wider text-primary">
           {category}
         </p>
 
@@ -109,14 +109,14 @@ const MediaVideoCard = ({ media }: MediaVideoCardProps) => {
 
         <div className="flex gap-3 pt-1">
           <Button
-            className="flex-1 rounded-full bg-[#1b7a4e] text-white hover:bg-[#156041]"
+            className="flex-1 rounded-full gradient-gold text-secondary font-semibold shadow-luxury hover:opacity-90"
             onClick={() => media.id && navigate(`/media/${media.id}`)}
           >
             Watch Video
           </Button>
           <Button
             variant="outline"
-            className="flex-1 rounded-full border-[#1b7a4e] text-[#1b7a4e] hover:bg-[#1b7a4e]/5"
+            className="flex-1 rounded-full border-primary text-primary hover:bg-primary/10"
             onClick={() => navigate(`/properties/${media.propertyId}`)}
           >
             View Property
