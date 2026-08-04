@@ -83,20 +83,20 @@ const BlogDetailsPage = () => {
         {/* Blog Content */}
         <article className="max-w-4xl mx-auto">
           {/* Title and Meta */}
-          <header className="mb-8">
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground mb-6">
+          <header className="mb-6">
+            <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
               {blog.title}
             </h1>
             
-            <div className="flex flex-wrap items-center gap-4 text-muted-foreground mb-6">
+            <div className="flex flex-wrap items-center gap-4 text-xs text-muted-foreground mb-4">
               <div className="flex items-center gap-2">
                 <User className="h-4 w-4" />
-                <span className="text-sm font-medium">{blog.author}</span>
+                <span className="font-medium">{blog.author}</span>
               </div>
               {blog.publishedAt && (
                 <div className="flex items-center gap-2">
                   <Calendar className="h-4 w-4" />
-                  <span className="text-sm">
+                  <span>
                     {new Date(blog.publishedAt).toLocaleDateString("en-US", {
                       year: "numeric",
                       month: "long",
@@ -109,24 +109,24 @@ const BlogDetailsPage = () => {
 
             {/* Summary */}
             {blog.summary && (
-              <p className="text-xl text-muted-foreground leading-relaxed mb-8">
+              <p className="text-xs text-muted-foreground leading-relaxed mb-6 font-medium">
                 {blog.summary}
               </p>
             )}
           </header>
 
           {/* Main Content */}
-          <div className="prose prose-lg max-w-none">
+          <div className="space-y-3">
             {blog.content ? (
-              <div className="text-foreground leading-relaxed">
+              <div className="space-y-2">
                 {blog.content.split("\n").map((paragraph, index) => (
-                  <p key={index} className="mb-4 text-lg">
+                  <p key={index} className="text-xs text-muted-foreground leading-relaxed">
                     {paragraph || "\u00A0"}
                   </p>
                 ))}
               </div>
             ) : (
-              <p className="text-muted-foreground text-lg leading-relaxed">
+              <p className="text-xs text-muted-foreground leading-relaxed">
                 {blog.summary}
               </p>
             )}

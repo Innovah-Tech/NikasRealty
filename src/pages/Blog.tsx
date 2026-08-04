@@ -60,18 +60,18 @@ const Blog = () => {
       <section className="py-20 bg-background min-h-screen">
         <div className="container mx-auto px-4 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-5xl font-bold text-foreground mb-3">Latest Blog</h2>
+            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-3">Latest Blog</h2>
             <div className="h-1 w-24 mx-auto gradient-gold mb-3" />
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            <p className="text-xs text-muted-foreground max-w-2xl mx-auto leading-relaxed">
               Get insights, advice, and stories about buying, selling, and investing in real estate with Nikas Realty.
             </p>
           </div>
           {loading ? (
-            <div className="flex justify-center py-16 text-muted-foreground">Loading blogs...</div>
+            <div className="flex justify-center py-16 text-xs text-muted-foreground">Loading blogs...</div>
           ) : error ? (
             <div className="text-center py-16 space-y-4">
-              <p className="text-xl font-semibold text-foreground">Our stories are being refreshed</p>
-              <p className="text-muted-foreground">{error}</p>
+              <p className="text-lg font-semibold text-foreground">Our stories are being refreshed</p>
+              <p className="text-xs text-muted-foreground">{error}</p>
               {isDev && debugError && (
                 <p className="text-xs text-muted-foreground">
                   Debug details: {debugError}
@@ -90,9 +90,9 @@ const Blog = () => {
               </Button>
             </div>
           ) : posts.length === 0 ? (
-            <div className="text-center text-muted-foreground py-16">
+            <div className="text-center text-xs text-muted-foreground py-16">
               <p className="mb-2">No blog posts available yet.</p>
-              <p className="text-sm">Check back soon or contact the administrator.</p>
+              <p className="text-xs">Check back soon or contact the administrator.</p>
             </div>
           ) : (
             <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-3">
@@ -113,17 +113,17 @@ const Blog = () => {
                     </div>
                   )}
                   <CardHeader className="flex-grow">
-                    <CardTitle className="text-2xl text-primary mb-1 group-hover:text-primary/80 transition-colors">
+                    <CardTitle className="text-xl font-semibold text-primary mb-1 group-hover:text-primary/80 transition-colors">
                       {post.title}
                     </CardTitle>
-                    <CardDescription className="text-muted-foreground mb-3 line-clamp-3">
+                    <CardDescription className="text-xs text-muted-foreground mb-3 line-clamp-3 leading-relaxed">
                       {post.summary}
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="flex flex-col gap-3 mt-auto">
-                    <div className="flex items-center text-sm text-muted-foreground gap-4 mb-2">
+                    <div className="flex items-center text-xs text-muted-foreground gap-4 mb-2">
                       <span>By {post.author}</span>
-                      <span className="text-xs">
+                      <span>
                         {post.publishedAt
                           ? new Date(post.publishedAt).toLocaleDateString()
                           : ""}
