@@ -443,7 +443,12 @@ const Properties = () => {
                           )}
                         </div>
                       ) : (
-                        <p className="text-2xl font-bold text-primary">{displayPrice}</p>
+                        <p className="text-2xl font-bold text-primary">
+                          {property.priceType === 'from' && (
+                            <span className="text-sm font-semibold text-primary/80 mr-1">From</span>
+                          )}
+                          {displayPrice}
+                        </p>
                       )}
                     </div>
                   </CardContent>
