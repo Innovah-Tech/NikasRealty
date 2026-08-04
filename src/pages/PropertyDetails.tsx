@@ -215,10 +215,10 @@ const PropertyDetailsPage = () => {
           </div>
         </div>
 
-        {/* Main Content Grid — enquiry form first on mobile, sidebar on desktop */}
+        {/* Main Content Grid */}
         <div className="grid gap-8 lg:grid-cols-3">
           {/* Left Column - Details */}
-          <div className="lg:col-span-2 space-y-8 order-2 lg:order-1">
+          <div className="lg:col-span-2 space-y-8">
             {/* Gallery */}
             {images.length > 1 && (
               <div className="space-y-3">
@@ -423,7 +423,7 @@ const PropertyDetailsPage = () => {
           </div>
 
           {/* Right Column - Contact / Booking Form */}
-          <div className="lg:col-span-1 order-1 lg:order-2">
+          <div className="lg:col-span-1">
             <div className="lg:sticky lg:top-24">
               <PropertyEnquiryCard propertyName={property.title} propertyId={property.id} />
             </div>
