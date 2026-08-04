@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { Phone, MessageCircle, Link as LinkIcon } from 'lucide-react';
+import { Phone, MessageCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { APP_CONFIG, THEME_CONFIG } from '@/config/constants';
 import { sanitizeText, sanitizePhone } from '@/utils/sanitize';
@@ -117,9 +117,14 @@ const PropertyEnquiryCard = ({ propertyName, propertyId }: PropertyEnquiryCardPr
       }
 
       // Format WhatsApp message
+      const propertyUrl = propertyId
+        ? `${window.location.origin}/properties/${propertyId}`
+        : null;
+
       const lines = [
         `*REQUEST A SHOWING*`,
         propertyName ? `*Property:* ${propertyName}` : null,
+        propertyUrl ? `*Property Link:* ${propertyUrl}` : null,
         `*Name:* ${sanitizedName}`,
         `*Phone:* ${sanitizedPhone}`,
         sanitizedPropertyUse ? `*Property Use:* ${sanitizedPropertyUse}` : null,
@@ -281,22 +286,6 @@ const PropertyEnquiryCard = ({ propertyName, propertyId }: PropertyEnquiryCardPr
               className="w-full bg-[#f4f6f4] text-gray-900 placeholder:text-gray-400 font-medium text-sm rounded-xl p-4 border-none focus:outline-none focus:ring-2 focus:ring-[#DA9100] transition-all resize-none"
             />
           </div>
-
-          {/* Property Link */}
-          {propertyId && propertyName && (
-            <a
-              href={`/properties/${propertyId}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-2 w-full px-4 py-3 rounded-xl bg-[#DA9100]/10 border border-[#DA9100]/40 hover:bg-[#DA9100]/20 transition-all duration-200 group"
-            >
-              <LinkIcon className="w-4 h-4 text-[#DA9100] shrink-0" />
-              <span className="text-[#DA9100] text-sm font-semibold truncate group-hover:underline">
-                {propertyName}
-              </span>
-              <span className="ml-auto text-[#DA9100]/60 text-xs shrink-0">View →</span>
-            </a>
-          )}
 
           {/* Send Enquiry on WhatsApp Button (Nikas Realty Gold Gradient) */}
           <button
