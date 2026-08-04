@@ -108,13 +108,13 @@ const AvailableUnitsBuilder = ({ value, onChange }: AvailableUnitsBuilderProps) 
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="unitsIntro">Introduction</Label>
+          <Label htmlFor="unitsIntro">Introduction (Optional)</Label>
           <Textarea
             id="unitsIntro"
             rows={3}
             value={section.introduction ?? ''}
             onChange={(e) => updateSection({ introduction: e.target.value })}
-            placeholder="Brief introduction about the available units..."
+            placeholder="Optional introduction about the available units..."
           />
         </div>
 
@@ -234,7 +234,7 @@ const AvailableUnitsBuilder = ({ value, onChange }: AvailableUnitsBuilderProps) 
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="unitsClosing">Closing Paragraph</Label>
+          <Label htmlFor="unitsClosing">Closing Paragraph (Optional)</Label>
           <Textarea
             id="unitsClosing"
             rows={2}
