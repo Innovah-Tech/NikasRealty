@@ -103,6 +103,14 @@ const Footer = () => {
               </li>
               <li>
                 <a
+                  href="tel:+254715699774"
+                  className="hover:text-primary transition-smooth"
+                >
+                  Phone: 0715 699 774
+                </a>
+              </li>
+              <li>
+                <a
                   href="mailto:nikasrealty@gmail.com"
                   className="hover:text-primary transition-smooth"
                 >
