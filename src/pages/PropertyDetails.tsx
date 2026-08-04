@@ -11,7 +11,7 @@ import { PROPERTY_IMAGE_FALLBACK } from "@/constants/propertyImages";
 import { getPropertyImageUrl } from "@/utils/imageUtils";
 import { descriptionToParagraphs, contentToParagraphs } from "@/utils/text";
 import { formatPostedDate } from "@/utils/dateUtils";
-import { formatPropertyPrice, getPropertyAmenities } from "@/utils/propertyUtils";
+import { getPropertyAmenities } from "@/utils/propertyUtils";
 import { hasAvailableUnitsData } from "@/utils/propertyFormUtils";
 
 const PropertyDetailsPage = () => {
@@ -103,7 +103,7 @@ const PropertyDetailsPage = () => {
       line.trim() === '' ? (
         <div key={index} className="h-2" aria-hidden="true" />
       ) : (
-        <p key={index} className="text-xs text-muted-foreground leading-relaxed">
+        <p key={index} className="text-sm text-muted-foreground leading-relaxed">
           {line}
         </p>
       )
@@ -264,7 +264,14 @@ const PropertyDetailsPage = () => {
                     )}
                   </div>
                 ) : (
-                  formatPropertyPrice(property)
+                  <span>
+                    {property.priceType === 'from' && (
+                      <span className="text-lg md:text-xl font-semibold text-primary/80 mr-1">From</span>
+                    )}
+                    {typeof property.price === 'number'
+                      ? `KES ${property.price.toLocaleString()}`
+                      : property.price}
+                  </span>
                 )}
               </div>
 
