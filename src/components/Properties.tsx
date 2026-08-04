@@ -289,7 +289,7 @@ const Properties = () => {
                 return hasUnit ? size : `${size} sqm`;
               };
 
-              let displayPrice = formatPropertyPrice(property);
+              let displayPrice = formatPropertyPrice(property).replace(/^From\s/, '');
 
               if ((property.status === 'for-rent' || property.status === 'For Rent') && (property.priceDaily || property.priceMonthly)) {
                 if (property.priceMonthly) {
