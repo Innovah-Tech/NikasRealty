@@ -656,7 +656,7 @@ const AdminEditProperty = () => {
                       id="images"
                       type="file"
                       multiple
-                      accept="image/*"
+                      accept="image/*,.heic,.heif,.HEIC,.HEIF"
                       className="hidden"
                       onChange={handleImageUpload}
                       disabled={uploading}

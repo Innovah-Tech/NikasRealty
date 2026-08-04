@@ -10,15 +10,9 @@ interface CloudinaryConfig {
 }
 
 import { CLOUDINARY_CONFIG } from '@/config/constants';
+import { prepareImageFile, prepareImageFiles } from '@/utils/imageUtils';
 
 // Get Cloudinary config
-// SECURITY NOTE: These credentials are public by design for unsigned uploads.
-// Security is enforced via Cloudinary upload preset restrictions:
-// - File size limits
-// - File type restrictions (images only)
-// - Rate limiting
-// - Folder/tag restrictions
-// Ensure these restrictions are configured in Cloudinary dashboard.
 const getCloudinaryConfig = (): CloudinaryConfig => {
   return {
     cloudName: CLOUDINARY_CONFIG.cloudName,
@@ -32,23 +26,20 @@ export const imageHosting = {
    */
   async uploadImage(file: File): Promise<string> {
     try {
+      const processedFile = await prepareImageFile(file);
       const { cloudName, uploadPreset } = getCloudinaryConfig();
 
-      console.log('Uploading to Cloudinary:', { cloudName, uploadPreset, fileName: file.name, fileSize: file.size });
+      console.log('Uploading to Cloudinary:', {
+        cloudName,
+        uploadPreset,
+        fileName: processedFile.name,
+        fileSize: processedFile.size,
+      });
 
       const formData = new FormData();
-      formData.append('file', file);
+      formData.append('file', processedFile);
       formData.append('upload_preset', uploadPreset);
       formData.append('folder', 'properties'); // Explicitly set folder to match preset
-
-      // Browsers cannot display HEIC/HEIF — convert to JPG on upload
-      const isHeic =
-        /\.heic$|\.heif$/i.test(file.name) ||
-        file.type === 'image/heic' ||
-        file.type === 'image/heif';
-      if (isHeic) {
-        formData.append('format', 'jpg');
-      }
 
       const response = await fetch(
         `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
@@ -64,7 +55,6 @@ export const imageHosting = {
 
         let errorMessage = error.error?.message || 'Failed to upload image';
 
-        // Provide helpful error messages for common issues
         if (errorMessage.includes('Invalid upload preset') || errorMessage.includes('preset')) {
           errorMessage = `Upload preset '${uploadPreset}' is invalid or not found. Please check Cloudinary dashboard.`;
         } else if (errorMessage.includes('whitelisted') || errorMessage.includes('unsigned')) {
@@ -82,11 +72,10 @@ export const imageHosting = {
 
       const data = await response.json();
       console.log('Cloudinary upload successful:', data.secure_url);
-      return data.secure_url; // Returns the CDN URL
+      return data.secure_url;
     } catch (error: any) {
       console.error('Image upload error:', error);
 
-      // Network error handling
       if (error.name === 'TypeError' && error.message.includes('fetch')) {
         throw new Error('Network error. Please check your internet connection and try again.');
       }
@@ -100,7 +89,8 @@ export const imageHosting = {
    */
   async uploadImages(files: File[]): Promise<string[]> {
     try {
-      const uploadPromises = files.map(file => this.uploadImage(file));
+      const processedFiles = await prepareImageFiles(files);
+      const uploadPromises = processedFiles.map((file) => this.uploadImage(file));
       return await Promise.all(uploadPromises);
     } catch (error: any) {
       console.error('Error uploading images:', error);

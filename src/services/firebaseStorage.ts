@@ -2,11 +2,9 @@ import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage
 import { storage, auth } from '@/lib/firebase';
 import { imageHosting } from './imageHosting';
 import { CLOUDINARY_CONFIG } from '@/config/constants';
+import { prepareImageFile, prepareImageFiles } from '@/utils/imageUtils';
 
 // Use Cloudinary for image hosting (free tier, no backend needed)
-// SECURITY NOTE: These credentials are public by design for unsigned uploads.
-// Security is enforced via Cloudinary upload preset restrictions.
-// Ensure proper restrictions are configured in Cloudinary dashboard.
 const useCloudinary = (): boolean => {
   return !!(CLOUDINARY_CONFIG.cloudName && CLOUDINARY_CONFIG.uploadPreset);
 };
@@ -14,14 +12,15 @@ const useCloudinary = (): boolean => {
 export const firebaseStorage = {
   // Upload a file - uses Cloudinary if configured, otherwise Firebase Storage
   async uploadFile(file: File, path: string): Promise<string> {
+    const processedFile = await prepareImageFile(file);
+
     // Use Cloudinary if configured
     if (useCloudinary()) {
       console.log('Using Cloudinary for file upload');
       try {
-        return await imageHosting.uploadImage(file);
+        return await imageHosting.uploadImage(processedFile);
       } catch (error: any) {
         console.error('Cloudinary upload failed, falling back to Firebase:', error);
-        // Fall through to Firebase Storage
       }
     } else {
       console.log('Cloudinary not configured, using Firebase Storage');
@@ -29,19 +28,17 @@ export const firebaseStorage = {
 
     // Fallback to Firebase Storage
     try {
-      // Check if user is authenticated
       if (!auth.currentUser) {
         throw new Error('You must be logged in to upload files');
       }
 
       const storageRef = ref(storage, path);
-      await uploadBytes(storageRef, file);
+      await uploadBytes(storageRef, processedFile);
       const downloadURL = await getDownloadURL(storageRef);
       return downloadURL;
     } catch (error: any) {
       console.error('Error uploading file:', error);
 
-      // Provide more helpful error messages
       if (error.code === 'storage/unauthorized') {
         throw new Error('You do not have permission to upload files. Please check Firebase Storage rules.');
       } else if (error.code === 'storage/canceled') {
@@ -58,14 +55,15 @@ export const firebaseStorage = {
 
   // Upload multiple files
   async uploadFiles(files: File[], basePath: string): Promise<string[]> {
+    const processedFiles = await prepareImageFiles(files);
+
     // Use Cloudinary if configured
     if (useCloudinary()) {
-      console.log(`Using Cloudinary for batch upload of ${files.length} files`);
+      console.log(`Using Cloudinary for batch upload of ${processedFiles.length} files`);
       try {
-        return await imageHosting.uploadImages(files);
+        return await imageHosting.uploadImages(processedFiles);
       } catch (error: any) {
         console.error('Cloudinary upload failed, falling back to Firebase:', error);
-        // Fall through to Firebase Storage
       }
     } else {
       console.log('Cloudinary not configured, using Firebase Storage for batch upload');
@@ -73,12 +71,11 @@ export const firebaseStorage = {
 
     // Fallback to Firebase Storage
     try {
-      // Check if user is authenticated
       if (!auth.currentUser) {
         throw new Error('You must be logged in to upload files');
       }
 
-      const uploadPromises = files.map((file, index) => {
+      const uploadPromises = processedFiles.map((file, index) => {
         const fileName = `${Date.now()}-${index}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
         const path = `${basePath}/${fileName}`;
         return this.uploadFile(file, path);

@@ -1,7 +1,58 @@
+import heic2any from 'heic2any';
+
+/**
+ * Prepares image file for upload.
+ * Automatically converts iPhone HEIC/HEIF files to standard JPEG format
+ * so that they can be uploaded and rendered across all browsers.
+ */
+export async function prepareImageFile(file: File): Promise<File> {
+  const fileName = file.name || '';
+  const fileType = (file.type || '').toLowerCase();
+  const isHeic =
+    /\.(heic|heif)$/i.test(fileName) ||
+    fileType === 'image/heic' ||
+    fileType === 'image/heif' ||
+    fileType === 'image/heic-sequence' ||
+    fileType === 'image/heif-sequence';
+
+  if (!isHeic) {
+    return file;
+  }
+
+  console.log(`Converting iPhone HEIC image (${fileName}) to JPEG...`);
+
+  try {
+    const result = await heic2any({
+      blob: file,
+      toType: 'image/jpeg',
+      quality: 0.88,
+    });
+
+    const blob = Array.isArray(result) ? result[0] : result;
+    const cleanName = fileName.replace(/\.(heic|heif)$/i, '');
+    const newName = `${cleanName || 'iphone_photo'}.jpg`;
+
+    return new File([blob], newName, {
+      type: 'image/jpeg',
+      lastModified: Date.now(),
+    });
+  } catch (error) {
+    console.error('HEIC image conversion failed, proceeding with original file:', error);
+    return file;
+  }
+}
+
+/**
+ * Prepares multiple image files (converting any HEIC/HEIF files to JPEG).
+ */
+export async function prepareImageFiles(files: File[] | FileList): Promise<File[]> {
+  const fileArray = Array.from(files);
+  return Promise.all(fileArray.map((file) => prepareImageFile(file)));
+}
+
 /**
  * Image utility functions for Cloudinary
  */
-
 const CLOUDINARY_UPLOAD_SEGMENT = '/image/upload/';
 
 const isHeicUrl = (url: string): boolean => /\.heic($|\?)/i.test(url) || /\.heif($|\?)/i.test(url);
@@ -13,11 +64,6 @@ const hasCloudinaryTransformations = (pathAfterUpload: string): boolean => {
 
 /**
  * Get optimized Cloudinary image URL
- * @param url - Original image URL (Cloudinary or other)
- * @param width - Desired width (optional)
- * @param height - Desired height (optional)
- * @param quality - Image quality 1-100 (optional, default: auto)
- * @returns Optimized image URL
  */
 export const getOptimizedImageUrl = (
   url: string,
@@ -46,7 +92,6 @@ export const getOptimizedImageUrl = (
   if (width) transformations.unshift(`w_${width}`);
   if (height) transformations.unshift(`h_${height}`);
 
-  // HEIC/HEIF is not supported in browsers — force JPEG delivery from Cloudinary
   if (isHeicUrl(url)) {
     transformations.push('f_jpg');
   } else {
@@ -72,7 +117,9 @@ export const getThumbnailUrl = (url: string, size: number = 300): string => {
   return getOptimizedImageUrl(url, size, size, 75);
 };
 
-/** Resolve a property image URL for display (handles HEIC via Cloudinary transforms). */
+/**
+ * Resolve a property image URL for display (handles HEIC via Cloudinary transforms).
+ */
 export const getPropertyImageUrl = (
   url: string,
   size: 'thumbnail' | 'card' | 'full' = 'card'
@@ -80,4 +127,3 @@ export const getPropertyImageUrl = (
   const widths = { thumbnail: 400, card: 800, full: 1600 };
   return getOptimizedImageUrl(url, widths[size]);
 };
-

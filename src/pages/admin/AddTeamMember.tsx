@@ -232,7 +232,7 @@ const AdminAddTeamMember = () => {
                       <input
                         id="photo"
                         type="file"
-                        accept="image/*"
+                        accept="image/*,.heic,.heif,.HEIC,.HEIF"
                         className="hidden"
                         onChange={handleImageUpload}
                         disabled={uploading}

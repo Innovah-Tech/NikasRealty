@@ -267,7 +267,7 @@ const AdminEditBlog = () => {
                           </Button>
                           <input
                             type="file"
-                            accept="image/*"
+                            accept="image/*,.heic,.heif,.HEIC,.HEIF"
                             onChange={handleImageUpload}
                             className="hidden"
                             disabled={uploading}
