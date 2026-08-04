@@ -124,13 +124,13 @@ const PropertyEnquiryCard = ({ propertyName, propertyId }: PropertyEnquiryCardPr
       const lines = [
         `*REQUEST A SHOWING*`,
         propertyName ? `*Property:* ${propertyName}` : null,
-        propertyUrl ? `*Property Link:* ${propertyUrl}` : null,
         `*Name:* ${sanitizedName}`,
         `*Phone:* ${sanitizedPhone}`,
         sanitizedPropertyUse ? `*Property Use:* ${sanitizedPropertyUse}` : null,
         sanitizedBudget ? `*Budget:* ${sanitizedBudget}` : null,
         showingDateTime ? `*Preferred Date & Time:* ${showingDateTime}` : null,
         sanitizedMessage ? `*Instructions:* ${sanitizedMessage}` : null,
+        propertyUrl ? `*Property Link:* ${propertyUrl}` : null,
       ].filter(Boolean);
 
       const whatsappText = encodeURIComponent(lines.join('\n'));
