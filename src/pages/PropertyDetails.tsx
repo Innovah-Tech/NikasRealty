@@ -292,7 +292,7 @@ const PropertyDetailsPage = () => {
               </div>
             </div>
 
-            {/* Description */}
+            {/* 1. Description */}
             {descriptionParagraphs.some((p) => p.trim()) && (
               <section className="space-y-3">
                 <h2 className="text-xl font-semibold text-foreground">Description</h2>
@@ -300,67 +300,7 @@ const PropertyDetailsPage = () => {
               </section>
             )}
 
-            {/* Amenities */}
-            {amenities.length > 0 && (
-              <section className="space-y-3">
-                <h2 className="text-xl font-semibold text-foreground">Amenities & Features</h2>
-                <ul className="space-y-1.5">
-                  {amenities.map((item, index) => (
-                    <li key={index} className="flex items-start gap-2 text-xs text-muted-foreground leading-relaxed">
-                      <span className="text-primary mt-0.5 shrink-0">•</span>
-                      <span>{item}</span>
-                    </li>
-                  ))}
-                </ul>
-              </section>
-            )}
-
-            {/* Payment Plan */}
-            {hasPaymentPlan && property.paymentPlan && (
-              <section className="space-y-3">
-                <h2 className="text-xl font-semibold text-foreground">
-                  {property.paymentPlan.title || 'Flexible Payment Plan'}
-                </h2>
-
-                {property.paymentPlan.paymentMethods && property.paymentPlan.paymentMethods.length > 0 && (
-                  <ul className="space-y-1.5">
-                    {property.paymentPlan.paymentMethods.includes('cash') && (
-                      <li className="flex items-start gap-2 text-xs text-muted-foreground leading-relaxed">
-                        <span className="text-primary mt-0.5 shrink-0">•</span>
-                        <span>Cash</span>
-                      </li>
-                    )}
-                    {property.paymentPlan.paymentMethods.includes('mortgage') && (
-                      <li className="flex items-start gap-2 text-xs text-muted-foreground leading-relaxed">
-                        <span className="text-primary mt-0.5 shrink-0">•</span>
-                        <span>Mortgage</span>
-                      </li>
-                    )}
-                  </ul>
-                )}
-
-                {paymentPlanParagraphs.some((p) => p.trim()) && (
-                  <div className="space-y-1">{renderParagraphs(paymentPlanParagraphs)}</div>
-                )}
-              </section>
-            )}
-
-            {/* Legacy Payment Options fallback */}
-            {!hasPaymentPlan && property.paymentOptions && property.paymentOptions.length > 0 && (
-              <section className="space-y-3">
-                <h2 className="text-xl font-semibold text-foreground">Payment Options</h2>
-                <ul className="space-y-1.5">
-                  {property.paymentOptions.map((option, index) => (
-                    <li key={index} className="flex items-start gap-2 text-xs text-muted-foreground leading-relaxed">
-                      <span className="text-primary mt-0.5 shrink-0">•</span>
-                      <span>{option}</span>
-                    </li>
-                  ))}
-                </ul>
-              </section>
-            )}
-
-            {/* Available Units & Prices */}
+            {/* 2. Available Units & Prices */}
             {showAvailableUnits && property.availableUnits && (
               <section className="space-y-4">
                 <h2 className="text-xl font-semibold text-foreground">
@@ -413,7 +353,67 @@ const PropertyDetailsPage = () => {
               </section>
             )}
 
-            {/* Completion Date */}
+            {/* 3. Amenities */}
+            {amenities.length > 0 && (
+              <section className="space-y-3">
+                <h2 className="text-xl font-semibold text-foreground">Amenities & Features</h2>
+                <ul className="space-y-1.5">
+                  {amenities.map((item, index) => (
+                    <li key={index} className="flex items-start gap-2 text-xs text-muted-foreground leading-relaxed">
+                      <span className="text-primary mt-0.5 shrink-0">•</span>
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            )}
+
+            {/* 4. Payment Plan */}
+            {hasPaymentPlan && property.paymentPlan && (
+              <section className="space-y-3">
+                <h2 className="text-xl font-semibold text-foreground">
+                  {property.paymentPlan.title || 'Flexible Payment Plan'}
+                </h2>
+
+                {property.paymentPlan.paymentMethods && property.paymentPlan.paymentMethods.length > 0 && (
+                  <ul className="space-y-1.5">
+                    {property.paymentPlan.paymentMethods.includes('cash') && (
+                      <li className="flex items-start gap-2 text-xs text-muted-foreground leading-relaxed">
+                        <span className="text-primary mt-0.5 shrink-0">•</span>
+                        <span>Cash</span>
+                      </li>
+                    )}
+                    {property.paymentPlan.paymentMethods.includes('mortgage') && (
+                      <li className="flex items-start gap-2 text-xs text-muted-foreground leading-relaxed">
+                        <span className="text-primary mt-0.5 shrink-0">•</span>
+                        <span>Mortgage</span>
+                      </li>
+                    )}
+                  </ul>
+                )}
+
+                {paymentPlanParagraphs.some((p) => p.trim()) && (
+                  <div className="space-y-1">{renderParagraphs(paymentPlanParagraphs)}</div>
+                )}
+              </section>
+            )}
+
+            {/* Legacy Payment Options fallback */}
+            {!hasPaymentPlan && property.paymentOptions && property.paymentOptions.length > 0 && (
+              <section className="space-y-3">
+                <h2 className="text-xl font-semibold text-foreground">Payment Options</h2>
+                <ul className="space-y-1.5">
+                  {property.paymentOptions.map((option, index) => (
+                    <li key={index} className="flex items-start gap-2 text-xs text-muted-foreground leading-relaxed">
+                      <span className="text-primary mt-0.5 shrink-0">•</span>
+                      <span>{option}</span>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            )}
+
+            {/* 5. Completion Date */}
             {property.completionDate && (
               <section className="space-y-2">
                 <h2 className="text-xl font-semibold text-foreground">Completion Date</h2>
