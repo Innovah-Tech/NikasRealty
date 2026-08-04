@@ -1,7 +1,7 @@
-import { useState } from 'react';
-import { Phone, MessageCircle } from 'lucide-react';
+import { useState, useMemo } from 'react';
+import { Phone, MessageCircle, Calendar, Clock } from 'lucide-react';
 import { toast } from 'sonner';
-import { APP_CONFIG } from '@/config/constants';
+import { APP_CONFIG, THEME_CONFIG } from '@/config/constants';
 import { sanitizeText, sanitizePhone } from '@/utils/sanitize';
 import { validateName, validatePhone } from '@/utils/validate';
 
@@ -10,6 +10,23 @@ interface PropertyEnquiryCardProps {
   propertyId?: string;
 }
 
+const TIME_OPTIONS = [
+  'Morning (9:00 AM - 12:00 PM)',
+  'Early Afternoon (12:00 PM - 3:00 PM)',
+  'Late Afternoon (3:00 PM - 6:00 PM)',
+  'Evening (6:00 PM - 8:00 PM)',
+  '09:00 AM',
+  '10:00 AM',
+  '11:00 AM',
+  '12:00 PM',
+  '01:00 PM',
+  '02:00 PM',
+  '03:00 PM',
+  '04:00 PM',
+  '05:00 PM',
+  '06:00 PM',
+];
+
 const PropertyEnquiryCard = ({ propertyName, propertyId }: PropertyEnquiryCardProps) => {
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState({
@@ -17,10 +34,36 @@ const PropertyEnquiryCard = ({ propertyName, propertyId }: PropertyEnquiryCardPr
     phone: '',
     propertyUse: '',
     budget: '',
-    dateTime: '',
+    selectedDay: '',
+    selectedTime: '',
     message: '',
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Generate dynamic day options for the next 14 days + flexible option
+  const dayOptions = useMemo(() => {
+    const options = [];
+    const today = new Date();
+    for (let i = 0; i < 14; i++) {
+      const d = new Date(today);
+      d.setDate(today.getDate() + i);
+      const label =
+        i === 0
+          ? `Today (${d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })})`
+          : i === 1
+          ? `Tomorrow (${d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })})`
+          : d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+      const value = d.toLocaleDateString('en-US', {
+        weekday: 'short',
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+      });
+      options.push({ value, label });
+    }
+    options.push({ value: 'Flexible / Any Day', label: 'Flexible / Any Day' });
+    return options;
+  }, []);
 
   const handleWhatsAppSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -45,6 +88,7 @@ const PropertyEnquiryCard = ({ propertyName, propertyId }: PropertyEnquiryCardPr
       const sanitizedPropertyUse = sanitizeText(formData.propertyUse);
       const sanitizedBudget = sanitizeText(formData.budget);
       const sanitizedMessage = sanitizeText(formData.message);
+      const showingDateTime = [formData.selectedDay, formData.selectedTime].filter(Boolean).join(' at ');
 
       // Save to database
       try {
@@ -55,7 +99,7 @@ const PropertyEnquiryCard = ({ propertyName, propertyId }: PropertyEnquiryCardPr
           message: [
             sanitizedPropertyUse ? `Property Use: ${sanitizedPropertyUse}` : '',
             sanitizedBudget ? `Budget: ${sanitizedBudget}` : '',
-            formData.dateTime ? `Preferred Showing Date & Time: ${formData.dateTime}` : '',
+            showingDateTime ? `Preferred Day & Time: ${showingDateTime}` : '',
             sanitizedMessage ? `Notes: ${sanitizedMessage}` : '',
           ].filter(Boolean).join('\n'),
           property: propertyName || 'General Showing Request',
@@ -65,7 +109,7 @@ const PropertyEnquiryCard = ({ propertyName, propertyId }: PropertyEnquiryCardPr
         await emailService.sendNotification({
           name: sanitizedName,
           phone: sanitizedPhone,
-          message: `Property Use: ${sanitizedPropertyUse || 'N/A'}\nBudget: ${sanitizedBudget || 'N/A'}\nShowing Date & Time: ${formData.dateTime || 'N/A'}\nNotes: ${sanitizedMessage || 'N/A'}`,
+          message: `Property Use: ${sanitizedPropertyUse || 'N/A'}\nBudget: ${sanitizedBudget || 'N/A'}\nShowing Day & Time: ${showingDateTime || 'N/A'}\nNotes: ${sanitizedMessage || 'N/A'}`,
           type: `Showing Request${propertyId ? ` (${propertyId})` : ''}${propertyName ? `: ${propertyName}` : ''}`,
         });
       } catch (dbErr) {
@@ -73,17 +117,6 @@ const PropertyEnquiryCard = ({ propertyName, propertyId }: PropertyEnquiryCardPr
       }
 
       // Format WhatsApp message
-      const formattedDate = formData.dateTime
-        ? new Date(formData.dateTime).toLocaleString('en-US', {
-            weekday: 'short',
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit',
-          })
-        : '';
-
       const lines = [
         `*REQUEST A SHOWING*`,
         propertyName ? `*Property:* ${propertyName}` : null,
@@ -91,7 +124,7 @@ const PropertyEnquiryCard = ({ propertyName, propertyId }: PropertyEnquiryCardPr
         `*Phone:* ${sanitizedPhone}`,
         sanitizedPropertyUse ? `*Property Use:* ${sanitizedPropertyUse}` : null,
         sanitizedBudget ? `*Budget:* ${sanitizedBudget}` : null,
-        formattedDate ? `*Preferred Date & Time:* ${formattedDate}` : null,
+        showingDateTime ? `*Preferred Date & Time:* ${showingDateTime}` : null,
         sanitizedMessage ? `*Instructions:* ${sanitizedMessage}` : null,
       ].filter(Boolean);
 
@@ -112,23 +145,31 @@ const PropertyEnquiryCard = ({ propertyName, propertyId }: PropertyEnquiryCardPr
   };
 
   return (
-    <div className="bg-[#054932] rounded-3xl p-6 sm:p-7 shadow-2xl text-white font-montserrat max-w-md mx-auto transition-all duration-300">
+    <div className="bg-[#054932] rounded-3xl p-6 sm:p-7 shadow-2xl text-white font-montserrat max-w-md mx-auto transition-all duration-300 border border-[#DA9100]/30">
       {/* Header Title & Subtitle */}
-      <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight mb-2 text-white">
-        Request A Showing
-      </h2>
+      <div className="flex items-center justify-between mb-2">
+        <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
+          Request A Showing
+        </h2>
+        <div className="w-3 h-3 rounded-full bg-[#DA9100] shadow-[0_0_10px_#DA9100]" />
+      </div>
       <p className="text-xs sm:text-sm font-normal text-emerald-100/90 leading-relaxed mb-6">
         Click the button below to open the viewing form. Your enquiry will be prepared directly for WhatsApp.
       </p>
 
-      {/* Main Action Button (Toggles Form) */}
+      {/* Main Action Button (Toggles Form using Nikas Realty Gold) */}
       <button
         type="button"
         onClick={() => setShowForm((prev) => !prev)}
+        style={
+          showForm
+            ? { background: THEME_CONFIG.gradientGold, color: '#1c1917' }
+            : {}
+        }
         className={`w-full font-extrabold text-sm sm:text-base tracking-wider uppercase py-3.5 px-6 rounded-full transition-all duration-300 shadow-md cursor-pointer mb-3 flex items-center justify-center ${
           showForm
-            ? 'bg-[#c23866] hover:bg-[#b02f58] text-white'
-            : 'bg-white hover:bg-emerald-50 text-[#054932]'
+            ? 'shadow-luxury text-stone-900 border border-[#DA9100]'
+            : 'bg-white hover:bg-amber-50 text-[#054932]'
         }`}
       >
         REQUEST A SHOWING
@@ -145,7 +186,7 @@ const PropertyEnquiryCard = ({ propertyName, propertyId }: PropertyEnquiryCardPr
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
               required
-              className="w-full h-12 bg-[#f4f6f4] text-gray-900 placeholder:text-gray-400 font-medium text-sm rounded-xl px-4 border-none focus:outline-none focus:ring-2 focus:ring-emerald-400 transition-all"
+              className="w-full h-12 bg-[#f4f6f4] text-gray-900 placeholder:text-gray-400 font-medium text-sm rounded-xl px-4 border-none focus:outline-none focus:ring-2 focus:ring-[#DA9100] transition-all"
             />
           </div>
 
@@ -157,7 +198,7 @@ const PropertyEnquiryCard = ({ propertyName, propertyId }: PropertyEnquiryCardPr
               value={formData.phone}
               onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
               required
-              className="w-full h-12 bg-[#f4f6f4] text-gray-900 placeholder:text-gray-400 font-medium text-sm rounded-xl px-4 border-none focus:outline-none focus:ring-2 focus:ring-emerald-400 transition-all"
+              className="w-full h-12 bg-[#f4f6f4] text-gray-900 placeholder:text-gray-400 font-medium text-sm rounded-xl px-4 border-none focus:outline-none focus:ring-2 focus:ring-[#DA9100] transition-all"
             />
           </div>
 
@@ -166,7 +207,7 @@ const PropertyEnquiryCard = ({ propertyName, propertyId }: PropertyEnquiryCardPr
             <select
               value={formData.propertyUse}
               onChange={(e) => setFormData({ ...formData, propertyUse: e.target.value })}
-              className="w-full h-12 bg-[#f4f6f4] text-gray-900 font-medium text-sm rounded-xl px-4 border-none focus:outline-none focus:ring-2 focus:ring-emerald-400 transition-all cursor-pointer invalid:text-gray-400"
+              className="w-full h-12 bg-[#f4f6f4] text-gray-900 font-medium text-sm rounded-xl px-4 border-none focus:outline-none focus:ring-2 focus:ring-[#DA9100] transition-all cursor-pointer"
             >
               <option value="" disabled className="text-gray-400">
                 Property Use
@@ -187,19 +228,47 @@ const PropertyEnquiryCard = ({ propertyName, propertyId }: PropertyEnquiryCardPr
               placeholder="Budget / Price Range"
               value={formData.budget}
               onChange={(e) => setFormData({ ...formData, budget: e.target.value })}
-              className="w-full h-12 bg-[#f4f6f4] text-gray-900 placeholder:text-gray-400 font-medium text-sm rounded-xl px-4 border-none focus:outline-none focus:ring-2 focus:ring-emerald-400 transition-all"
+              className="w-full h-12 bg-[#f4f6f4] text-gray-900 placeholder:text-gray-400 font-medium text-sm rounded-xl px-4 border-none focus:outline-none focus:ring-2 focus:ring-[#DA9100] transition-all"
             />
           </div>
 
-          {/* Date & Time Picker showing both Day and Time */}
-          <div>
-            <input
-              type="datetime-local"
-              placeholder="mm/dd/yyyy --:-- --"
-              value={formData.dateTime}
-              onChange={(e) => setFormData({ ...formData, dateTime: e.target.value })}
-              className="w-full h-12 bg-[#f4f6f4] text-gray-900 placeholder:text-gray-400 font-medium text-sm rounded-xl px-4 border-none focus:outline-none focus:ring-2 focus:ring-emerald-400 transition-all cursor-pointer"
-            />
+          {/* Day & Time Selection via Dropdown Menus */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {/* Preferred Day Dropdown */}
+            <div>
+              <select
+                value={formData.selectedDay}
+                onChange={(e) => setFormData({ ...formData, selectedDay: e.target.value })}
+                className="w-full h-12 bg-[#f4f6f4] text-gray-900 font-medium text-sm rounded-xl px-3 border-none focus:outline-none focus:ring-2 focus:ring-[#DA9100] transition-all cursor-pointer"
+              >
+                <option value="" disabled className="text-gray-400">
+                  Select Day
+                </option>
+                {dayOptions.map((opt) => (
+                  <option key={opt.value} value={opt.value} className="text-gray-900">
+                    {opt.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Preferred Time Dropdown */}
+            <div>
+              <select
+                value={formData.selectedTime}
+                onChange={(e) => setFormData({ ...formData, selectedTime: e.target.value })}
+                className="w-full h-12 bg-[#f4f6f4] text-gray-900 font-medium text-sm rounded-xl px-3 border-none focus:outline-none focus:ring-2 focus:ring-[#DA9100] transition-all cursor-pointer"
+              >
+                <option value="" disabled className="text-gray-400">
+                  Select Time
+                </option>
+                {TIME_OPTIONS.map((t) => (
+                  <option key={t} value={t} className="text-gray-900">
+                    {t}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
 
           {/* Message / preferred viewing instructions */}
@@ -209,7 +278,7 @@ const PropertyEnquiryCard = ({ propertyName, propertyId }: PropertyEnquiryCardPr
               value={formData.message}
               onChange={(e) => setFormData({ ...formData, message: e.target.value })}
               rows={3}
-              className="w-full bg-[#f4f6f4] text-gray-900 placeholder:text-gray-400 font-medium text-sm rounded-xl p-4 border-none focus:outline-none focus:ring-2 focus:ring-emerald-400 transition-all resize-none"
+              className="w-full bg-[#f4f6f4] text-gray-900 placeholder:text-gray-400 font-medium text-sm rounded-xl p-4 border-none focus:outline-none focus:ring-2 focus:ring-[#DA9100] transition-all resize-none"
             />
           </div>
 
@@ -229,9 +298,9 @@ const PropertyEnquiryCard = ({ propertyName, propertyId }: PropertyEnquiryCardPr
       <button
         type="button"
         onClick={handleCallClick}
-        className="w-full bg-[#054932]/80 border border-white/25 hover:bg-white/10 text-white font-extrabold text-sm sm:text-base tracking-wider uppercase py-3.5 px-6 rounded-full transition-all duration-200 cursor-pointer flex items-center justify-center gap-2 mt-2"
+        className="w-full bg-[#054932]/80 border border-[#DA9100]/50 hover:bg-[#DA9100]/20 text-white font-extrabold text-sm sm:text-base tracking-wider uppercase py-3.5 px-6 rounded-full transition-all duration-200 cursor-pointer flex items-center justify-center gap-2 mt-2"
       >
-        <Phone className="w-4 h-4" />
+        <Phone className="w-4 h-4 text-[#DA9100]" />
         CALL NIKAS REALTY
       </button>
     </div>
@@ -239,4 +308,5 @@ const PropertyEnquiryCard = ({ propertyName, propertyId }: PropertyEnquiryCardPr
 };
 
 export default PropertyEnquiryCard;
+
 
