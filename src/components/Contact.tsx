@@ -93,6 +93,12 @@ const Contact = () => {
       link: "tel:+254710132320",
     },
     {
+      icon: Phone,
+      title: "Phone",
+      value: "0715 699 774",
+      link: "tel:+254715699774",
+    },
+    {
       icon: Mail,
       title: "Email",
       value: "nikasrealty@gmail.com",
