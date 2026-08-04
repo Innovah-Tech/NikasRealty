@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { Phone, MessageCircle, Calendar, Clock } from 'lucide-react';
+import { Phone, MessageCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { APP_CONFIG, THEME_CONFIG } from '@/config/constants';
 import { sanitizeText, sanitizePhone } from '@/utils/sanitize';
@@ -145,7 +145,7 @@ const PropertyEnquiryCard = ({ propertyName, propertyId }: PropertyEnquiryCardPr
   };
 
   return (
-    <div className="bg-[#054932] rounded-3xl p-6 sm:p-7 shadow-2xl text-white font-montserrat max-w-md mx-auto transition-all duration-300 border border-[#DA9100]/30">
+    <div className="bg-[#141416] rounded-3xl p-6 sm:p-7 shadow-2xl text-white font-montserrat max-w-md mx-auto transition-all duration-300 border border-[#DA9100]/40">
       {/* Header Title & Subtitle */}
       <div className="flex items-center justify-between mb-2">
         <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
@@ -153,7 +153,7 @@ const PropertyEnquiryCard = ({ propertyName, propertyId }: PropertyEnquiryCardPr
         </h2>
         <div className="w-3 h-3 rounded-full bg-[#DA9100] shadow-[0_0_10px_#DA9100]" />
       </div>
-      <p className="text-xs sm:text-sm font-normal text-emerald-100/90 leading-relaxed mb-6">
+      <p className="text-xs sm:text-sm font-normal text-stone-300 leading-relaxed mb-6">
         Click the button below to open the viewing form. Your enquiry will be prepared directly for WhatsApp.
       </p>
 
@@ -168,8 +168,8 @@ const PropertyEnquiryCard = ({ propertyName, propertyId }: PropertyEnquiryCardPr
         }
         className={`w-full font-extrabold text-sm sm:text-base tracking-wider uppercase py-3.5 px-6 rounded-full transition-all duration-300 shadow-md cursor-pointer mb-3 flex items-center justify-center ${
           showForm
-            ? 'shadow-luxury text-stone-900 border border-[#DA9100]'
-            : 'bg-white hover:bg-amber-50 text-[#054932]'
+            ? 'shadow-luxury text-stone-950 border border-[#DA9100]'
+            : 'bg-white hover:bg-stone-100 text-stone-900'
         }`}
       >
         REQUEST A SHOWING
@@ -282,13 +282,14 @@ const PropertyEnquiryCard = ({ propertyName, propertyId }: PropertyEnquiryCardPr
             />
           </div>
 
-          {/* Send Enquiry on WhatsApp Button */}
+          {/* Send Enquiry on WhatsApp Button (Nikas Realty Gold Gradient) */}
           <button
             type="submit"
             disabled={isSubmitting}
-            className="w-full bg-[#22c55e] hover:bg-[#1fb858] text-white font-extrabold text-sm sm:text-base tracking-wider uppercase py-3.5 px-6 rounded-full transition-all duration-200 shadow-md cursor-pointer flex items-center justify-center gap-2 mt-3 disabled:opacity-50"
+            style={{ background: THEME_CONFIG.gradientGold }}
+            className="w-full hover:brightness-105 text-stone-950 font-extrabold text-sm sm:text-base tracking-wider uppercase py-3.5 px-6 rounded-full transition-all duration-200 shadow-luxury cursor-pointer flex items-center justify-center gap-2 mt-3 disabled:opacity-50"
           >
-            <MessageCircle className="w-5 h-5 fill-white/20" />
+            <MessageCircle className="w-5 h-5 fill-stone-950/20" />
             {isSubmitting ? 'PREPARING...' : 'SEND ENQUIRY ON WHATSAPP'}
           </button>
         </form>
@@ -298,7 +299,7 @@ const PropertyEnquiryCard = ({ propertyName, propertyId }: PropertyEnquiryCardPr
       <button
         type="button"
         onClick={handleCallClick}
-        className="w-full bg-[#054932]/80 border border-[#DA9100]/50 hover:bg-[#DA9100]/20 text-white font-extrabold text-sm sm:text-base tracking-wider uppercase py-3.5 px-6 rounded-full transition-all duration-200 cursor-pointer flex items-center justify-center gap-2 mt-2"
+        className="w-full bg-stone-900/90 border border-[#DA9100]/60 hover:bg-[#DA9100]/20 text-white font-extrabold text-sm sm:text-base tracking-wider uppercase py-3.5 px-6 rounded-full transition-all duration-200 cursor-pointer flex items-center justify-center gap-2 mt-2"
       >
         <Phone className="w-4 h-4 text-[#DA9100]" />
         CALL NIKAS REALTY
@@ -308,5 +309,6 @@ const PropertyEnquiryCard = ({ propertyName, propertyId }: PropertyEnquiryCardPr
 };
 
 export default PropertyEnquiryCard;
+
 
 
