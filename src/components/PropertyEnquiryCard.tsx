@@ -191,7 +191,7 @@ const PropertyEnquiryCard = ({ propertyName, propertyId }: PropertyEnquiryCardPr
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
               required
-              className="w-full h-12 bg-[#f4f6f4] text-gray-900 placeholder:text-gray-400 font-medium text-sm rounded-xl px-4 border-none focus:outline-none focus:ring-2 focus:ring-[#DA9100] transition-all"
+              className="w-full h-12 bg-[#f4f6f4] text-gray-900 placeholder:text-gray-400 font-medium text-base rounded-xl px-4 border-none focus:outline-none focus:ring-2 focus:ring-[#DA9100] transition-all"
             />
           </div>
 
@@ -203,7 +203,7 @@ const PropertyEnquiryCard = ({ propertyName, propertyId }: PropertyEnquiryCardPr
               value={formData.phone}
               onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
               required
-              className="w-full h-12 bg-[#f4f6f4] text-gray-900 placeholder:text-gray-400 font-medium text-sm rounded-xl px-4 border-none focus:outline-none focus:ring-2 focus:ring-[#DA9100] transition-all"
+              className="w-full h-12 bg-[#f4f6f4] text-gray-900 placeholder:text-gray-400 font-medium text-base rounded-xl px-4 border-none focus:outline-none focus:ring-2 focus:ring-[#DA9100] transition-all"
             />
           </div>
 
@@ -212,7 +212,7 @@ const PropertyEnquiryCard = ({ propertyName, propertyId }: PropertyEnquiryCardPr
             <select
               value={formData.propertyUse}
               onChange={(e) => setFormData({ ...formData, propertyUse: e.target.value })}
-              className="w-full h-12 bg-[#f4f6f4] text-gray-900 font-medium text-sm rounded-xl px-4 border-none focus:outline-none focus:ring-2 focus:ring-[#DA9100] transition-all cursor-pointer"
+              className="w-full h-12 bg-[#f4f6f4] text-gray-900 font-medium text-base rounded-xl px-4 border-none focus:outline-none focus:ring-2 focus:ring-[#DA9100] transition-all cursor-pointer"
             >
               <option value="" disabled className="text-gray-400">
                 Property Use
@@ -233,7 +233,7 @@ const PropertyEnquiryCard = ({ propertyName, propertyId }: PropertyEnquiryCardPr
               placeholder="Budget / Price Range"
               value={formData.budget}
               onChange={(e) => setFormData({ ...formData, budget: e.target.value })}
-              className="w-full h-12 bg-[#f4f6f4] text-gray-900 placeholder:text-gray-400 font-medium text-sm rounded-xl px-4 border-none focus:outline-none focus:ring-2 focus:ring-[#DA9100] transition-all"
+              className="w-full h-12 bg-[#f4f6f4] text-gray-900 placeholder:text-gray-400 font-medium text-base rounded-xl px-4 border-none focus:outline-none focus:ring-2 focus:ring-[#DA9100] transition-all"
             />
           </div>
 
@@ -244,7 +244,7 @@ const PropertyEnquiryCard = ({ propertyName, propertyId }: PropertyEnquiryCardPr
               <select
                 value={formData.selectedDay}
                 onChange={(e) => setFormData({ ...formData, selectedDay: e.target.value })}
-                className="w-full h-12 bg-[#f4f6f4] text-gray-900 font-medium text-sm rounded-xl px-3 border-none focus:outline-none focus:ring-2 focus:ring-[#DA9100] transition-all cursor-pointer"
+                className="w-full h-12 bg-[#f4f6f4] text-gray-900 font-medium text-base rounded-xl px-4 border-none focus:outline-none focus:ring-2 focus:ring-[#DA9100] transition-all cursor-pointer"
               >
                 <option value="" disabled className="text-gray-400">
                   Select Day
@@ -262,7 +262,7 @@ const PropertyEnquiryCard = ({ propertyName, propertyId }: PropertyEnquiryCardPr
               <select
                 value={formData.selectedTime}
                 onChange={(e) => setFormData({ ...formData, selectedTime: e.target.value })}
-                className="w-full h-12 bg-[#f4f6f4] text-gray-900 font-medium text-sm rounded-xl px-3 border-none focus:outline-none focus:ring-2 focus:ring-[#DA9100] transition-all cursor-pointer"
+                className="w-full h-12 bg-[#f4f6f4] text-gray-900 font-medium text-base rounded-xl px-4 border-none focus:outline-none focus:ring-2 focus:ring-[#DA9100] transition-all cursor-pointer"
               >
                 <option value="" disabled className="text-gray-400">
                   Select Time
@@ -283,7 +283,7 @@ const PropertyEnquiryCard = ({ propertyName, propertyId }: PropertyEnquiryCardPr
               value={formData.message}
               onChange={(e) => setFormData({ ...formData, message: e.target.value })}
               rows={3}
-              className="w-full bg-[#f4f6f4] text-gray-900 placeholder:text-gray-400 font-medium text-sm rounded-xl p-4 border-none focus:outline-none focus:ring-2 focus:ring-[#DA9100] transition-all resize-none"
+              className="w-full bg-[#f4f6f4] text-gray-900 placeholder:text-gray-400 font-medium text-base rounded-xl p-4 border-none focus:outline-none focus:ring-2 focus:ring-[#DA9100] transition-all resize-none"
             />
           </div>
 
