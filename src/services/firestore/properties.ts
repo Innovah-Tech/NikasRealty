@@ -516,5 +516,69 @@ export const propertiesService = {
       throw error;
     }
   },
+
+  // Get similar properties based on current property
+  async getSimilarProperties(currentProperty: Property, limit: number = 4): Promise<Property[]> {
+    try {
+      const allProperties = await this.getAll();
+
+      // Filter out the current property
+      const otherProperties = allProperties.filter(p => p.id !== currentProperty.id);
+
+      // Calculate similarity score for each property
+      const scoredProperties = otherProperties.map(property => {
+        let score = 0;
+
+        // Same type (high weight)
+        if (property.type === currentProperty.type) {
+          score += 30;
+        }
+
+        // Same status (medium weight)
+        const normalizeStatus = (s: string) => s?.toLowerCase().replace(/\s+/g, '-') || '';
+        if (normalizeStatus(property.status) === normalizeStatus(currentProperty.status)) {
+          score += 20;
+        }
+
+        // Same location (medium weight)
+        if (property.location && currentProperty.location &&
+            property.location.toLowerCase().includes(currentProperty.location.toLowerCase().split(',')[0])) {
+          score += 25;
+        }
+
+        // Similar bedrooms (low weight)
+        if (property.bedrooms && currentProperty.bedrooms) {
+          const bedDiff = Math.abs(property.bedrooms - currentProperty.bedrooms);
+          if (bedDiff === 0) score += 15;
+          else if (bedDiff === 1) score += 10;
+          else if (bedDiff === 2) score += 5;
+        }
+
+        // Similar price range (low weight)
+        const currentPrice = typeof currentProperty.price === 'number' 
+          ? currentProperty.price 
+          : parseFloat(String(currentProperty.price).replace(/[^0-9.]/g, '')) || 0;
+        const propertyPrice = typeof property.price === 'number' 
+          ? property.price 
+          : parseFloat(String(property.price).replace(/[^0-9.]/g, '')) || 0;
+        
+        if (currentPrice > 0 && propertyPrice > 0) {
+          const priceRatio = propertyPrice / currentPrice;
+          if (priceRatio >= 0.8 && priceRatio <= 1.2) score += 10;
+          else if (priceRatio >= 0.6 && priceRatio <= 1.4) score += 5;
+        }
+
+        return { property, score };
+      });
+
+      // Sort by similarity score and return top results
+      scoredProperties.sort((a, b) => b.score - a.score);
+      
+      return scoredProperties.slice(0, limit).map(item => item.property);
+    } catch (error) {
+      console.error('Error fetching similar properties:', error);
+      return [];
+    }
+  },
 };
 

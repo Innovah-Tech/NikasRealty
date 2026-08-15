@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import PropertyEnquiryCard from "@/components/PropertyEnquiryCard";
+import SimilarListings from "@/components/SimilarListings";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { MapPin, Bed, Bath, Square, Loader2, ArrowLeft, X, Clock } from "lucide-react";
@@ -436,6 +437,9 @@ const PropertyDetailsPage = () => {
             </div>
           </div>
         </div>
+
+        {/* Similar Listings */}
+        {property && <SimilarListings currentProperty={property} />}
 
         {/* Lightbox Modal */}
         {lightboxOpen && images.length > 0 && (
