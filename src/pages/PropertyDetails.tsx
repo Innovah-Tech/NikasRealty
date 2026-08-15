@@ -4,6 +4,8 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import PropertyEnquiryCard from "@/components/PropertyEnquiryCard";
 import SimilarListings from "@/components/SimilarListings";
+import OurListings from "@/components/OurListings";
+import LatestListings from "@/components/LatestListings";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { MapPin, Bed, Bath, Square, Loader2, ArrowLeft, X, Clock } from "lucide-react";
@@ -431,10 +433,12 @@ const PropertyDetailsPage = () => {
           </div>
 
           {/* Right Column - Contact / Booking Form */}
-          <div className="md:col-span-1">
+          <div className="md:col-span-1 space-y-6">
             <div className="md:sticky md:top-24">
               <PropertyEnquiryCard propertyName={property.title} propertyId={property.id} />
             </div>
+            <OurListings />
+            <LatestListings />
           </div>
         </div>
 
